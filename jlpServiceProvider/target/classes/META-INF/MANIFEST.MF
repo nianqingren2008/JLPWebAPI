@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Implementation-Title: jlp-service-provider
+Implementation-Version: 0.0.1-SNAPSHOT
+Built-By: Administrator
+Implementation-Vendor-Id: com.callan.service.provider
+Build-Jdk: 1.8.0_131
+Implementation-URL: https://projects.spring.io/spring-boot/#/spring-bo
+ ot-starter-parent/jlp-service-provider
+Created-By: Maven Integration for Eclipse
+
