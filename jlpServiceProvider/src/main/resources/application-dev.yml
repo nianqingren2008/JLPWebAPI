@@ -1,0 +1,29 @@
+server:
+  port: 8001
+
+spring:
+  application:
+    name: jlp-service-provider
+
+spring.datasource.driver-class-name: oracle.jdbc.driver.OracleDriver
+spring.datasource.url: jdbc:oracle:thin:@192.168.17.165:1521:orcl
+spring.datasource.username: jlp
+spring.datasource.password: jlp
+
+
+feign:
+  hystrix:
+    enabled: true
+
+mybatis:
+  mapper-locations: classpath:mapping/*Mapper.xml
+  type-aliases-package: com.callan.service.provider
+ 
+#showSql
+logging:
+  level:
+    com:
+      callan:
+         service:
+           provider : debug
+

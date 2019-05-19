@@ -16,6 +16,7 @@ import com.callan.service.provider.service.IJLpService;
 @Service
 public class JLPServiceImpl implements IJLpService{
 	Log log = LogFactory.getLog(JLPServiceImpl.class);
+	
 	@Autowired
 	private IJLPDao dao;
 	

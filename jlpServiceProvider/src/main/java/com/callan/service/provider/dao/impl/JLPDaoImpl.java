@@ -9,22 +9,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import com.callan.service.provider.dao.IJLPDao;
 
-
 @SuppressWarnings({ "unchecked", "rawtypes" })
-@Repository("commonSVCDaoImpl")
+@Repository
 public class JLPDaoImpl   implements IJLPDao {
-
-
-    @Resource(name = "jdbcTemplate")
-    protected JdbcTemplate jdbcTemplate;
+	
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Override
     public List<Map<String, Object>> queryForSQLStreaming(String sql, Object[] params) throws Exception {
