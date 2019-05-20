@@ -1,9 +1,11 @@
 package com.callan.service.provider.pojo.advanceQueryBase;
 
+import java.util.List;
+
 public class QueryIncludesEX {
 	private String condType;
-	private QueryIncludesEXCondition includes;
-	private QueryIncludesEXCondition excludes;
+	private List<QueryIncludesEXCondition> includes;
+	private List<QueryIncludesEXCondition> excludes;
 	
 	public String getCondType() {
 		return condType;
@@ -11,17 +13,18 @@ public class QueryIncludesEX {
 	public void setCondType(String condType) {
 		this.condType = condType;
 	}
-	public QueryIncludesEXCondition getIncludes() {
+	public List<QueryIncludesEXCondition> getIncludes() {
 		return includes;
 	}
-	public void setIncludes(QueryIncludesEXCondition includes) {
+	public void setIncludes(List<QueryIncludesEXCondition> includes) {
 		this.includes = includes;
 	}
-	public QueryIncludesEXCondition getExcludes() {
+	public List<QueryIncludesEXCondition> getExcludes() {
 		return excludes;
 	}
-	public void setExcludes(QueryIncludesEXCondition excludes) {
+	public void setExcludes(List<QueryIncludesEXCondition> excludes) {
 		this.excludes = excludes;
 	}
+	
 	
 }

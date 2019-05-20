@@ -10,10 +10,10 @@ import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
-import com.callan.service.provider.pojo.db.JShowview;
+import com.callan.service.provider.pojo.db.JShowView;
 
 @Mapper
-public interface JShowviewMapper {
+public interface JShowViewMapper {
 	/**
 	 * 
 	 * @return
@@ -23,7 +23,7 @@ public interface JShowviewMapper {
         @Result(property = "id",  column = "id" ),
         @Result(property = "activeflag", column = "activeflag")
     })
-    public List<JShowview> getAll();
+    public List<JShowView> getAll();
 	
 	
 	/**
@@ -32,21 +32,29 @@ public interface JShowviewMapper {
 	 * @return
 	 */
     @Select("SELECT * FROM J_SHOWVIEW WHERE id = #{id}")
-    JShowview getOne(Long id);
+    JShowView getOne(Long id);
+    
+    /**
+	 * 
+	 * @param id
+	 * @return
+	 */
+    @Select("SELECT * FROM J_SHOWVIEW WHERE id = #{id} and ")
+    JShowView getOne(JShowView entity);
     
     /**
      * 
      * @param user
      */
     @Insert("INSERT INTO J_SHOWVIEW(ID,CODE,NAME,ACTIVEFLAG,MAINTABLECODE) VALUES(#{id}, #{CODE}, #{NAME},#{ACTIVEFLAG},#{MAINTABLECODE})")
-    void insert(JShowview user);
+    void insert(JShowView entity);
 
     /**
      * 
      * @param user
      */
     @Update("UPDATE J_SHOWVIEW SET CODE=#{CODE},NAME=#{NAME},ACTIVEFLAG=#{ACTIVEFLAG},MAINTABLECODE=#{MAINTABLECODE} WHERE id =#{id}")
-    void update(JShowview user);
+    void update(JShowView entity);
 
     /**
      * 

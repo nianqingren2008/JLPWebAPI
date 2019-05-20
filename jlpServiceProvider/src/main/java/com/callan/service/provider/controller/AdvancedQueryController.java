@@ -1,5 +1,15 @@
 package com.callan.service.provider.controller;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,8 +23,24 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSONObject;
 import com.callan.service.provider.pojo.AdvanceQueryRequest;
 import com.callan.service.provider.pojo.AdvanceQueryResponse;
-import com.callan.service.provider.pojo.db.JShowview;
-import com.callan.service.provider.service.IJShowviewService;
+import com.callan.service.provider.pojo.advanceQueryBase.ColunmsModel;
+import com.callan.service.provider.pojo.advanceQueryBase.Queries;
+import com.callan.service.provider.pojo.advanceQueryBase.QueryConds;
+import com.callan.service.provider.pojo.advanceQueryBase.QueryIncludesEXCondition;
+import com.callan.service.provider.pojo.advanceQueryBase.Sorted;
+import com.callan.service.provider.pojo.db.JRight;
+import com.callan.service.provider.pojo.db.JSensitiveWord;
+import com.callan.service.provider.pojo.db.JShowDetailView;
+import com.callan.service.provider.pojo.db.JShowView;
+import com.callan.service.provider.pojo.db.JTableDict;
+import com.callan.service.provider.pojo.db.JTableFieldDict;
+import com.callan.service.provider.service.IJLpService;
+import com.callan.service.provider.service.IJRightService;
+import com.callan.service.provider.service.IJSensitiveWordService;
+import com.callan.service.provider.service.IJShowDetailViewService;
+import com.callan.service.provider.service.IJShowViewService;
+import com.callan.service.provider.service.IJTableDictService;
+import com.callan.service.provider.service.IJTableFieldDictService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,109 +49,148 @@ import io.swagger.annotations.ApiOperation;
 @Api(description = "病例检索查询")
 public class AdvancedQueryController {
 	Log log = LogFactory.getLog(AdvancedQueryController.class);
+
+	public final String PatientGlobalTable = "D_PATIENTGLOBAL";
+
 	@Autowired
-	private IJShowviewService jShowviewService;
-	
-	@ApiOperation(value = "病例检索" ,  notes="111")
-	@RequestMapping(value = "/api/AdvanceQuery",method = {RequestMethod.GET,RequestMethod.POST})
-	public String query(@RequestBody String advanceQuery,String pageNum,String pageSize) {
+	private IJShowViewService jShowviewService;
+
+	@Autowired
+	private IJShowDetailViewService jShowDetailViewService;
+
+	@Autowired
+	private IJTableDictService jTableDictService;
+
+	@Autowired
+	private IJTableFieldDictService jTableFieldDictService;
+
+	@Autowired
+	private IJLpService jlpService;
+
+//	@Autowired
+//	private IJRightService jRightService;
+
+	@Autowired
+	private IJSensitiveWordService jSensitiveWordService;
+
+	@ApiOperation(value = "病例检索", notes = "111")
+	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.GET, RequestMethod.POST })
+	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpSession session) {
 		AdvanceQueryRequest advanceQueryRequest = null;
 		try {
-			advanceQueryRequest = JSONObject.toJavaObject(JSONObject.parseObject(advanceQuery)
-						, AdvanceQueryRequest.class);
-		}catch(Exception e) {
+			advanceQueryRequest = JSONObject.toJavaObject(JSONObject.parseObject(advanceQuery),
+					AdvanceQueryRequest.class);
+		} catch (Exception e) {
 			log.error(e);
 		}
-        boolean isTotals = false;
-        int pageNumInt = StringUtils.isBlank(pageNum) ? 1 : Integer.parseInt(pageNum);
-        int pageSizeInt = StringUtils.isBlank(pageSize) ? 20 : Integer.parseInt(pageSize);
-        AdvanceQueryResponse response =  new AdvanceQueryResponse();
-        if(advanceQueryRequest == null) {
-        	response.getResponse().setCode("0000");
-        	response.getResponse().setText("传入参数为空");
-        	return response.toJsonString();
-        }
-        if(advanceQueryRequest.getViewId() == 0) {
-        	response.getResponse().setCode("0000");
-        	response.getResponse().setText("视图编号错误");
-        	return response.toJsonString();
-        }
-        
-        JShowview jShowview = jShowviewService.getOne(advanceQueryRequest.getViewId());
-        if (jShowview == null || !jShowview.getActiveflag().equals("1")) {
-        	response.getResponse().setCode("0000");
-        	response.getResponse().setText("视图编号错误");
-        	return JSONObject.toJSONString(response);
-        }
-        String mainTable = StringUtils.isBlank(jShowview.getMaintablecode()) ? "1" : jShowview.getMaintablecode();
-        
-//        #region 获取显示视图信息
-//        var showViewDetails = from detail in orclJlpContext.JShowdetailviews
-//                              where detail.Activeflag == "1" && detail.Viewid == showview.Id
-//                              join field in orclJlpContext.JTablefielddicts on detail.Fieldid equals field.Id into tablefields
-//                              from field in tablefields.DefaultIfEmpty()
-//                              where field.Showflag == "1"
-//                              join table in orclJlpContext.JTabledicts on field.Tablecode equals table.Code into tables
-//                              from table in tables.DefaultIfEmpty()
-//                              where table.Activeflag == "1"
-//                              orderby detail.Sortno
-//                              select new { detail.Id, detail.Fieldid, detail.Sortno, detail.Fieldtitle, fieldInfos = field, tables = table };
-//
-//        if (advancedQuery.queryShowFields != null)
-//        {
-//            List<long> temoFieldList = new List<long>();
-//            advancedQuery.queryShowFields.ToList().ForEach(x =>
-//            {
-//                if (long.TryParse(x, out long y))
-//                {
-//                    temoFieldList.Add(y);
-//                }
-//            });
-//            showViewDetails = showViewDetails.Where(x => temoFieldList.Contains(x.Id));
-//        }
-//        var showFieldDetails = showViewDetails.Distinct().ToList().OrderBy(x => x.Sortno);
-//        #endregion
-//
-//        #region 验证显示字段
-//        if (showFieldDetails.Count() == 0)
-//        {
-//            responseModel.Code = "1001";
-//            responseModel.Text = "显示字段未配置";
-//            hashtable.Add("response", responseModel);
-//            return Ok(hashtable);
-//        }
-//        #endregion
-//
-//        List<List<QueryDetailModel>> queryMainDetails = new List<List<QueryDetailModel>>();
-//        if (advancedQuery.queries?.queryConds != null && advancedQuery.queries?.queryConds.Length > 0)
-//        {
-//            queryMainDetails.Add(advancedQuery.queries.queryConds.ToList());
-//        }
-//
-//        #region 获取查询所有表名
-//        var tableNameMainWheres = from a in queryMainDetails
-//                                  from b in a
-//                                  select b.condition.Split('.').FirstOrDefault().ToUpper();
-//        var tableNameWhereMainValues = from a in queryMainDetails
-//                                       from b in a
-//                                       where b.fieldType == FieldValueType.Field
-//                                       select b.condValue.Split('.').FirstOrDefault().ToUpper();
-//        var whereFieldsMain = from a in queryMainDetails
-//                              from b in a
-//                              select b.condition.ToUpper();
-//
-//        var whereFieldTypesMain = (from a in orclJlpContext.JTabledicts
-//                                   join b in orclJlpContext.JTablefielddicts on a.Code equals b.Tablecode into tablefields
-//                                   from b in tablefields
-//                                   where a.Activeflag == "1" && whereFieldsMain.Contains(a.Name + "." + b.Name)
-//                                   select new { field = a.Name + "." + b.Name, type = b.Type }).Distinct().ToList();
+		boolean isTotals = false;
+		int pageNumInt = StringUtils.isBlank(pageNum) ? 1 : Integer.parseInt(pageNum);
+		int pageSizeInt = StringUtils.isBlank(pageSize) ? 20 : Integer.parseInt(pageSize);
+		AdvanceQueryResponse response = new AdvanceQueryResponse();
+		if (advanceQueryRequest == null) {
+			response.getResponse().setCode("0000");
+			response.getResponse().setText("传入参数为空");
+			return response.toJsonString();
+		}
+		if (advanceQueryRequest.getViewId() == 0) {
+			response.getResponse().setCode("0000");
+			response.getResponse().setText("视图编号错误");
+			return response.toJsonString();
+		}
+
+		JShowView jShowView = jShowviewService.getOne(advanceQueryRequest.getViewId());
+		if (jShowView == null || !jShowView.getActiveflag().equals("1")) {
+			response.getResponse().setCode("0000");
+			response.getResponse().setText("视图编号错误");
+			return JSONObject.toJSONString(response);
+		}
+		String mainTable = jShowView.getMaintablecode();
+
+		// 获取显示视图信息
+		List<JShowDetailView> jShowDetailViewList = jShowDetailViewService.getByViewId(jShowView.getId(), true);
+//        
+		List<JTableFieldDict> jTableFieldDictList = new ArrayList<JTableFieldDict>();
+		for (JShowDetailView jShowDetailView : jShowDetailViewList) {
+			long fieldId = jShowDetailView.getFieldid();
+			JTableFieldDict jTableFieldDict = jTableFieldDictService.getOne(fieldId, true);
+			jTableFieldDictList.add(jTableFieldDict);
+			jTableFieldDict.setjShowDetailView(jShowDetailView);
+			jShowDetailView.setjTableFieldDict(jTableFieldDict);
+        	JTableDict jTableDict = jTableDictService.getByCode(jTableFieldDict.getTablecode(),true);
+        	jShowDetailView.setjTableDict(jTableDict);
+        	
+
+		}
+
+		List<JShowDetailView> jShowDetailViewListShow = new ArrayList<>();
+		if (advanceQueryRequest.getQueryShowFields() != null) {
+			List<Long> tempFieldList = new ArrayList<Long>();
+			for (Long field : advanceQueryRequest.getQueryShowFields()) {
+				tempFieldList.add(field);
+			}
+			for (JShowDetailView jShowDetailView : jShowDetailViewList) {
+				if (tempFieldList.contains(jShowDetailView.getId().longValue())) {
+					if (!jShowDetailViewListShow.contains(jShowDetailView)) {
+						jShowDetailViewListShow.add(jShowDetailView);
+					}
+				}
+			}
+		}
+		Collections.sort(jShowDetailViewListShow, new Comparator<JShowDetailView>() {
+			@Override
+			public int compare(JShowDetailView o1, JShowDetailView o2) {
+				return o1.getSortno().compareTo(o2.getSortno());
+			}
+		});
+
+		if (jTableFieldDictList.size() == 0) {
+			response.getResponse().setCode("1001");
+			response.getResponse().setText("显示字段未配置");
+			return response.toJsonString();
+		}
+
+		Set<ColunmsModel> columns = new HashSet<ColunmsModel>();
+		for (JTableFieldDict jTableFieldDict : jTableFieldDictList) {
+			ColunmsModel colunmsModel = new ColunmsModel();
+			colunmsModel.setDataIndex(jTableFieldDict.getName().toLowerCase());
+			colunmsModel.setKey(jTableFieldDict.getName().toLowerCase());
+			colunmsModel.setTitle(jTableFieldDict.getjShowDetailView().getFieldtitle());
+			colunmsModel.setIsLongStr("clob".equals(jTableFieldDict.getType()));
+			colunmsModel.setIsSearched("1".equals(jTableFieldDict.getQueryflag()));
+			columns.add(colunmsModel);
+		}
+
+		// 获取查询所有表名
+		List<QueryConds> queryCondsList = advanceQueryRequest.getQueries().getQueryConds();
+
+		Set<String> tableNameMainWheres = new HashSet<String>();
+		Set<String> tableNameWhereMainValues = new HashSet<String>();
+		Set<String> whereFieldsMain = new HashSet<String>();
+		Set<JTableFieldDict> whereFieldTypesMain = new HashSet<JTableFieldDict>();
+		String sqlWhereMain = "";
+
+		for (QueryConds queryConds : queryCondsList) {
+			String tableName = queryConds.getCondition().split("\\.")[0].toUpperCase();
+			tableNameMainWheres.add(tableName);
+			if (queryConds.getFieldType() == 1) {
+				tableNameWhereMainValues.add(queryConds.getCondValue().split("\\.")[0].toUpperCase());
+			}
+			whereFieldsMain.add(queryConds.getCondition().toUpperCase());
+			JTableDict jTableDict = jTableDictService.getByCode(tableName, true);
+			List<JTableFieldDict> jTableFieldDictListShow = jTableFieldDictService.getByTableCode(jTableDict.getCode(),
+					true);
+			for (JTableFieldDict jTableFieldDict : jTableFieldDictListShow) {
+				whereFieldTypesMain.add(jTableFieldDict);
+			}
+		}
 //        queryMainDetails.ForEach(x =>
 //        {
 //            x.ForEach(y =>
 //            {
 //                if (y.fieldType != FieldValueType.Field)
 //                {
-//                    y.fieldType = (whereFieldTypesMain.FirstOrDefault(m => m.field == y.condition.ToUpper())?.type.toFieldValueType()) ?? FieldValueType.String;
+//                    y.fieldType = (whereFieldTypesMain.FirstOrDefault(m => m.field == y.condition.ToUpper())
+//                        ?.type.toFieldValueType()) ?? FieldValueType.String;
 //                }
 //            });
 //            if (x.LastOrDefault() != null)
@@ -133,247 +198,117 @@ public class AdvancedQueryController {
 //                x.LastOrDefault().combinator = "";
 //            }
 //        });
-//
-//        #endregion
-//
-//        #region 获取当前查询条件
-//        var tableNames = showFieldDetails.Select(x => x.tables.Name).Distinct().ToList();
-//        var fieldNames = showFieldDetails.Select(x => (x.tables.Name + "." + x.fieldInfos.Name).ToLower()).Distinct().ToList();
-//        var fieldShowNames = showFieldDetails.Select(x => x.fieldInfos.Name.ToLower()).Distinct().ToArray();
-//
-//        var columns = showFieldDetails.Select(
-//            x => new ColunmsModel()
-//            {
-//                dataIndex = x.fieldInfos.Name.ToLower(),
-//                key = x.fieldInfos.Name.ToLower(),
-//                title = x.Fieldtitle,
-//                isLongStr = x.fieldInfos.Type == "clob",
-//                isSearched = x.fieldInfos.Queryflag == "1"
-//            }).Distinct().ToArray();
-//        #endregion
-//
-//        var SqlWhereMain = queryMainDetails.Select(x => x.ToArray().ToStringEx(" ")).ToArray().ToStringEx(" and ");
+		Set<String> tableNames = new HashSet<String>();
+		Set<String> fieldNames = new HashSet<String>();
+		Set<String> fieldShowNames = new HashSet<String>();
+		for(JShowDetailView JShowDetailView : jShowDetailViewListShow) {
+			tableNames.add(JShowDetailView.getjTableDict().getName());
+			fieldNames.add((JShowDetailView.getjTableDict().getName() + "." 
+					+ JShowDetailView.getjTableFieldDict().getName()).toUpperCase());
+			fieldShowNames.add(JShowDetailView.getjTableFieldDict().getName().toLowerCase());
+		}
+
+//        String SqlWhereMain = queryMainDetails.Select(x => x.ToArray().ToStringEx(" ")).ToArray().ToStringEx(" and ");
 //        tableNames.AddRange(tableNameMainWheres);
 //        tableNames.AddRange(tableNameWhereMainValues);
 //        tableNames = tableNames.Distinct().ToList();
 //        tableNames.RemoveAll(x => x.ToUpper() == JLPStaticProperties.PatientGlobalTable);
 //
-//        #region 排序字段处理
-//        string sortStr = string.Empty;
-//        if (advancedQuery.sorted is null) advancedQuery.sorted = new SortFieldModel[] { };
-//        var sorts = advancedQuery.sorted.Where(x => fieldShowNames.Contains(x.id.ToLower())).Select(x => x.ToString()).ToArray();
-//        sortStr = sorts.ToStringEx(",");
-//        //fieldShowNames
-//        #endregion
+		List<Sorted> sortedList = advanceQueryRequest.getSorted();
+		String sorts = "";
+		for (Sorted sorted : sortedList) {
+			JTableFieldDict jTableFieldDict = jTableFieldDictService.getOne(Long.parseLong(sorted.getId()), true);
+			String sortedFieldName = jTableFieldDict.getName();
+			if (sorted.getDesc()) {
+				sorts += sortedFieldName + " desc ,";
+			} else {
+				sorts += sortedFieldName + ",";
+			}
+
+		}
+
 //
-//
-//        List<string> includeSql = new List<string>();
-//        List<string> excludeSql = new List<string>();
-//
-//        Dictionary<string, List<QueryCollectionModel>> queryList = new Dictionary<string, List<QueryCollectionModel>>();
-//
-//        if (advancedQuery.queries?.queryIncludesEX?.includes != null)
-//        {
-//            queryList.Add("include", advancedQuery.queries.queryIncludesEX.includes.ToList());
-//        }
-//
-//        if (!urlStatistic.includesTotal && advancedQuery.queries?.queryIncludesEX?.excludes != null)
-//        {
-//            queryList.Add("exclude", advancedQuery.queries.queryIncludesEX.excludes.ToList());
-//        }
-//
-//        string tempadvancedQueryType = string.Empty;
-//        foreach (var item in queryList)
-//        {
-//            foreach (var subItem in item.Value)
-//            {
-//                List<string> tempTableNames = new List<string>();
-//                List<string> tempFieldNames = new List<string>();
-//
-//                tempFieldNames.Add(JLPStaticProperties.PatientGlobalTable + ".Id");
-//
-//                List<List<QueryDetailModel>> queryDetails = new List<List<QueryDetailModel>>();
-//
-//                if (subItem.Conds is null)
-//                {
-//                    continue;
-//                }
-//
-//                queryDetails.Add(subItem.Conds.ToList());
-//
-//                #region 获取查询所有表名
-//                var tableNameWheres = from a in queryDetails
-//                                      from b in a
-//                                      select b.condition.Split('.').FirstOrDefault().ToUpper();
-//                var tableNameWhereValues = from a in queryDetails
-//                                           from b in a
-//                                           where b.fieldType == FieldValueType.Field
-//                                           select b.condValue.Split('.').FirstOrDefault().ToUpper();
-//                var whereFields = from a in queryDetails
-//                                  from b in a
-//                                  select b.condition.ToUpper();
-//
-//                var whereFieldTypes = (from a in orclJlpContext.JTabledicts
-//                                       join b in orclJlpContext.JTablefielddicts on a.Code equals b.Tablecode into tablefields
-//                                       from b in tablefields
-//                                       where a.Activeflag == "1" && whereFields.Contains(a.Name + "." + b.Name)
-//                                       select new { field = a.Name + "." + b.Name, type = b.Type }).Distinct().ToList();
-//                queryDetails.ForEach(x =>
-//                {
-//                    x.ForEach(y =>
-//                    {
-//                        if (y.fieldType != FieldValueType.Field)
-//                        {
-//                            y.fieldType = (whereFieldTypes.FirstOrDefault(m => m.field == y.condition.ToUpper())?.type.toFieldValueType()) ?? FieldValueType.String;
-//                        }
-//                    });
-//                    if (x.LastOrDefault() != null)
-//                    {
-//                        x.LastOrDefault().combinator = "";
-//                    }
-//                });
-//
-//                var SqlWhere = queryDetails.Select(x => x.ToArray().ToStringEx(" ")).ToArray().ToStringEx(" and ");
-//                tempTableNames.AddRange(tableNameWheres);
-//                tempTableNames.AddRange(tableNameWhereValues);
-//                tempTableNames = tempTableNames.Distinct().ToList();
-//                tempTableNames.RemoveAll(x => x.ToUpper() == JLPStaticProperties.PatientGlobalTable);
-//                #endregion
-//
-//                #region 获取查询结果和数量
-//                tempFieldNames = tempFieldNames.Distinct().ToList();
-//                string tableWhere = tempTableNames.ToArray().ToTableStringEx();
-//
-//                string TempSql = $"{subItem.leftqueto}select distinct {tempFieldNames.ToArray().ToStringEx(",")} from {tableWhere} {(string.IsNullOrEmpty(SqlWhere) ? "" : " where " + SqlWhere)} {subItem.rightqueto}";
-//
-//                if (item.Key == "include")
-//                {
-//                    if (includeSql.Count != 0)
-//                    {
-//                        includeSql.Add(tempadvancedQueryType);
-//                    }
-//                    includeSql.Add(TempSql);
-//                }
-//                else if (item.Key == "exclude")
-//                {
-//                    if (excludeSql.Count != 0)
-//                    {
-//                        excludeSql.Add(tempadvancedQueryType);
-//                    }
-//                    excludeSql.Add(TempSql);
-//                }
-//
-//                tempadvancedQueryType = subItem.setCombinator.ToString();
-//            }
-//            #endregion
-//        }
-//
-//        //增加隐藏主键
-//        fieldNames.Add(JLPStaticProperties.PatientGlobalTable + ".Id as hide_key");
-//
-//        #region 组装SQL
-//        StringBuilder includeStrBuilder = new StringBuilder();
-//        includeSql.ForEach(x =>
-//        {
-//            includeStrBuilder.AppendLine(x + " ");
-//        });
-//
-//        StringBuilder excludeStrBuilder = new StringBuilder();
-//        excludeSql.ForEach(x =>
-//        {
-//            excludeStrBuilder.AppendLine(x + " ");
-//        });
-//        string tempSql = string.Empty;
-//
-//        if (includeStrBuilder.Length > 0)
-//        {
-//            tempSql = $"select Id from ({includeStrBuilder.ToString()})";
-//            if (excludeStrBuilder.Length > 0)
-//            {
-//                tempSql += $" minus ({excludeStrBuilder.ToString()})";
-//            }
-//        }
-//        if (fieldNames.Where(x => x.ToUpper().Contains(".BIRTHDAY")).Any())
-//        {
-//            var tempFields = fieldNames.Where(x => x.ToUpper().Contains(".BIRTHDAY")).ToList();
-//            foreach (var item in tempFields)
-//            {
-//                fieldNames[fieldNames.IndexOf(item)] = $"to_char({item},'yyyy/mm/dd') as birthday";
-//            }
-//        }
-//        string finalSelectFields = fieldNames.ToArray().ToStringEx();
-//        string finalTables = tableNames.ToArray().ToTableStringEx(advancedQueryWhere: tempSql);
-//        string tableKeys = showFieldDetails.Select(x => x.tables.Name).Distinct().ToList().ToTableKeys(out Type tableKeyType);
-//
-//        string tempSqlWhere = string.Empty;
-//        if (tempSqlWhere.Length == 0)
-//        {
-//            tempSqlWhere = $" where D_PATIENTGLOBAL.jlactiveflag='1'";
-//        }
-//        else
-//        {
-//            tempSqlWhere += $" and D_PATIENTGLOBAL.jlactiveflag='1'";
-//        }
-//
-//        if (advancedQuery.patientGlobalId > 0)
-//        {
-//            tempSqlWhere += $" and D_PATIENTGLOBAL.Id={advancedQuery.patientGlobalId}";
-//        }
-//
-//        if (SqlWhereMain.Length > 0)
-//        {
-//            tempSqlWhere += $" and {SqlWhereMain}";
-//        }
-//
-//        tempSqlWhere += $" and {mainTable.Name}.Id is not null";
-//
-//        #endregion
-//
+		List<String> includeSqlList = new ArrayList<String>();
+		List<String> excludeSqlList = new ArrayList<String>();
+
+		List<QueryIncludesEXCondition> includes = advanceQueryRequest.getQueries().getQueryIncludesEX().getIncludes();
+		for (QueryIncludesEXCondition queryIncludesEXCondition : includes) {
+
+		}
+		List<QueryIncludesEXCondition> excludes = advanceQueryRequest.getQueries().getQueryIncludesEX().getExcludes();
+		// 增加隐藏主键
+		fieldNames.add(PatientGlobalTable + ".Id as hide_key");
+		StringBuilder includeBuilder = new StringBuilder();
+		for (String includeSql : includeSqlList) {
+			includeBuilder.append(includeSql);
+		}
+		StringBuilder excludeBuilder = new StringBuilder();
+		for (String excludeSql : excludeSqlList) {
+			excludeBuilder.append(excludeSql);
+		}
+		String tempSql = "";
+		if (includeBuilder.length() > 0) {
+			tempSql += "select Id from (" + includeBuilder.toString() + ")";
+			if (excludeBuilder.length() > 0) {
+				tempSql += " minus (" + excludeBuilder.toString() + ")";
+			}
+		}
+		for (String fieldName : fieldNames) {
+			if (fieldName.toUpperCase().contains("BIRTHDAY")) {
+				fieldName = "to_char({item},'yyyy/mm/dd') as birthday";
+			}
+		}
+		String finalSelectFields = fieldNames.toString();
+		String finalTables = tableNames.toString();
+		String tableKeys = fieldShowNames.toString();
+
+		String tempSqlWhere = " where 1=1 ";
+		tempSqlWhere += " and D_PATIENTGLOBAL.jlactiveflag='1'";
+		if (advanceQueryRequest.getPatientGlobalId() > 0) {
+			tempSqlWhere += " and D_PATIENTGLOBAL.Id = " + advanceQueryRequest.getPatientGlobalId();
+		}
+		if (sqlWhereMain.length() > 0) {
+			tempSqlWhere += " and  " + sqlWhereMain;
+		}
+		tempSqlWhere += " and " + mainTable + ".Id is not null";
 //        #region 组装返回值
-//        sortStr = $"{JLPStaticProperties.PatientGlobalTable}__Id";
+		String sortStr = PatientGlobalTable + "__Id";
 //
-//        string Sql = $"select distinct {tableKeys} from {finalTables} {tempSqlWhere}";
-//        string SqlCount = DBHelperBase.getCountSql(BarryCommon.DataBaseType.Oracle, Sql);
-//        LoggerHelper.Info(Sql);
-//        LoggerHelper.Info(SqlCount);
-//        if (isTotals)
-//        {
-//            dynamic count = orclJlpContext.Database.DynamicSqlQueryMethod(SqlCount, new object[] { }).ToListAsync().Result.FirstOrDefault();
-//            hashtable.Add("response", responseModel);
-//            hashtable.Add("totals", count.num);
-//        }
-//        else
-//        {
-//            string SqlKeys = DBHelperBase.getPageSql(BarryCommon.DataBaseType.Oracle, Sql, pageSize, pageNum, sortStr);
-//            LoggerHelper.Info(SqlKeys);
-//            var dataGrid = orclJlpContext.Database.Connection.QueryMutiRecords(new string[] { SqlCount, SqlKeys }, new Type[] { null, tableKeyType });
-//            dynamic count = dataGrid[0].First().NUM;
-//            var keysData = dataGrid[1].ToArray();
-//            hashtable.Add("response", responseModel);
-//            hashtable.Add("totals", count);
-//
-//            string keyIdWhere = keysData.GetKeysWhere();
-//            var retData = new object[] { };
-//            if (keyIdWhere.Length > 0)
-//            {
-//                string SqlData = $"select distinct {finalSelectFields} from {tableNames.ToArray().ToTableStringEx()} {tempSqlWhere} and {keyIdWhere} order by {JLPStaticProperties.PatientGlobalTable}.Id";
-//                retData = orclJlpContext.Database.DynamicSqlQueryMethod(SqlData, new object[] { }).ToListAsync().Result.ToArray();
-//
-//                var rights = ActionContext.GetUserRight();
-//                if (rights is null || !rights.Any(x => x.Id == 4))
-//                {
-//                    var sensitivewords = orclJlpContext.JSensitivewords.Where(x => x.Activeflag == JLPStaticProperties.ActiveFlag).Select(x => x.Name).ToArray().Select(x => x.ToLower()).ToArray();
-//                    if (sensitivewords.Count() > 0)
-//                    {
-//                        retData = retData.Sensitiveword(sensitivewords);
-//                    }
-//                }
-//            }
-//
-//            hashtable.Add("columns", columns);
-//            hashtable.Add("content", retData);
-//        }
-//        #endregion
+		String sql = "select distinct " + tableKeys + " from " + finalTables + " " + tempSqlWhere;
+		String sqlCount = "";// DBHelperBase.getCountSql(BarryCommon.DataBaseType.Oracle, Sql);
+		log.info("sql : " + sql);
+		log.info("sqlCount : " + sqlCount);
+		if (isTotals) {
+			int totals = jlpService.queryForSQL(sqlCount, new Object[] {}).size();
+			response.setTotals(totals);
+		} else {
+			String SqlKeys = sql;
+			log.info("SqlKeys : " + SqlKeys);
+			List<Map<String, Object>> dataGrid = jlpService.queryForSQL(SqlKeys, new Object[] {});
+
+			String keyIdWhere = "";// keysData.GetKeysWhere();
+			List<Map<String, Object>> retData = new ArrayList<Map<String, Object>>();
+			if (keyIdWhere.length() > 0) {
+				String SqlData = "select distinct " + finalSelectFields + " from " + tableNames + " " + tempSqlWhere
+						+ " and " + keyIdWhere + " order by " + PatientGlobalTable + ".Id";
+				retData = jlpService.queryForSQLStreaming(SqlData, new Object[] {});
+
+				JRight jRight = (JRight) session.getAttribute("jRight");
+				if (jRight == null || jRight.getId() != 4L) {
+					// 获取敏感字段配置
+					List<JSensitiveWord> jSensitiveWordList = jSensitiveWordService.getAll(true);
+
+					if (jSensitiveWordList.size() > 0) {
+						// 将敏感字段设置为 ***
+						// TODO
+//                        retData = retData.sensitiveWord(jSensitiveWordList);
+					}
+				}
+			}
+			response.setTotals(retData.size());
+			response.setColumns(columns);
+			response.setContent(retData);
+		}
 
 		return response.toJsonString();
 	}

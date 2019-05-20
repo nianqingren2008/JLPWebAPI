@@ -1,5 +1,7 @@
 package com.callan.service.provider.pojo.advanceQueryBase;
 
+import java.util.List;
+
 import com.alibaba.fastjson.annotation.JSONField;
 
 public class QueryIncludesEXCondition {
@@ -9,7 +11,7 @@ public class QueryIncludesEXCondition {
 	@JSONField(label = "abstract")
 	private String abstract1;
 	
-	private QueryConds conds;
+	private List<QueryConds> conds;
 	
 	public String getLeftqueto() {
 		return leftqueto;
@@ -29,11 +31,11 @@ public class QueryIncludesEXCondition {
 	public void setAbstract1(String abstract1) {
 		this.abstract1 = abstract1;
 	}
-	public QueryConds getConds() {
-		return conds;
-	}
-	public void setConds(QueryConds conds) {
+	public void setConds(List<QueryConds> conds) {
 		this.conds = conds;
+	}
+	public List<QueryConds> getConds() {
+		return conds;
 	}
 	
 }

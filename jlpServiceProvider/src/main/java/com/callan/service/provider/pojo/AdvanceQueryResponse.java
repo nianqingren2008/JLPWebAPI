@@ -2,15 +2,16 @@ package com.callan.service.provider.pojo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.alibaba.fastjson.JSONObject;
+import com.callan.service.provider.pojo.advanceQueryBase.ColunmsModel;
 import com.callan.service.provider.pojo.base.BaseResponse;
-import com.callan.service.provider.pojo.base.ResponseColumn;
 
 public class AdvanceQueryResponse {
 	private BaseResponse response = new BaseResponse();
-	private Double totals;
-	private List<ResponseColumn> columns;
+	private Integer totals;
+	private Set<ColunmsModel> columns;
 	private List<Map<String, Object>> content;
 	
 	public BaseResponse getResponse() {
@@ -19,16 +20,16 @@ public class AdvanceQueryResponse {
 	public void setResponse(BaseResponse response) {
 		this.response = response;
 	}
-	public Double getTotals() {
+	public Integer getTotals() {
 		return totals;
 	}
-	public void setTotals(Double totals) {
+	public void setTotals(Integer totals) {
 		this.totals = totals;
 	}
-	public List<ResponseColumn> getColumns() {
+	public Set<ColunmsModel> getColumns() {
 		return columns;
 	}
-	public void setColumns(List<ResponseColumn> columns) {
+	public void setColumns(Set<ColunmsModel> columns) {
 		this.columns = columns;
 	}
 	public List<Map<String, Object>> getContent() {

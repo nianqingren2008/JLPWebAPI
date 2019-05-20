@@ -6,11 +6,30 @@ import com.callan.service.provider.pojo.advanceQueryBase.Queries;
 import com.callan.service.provider.pojo.advanceQueryBase.Sorted;
 
 public class AdvanceQueryRequest {
+	/*
+	 * 排序字段
+	 */
 	private List<Sorted> sorted;
+	/*
+	 * 
+	 */
 	private String [] filtered;
+	/*
+	 * 视图ID
+	 */
 	private Long viewId;
+	/*
+	 * 纳排查询条件
+	 */
 	private Queries queries;
-	private List<Integer> queryShowFields;
+	/*
+	 * 查询显示项
+	 */
+	private List<Long> queryShowFields;
+	/*
+	 * 患者主索引
+	 */
+	private Long patientGlobalId;
 	
 	public List<Sorted> getSorted() {
 		return sorted;
@@ -36,11 +55,17 @@ public class AdvanceQueryRequest {
 	public void setQueries(Queries queries) {
 		this.queries = queries;
 	}
-	public List<Integer> getQueryShowFields() {
+	public List<Long> getQueryShowFields() {
 		return queryShowFields;
 	}
-	public void setQueryShowFields(List<Integer> queryShowFields) {
+	public void setQueryShowFields(List<Long> queryShowFields) {
 		this.queryShowFields = queryShowFields;
+	}
+	public Long getPatientGlobalId() {
+		return patientGlobalId;
+	}
+	public void setPatientGlobalId(Long patientGlobalId) {
+		this.patientGlobalId = patientGlobalId;
 	}
 	
 }

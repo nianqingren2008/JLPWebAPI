@@ -2,12 +2,33 @@ package com.callan.service.provider.pojo.advanceQueryBase;
 
 public class QueryConds {
 	
+	/*
+	 * 左括号
+	 */
 	private String leftqueto;
+	/*
+	 * 字段名称
+	 */
 	private String condition;
+	/*
+	 * 关系类型(AND OR)
+	 */
 	private String relation;
+	/*
+	 * 字段值类型
+	 */
 	private Integer fieldType;
+	/*
+	 * 字段值
+	 */
 	private String condValue;
+	/*
+	 * 右括号
+	 */
 	private String rightqueto;
+	/*
+	 * 逻辑类型(= != 大于 小于  NOTLIKE)
+	 */
 	private String combinator;
 	
 	public String getLeftqueto() {

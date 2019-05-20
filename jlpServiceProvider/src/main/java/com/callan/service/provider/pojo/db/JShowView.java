@@ -6,7 +6,7 @@ package com.callan.service.provider.pojo.db;
  * @author callan
  *
  */
-public class JShowview {
+public class JShowView {
 	
 	/**
 	 * 流水号
