@@ -5,13 +5,29 @@ import java.util.List;
 import com.alibaba.fastjson.annotation.JSONField;
 
 public class QueryIncludesEXCondition {
+	/*
+	 * 左括号
+	 */
 	private String leftqueto;
 	private String id;
 	
 	@JSONField(label = "abstract")
 	private String abstract1;
-	
+	/*
+	 * 查询条件
+	 */
 	private List<QueryConds> conds;
+	/*
+	 * 右括号
+	 */
+	private String rightqueto;
+	/*
+	 * 集合操作类别
+	 */
+	private String setCombinator;
+	private String type;
+		
+		
 	
 	public String getLeftqueto() {
 		return leftqueto;
@@ -36,6 +52,24 @@ public class QueryIncludesEXCondition {
 	}
 	public List<QueryConds> getConds() {
 		return conds;
+	}
+	public String getRightqueto() {
+		return rightqueto;
+	}
+	public void setRightqueto(String rightqueto) {
+		this.rightqueto = rightqueto;
+	}
+	public String getSetCombinator() {
+		return setCombinator;
+	}
+	public void setSetCombinator(String setCombinator) {
+		this.setCombinator = setCombinator;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
 	}
 	
 }

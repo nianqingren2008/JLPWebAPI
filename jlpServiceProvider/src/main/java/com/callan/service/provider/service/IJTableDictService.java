@@ -2,6 +2,7 @@ package com.callan.service.provider.service;
 
 import java.util.Map;
 
+import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.db.JTableDict;
 
 public interface IJTableDictService {
@@ -19,7 +20,7 @@ public interface IJTableDictService {
 	 * @param id
 	 * @return
 	 */
-	Map<Long, JTableDict> getAll4Id();
+	CacheResponse getAll4Id();
 
 	
 	/**
@@ -32,21 +33,43 @@ public interface IJTableDictService {
 
 	/**
 	 * 根据code获取记录 
-	 * @param tablecode
+	 * @param tableName
 	 * @param activeFlag
 	 * @return
 	 */
-	JTableDict getByCode(String tablecode);
+	JTableDict getByName(String tableName);
 	
 	/**
 	 * 根据code获取记录  只取有效记录
-	 * @param tablecode
+	 * @param tableName
 	 * @param activeFlag
 	 * @return
 	 */
-	JTableDict getByCode(String tablecode, boolean activeFlag);
+	JTableDict getByName(String tableName, boolean activeFlag);
 
 
-	Map<String, JTableDict> getAll4Code();
+	CacheResponse getAll4Name();
+	
+	
+	
+	/**
+	 * 根据code获取记录 
+	 * @param tableCode
+	 * @param activeFlag
+	 * @return
+	 */
+	JTableDict getByCode(String tableCode);
+	
+	/**
+	 * 根据code获取记录  只取有效记录
+	 * @param tableCode
+	 * @param activeFlag
+	 * @return
+	 */
+	JTableDict getByCode(String tableCode, boolean activeFlag);
+
+
+	CacheResponse getAll4Code();
+	
 
 }

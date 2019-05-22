@@ -18,7 +18,7 @@ import com.callan.service.provider.pojo.cache.CacheKey;
 import com.callan.service.provider.pojo.cache.NativeCacheable;
 import com.callan.service.provider.pojo.cache.NativeCacheable.KeyMode;
 import com.callan.service.provider.pojo.cache.NativeData;
-import com.callan.service.provider.pojo.cache.SerializeUtil;
+//import com.callan.service.provider.pojo.cache.SerializeUtil;
 import com.callan.service.provider.pojo.cache.Sha1Util;
 
 @Aspect
@@ -29,7 +29,7 @@ public class NativeCacheAop {
     
     @Pointcut("@annotation(com.callan.service.provider.pojo.cache.NativeCacheable)")  
     public void methodCachePointcut(){
-    	
+
     }
     
     
@@ -93,7 +93,9 @@ public class NativeCacheAop {
     
 	private Object getFromCache(String key,ProceedingJoinPoint pjp){
 		Object value = null;
-    	String methonName = pjp.getSignature().getName();
+		String declaringTypeName = pjp.getSignature().getDeclaringTypeName();
+		declaringTypeName = declaringTypeName.substring(declaringTypeName.lastIndexOf(".")+1,declaringTypeName.length());
+    	String methonName = declaringTypeName + "." + pjp.getSignature().getName();
     	
     	    logger.debug(methonName + ",开始从缓存获取， key:" + key);
     	    value = NativeData.getData(key);	//从缓存获取数据  
@@ -105,7 +107,7 @@ public class NativeCacheAop {
 	    	logger.info(methonName + ",[GET FAIL] 没有命中缓存，继续执行原有方法。");
 			value = pjp.proceed(); //跳过缓存,到后端查询数据  
 			
-			if(value instanceof HashMap<?, ?>) {
+			if(value instanceof CacheResponse) {
 				CacheResponse vo = (CacheResponse)value;
 				if(vo.getCode() == 0){
 					logger.info(methonName + ",本次方法返回了正确的结果，将结果缓存起来。。。");
@@ -139,7 +141,9 @@ public class NativeCacheAop {
     private String getCacheKey(ProceedingJoinPoint pjp,String key,KeyMode keyMode) {
         
         StringBuilder buf = new StringBuilder();
-        buf.append(pjp.getSignature().getDeclaringTypeName())
+        String declaringTypeName = pjp.getSignature().getDeclaringTypeName();
+        declaringTypeName = declaringTypeName.substring(declaringTypeName.lastIndexOf(".")+1,declaringTypeName.length());
+        buf.append(declaringTypeName)
         	.append(".").append(pjp.getSignature().getName());
         if(key.length()>0) {
             buf.append(".").append(key);
@@ -155,28 +159,27 @@ public class NativeCacheAop {
                     if(an instanceof CacheKey) {
                     	//对于基本类型，直接用toString即可，对与对象类型，则需要获取对象序列化值
                     	Object argObj = args[i];
-                    	String value = SerializeUtil.getValueByType(argObj);
-                        buf.append(".").append(SerializeUtil.hessianSerialize(value));
+//                    	String value = SerializeUtil.getValueByType(argObj);
+                        buf.append(".").append(argObj);
                         break;
                     }
                 }
             }
         } else if(keyMode == KeyMode.BASIC) {
             for(Object argObj : args) {
-            	String value = SerializeUtil.getValueByType(argObj);
-            	buf.append(".").append(value);
+//            	String value = SerializeUtil.getValueByType(argObj);
+            	buf.append(".").append(argObj);
             	
             }
         } else if(keyMode == KeyMode.ALL) { //本系统默认：ALL
             for(Object arg : args) {
-            	String objSerial = SerializeUtil.hessianSerialize(arg);
-            	logger.debug("获取对象序列化值:" + objSerial);
-                buf.append(".").append(objSerial);
+//            	String objSerial = SerializeUtil.hessianSerialize(arg);
+                buf.append(".").append(arg);
             }
         }
         logger.debug("最终拼装字符串：" + buf.toString());
-        String serialObject = Sha1Util.getEncrypteWord(SerializeUtil.hessianSerialize(buf.toString()));
-        logger.debug("序列化后的签名：" + serialObject);
+		String serialObject = /* Sha1Util.getEncrypteWord( */buf.toString()/* ) */;
+//        logger.debug("序列化后的签名：" + serialObject);
         return serialObject;  
     }
     

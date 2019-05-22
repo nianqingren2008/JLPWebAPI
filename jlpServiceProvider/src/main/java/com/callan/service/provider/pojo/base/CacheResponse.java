@@ -9,7 +9,7 @@ public class CacheResponse {
 	/*
 	 * 成功标识  0 ：成功
 	 */
-	private int code = 0;
+	private int code = -1;
 	/*
 	 * 返回业务数据
 	 */

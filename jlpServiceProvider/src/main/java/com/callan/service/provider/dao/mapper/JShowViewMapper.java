@@ -34,13 +34,13 @@ public interface JShowViewMapper {
     @Select("SELECT * FROM J_SHOWVIEW WHERE id = #{id}")
     JShowView getOne(Long id);
     
-    /**
-	 * 
-	 * @param id
-	 * @return
-	 */
-    @Select("SELECT * FROM J_SHOWVIEW WHERE id = #{id} and ")
-    JShowView getOne(JShowView entity);
+//    /**
+//	 * 
+//	 * @param id
+//	 * @return
+//	 */
+//    @Select("SELECT * FROM J_SHOWVIEW WHERE id = #{id} and ")
+//    JShowView getOne(JShowView entity);
     
     /**
      * 

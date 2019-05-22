@@ -3,6 +3,7 @@ package com.callan.service.provider.service;
 import java.util.List;
 import java.util.Map;
 
+import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.db.JShowDetailView;
 
 public interface IJShowDetailViewService {
@@ -42,19 +43,19 @@ public interface IJShowDetailViewService {
 	 * @param id
 	 * @return
 	 */
-	Map<Long, JShowDetailView> getAll4Id();
+	CacheResponse getAll4Id();
 
 	/**
 	 * 获取所有值  并按viewId归类
 	 * @param id
 	 * @return
 	 */
-	Map<Long, List<JShowDetailView>> getAll4ViewId();
+	CacheResponse getAll4ViewId();
 	/**
 	 * 获取所有值  并按viewId归类 只取 有效记录
 	 * @param activeFlag
 	 * @return
 	 */
-	Map<Long, List<JShowDetailView>> getAll4ViewId(boolean activeFlag);
+	CacheResponse getAll4ViewId(boolean activeFlag);
 
 }

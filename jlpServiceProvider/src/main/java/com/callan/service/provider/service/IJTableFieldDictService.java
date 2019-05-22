@@ -3,6 +3,7 @@ package com.callan.service.provider.service;
 import java.util.List;
 import java.util.Map;
 
+import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.db.JTableFieldDict;
 
 public interface IJTableFieldDictService {
@@ -20,7 +21,7 @@ public interface IJTableFieldDictService {
 	 * @param id
 	 * @return
 	 */
-	Map<Long, JTableFieldDict> getAll4Id();
+	CacheResponse getAll4Id();
 
 	
 	/**
@@ -46,8 +47,17 @@ public interface IJTableFieldDictService {
 	List<JTableFieldDict> getByTableCode(String tableName, boolean showFlag);
 
 
-	Map<String, List<JTableFieldDict>> getAll4TableCode();
+	CacheResponse getAll4TableCode();
 	
-	Map<String, List<JTableFieldDict>> getAll4TableCode(boolean showFlag);
+	CacheResponse getAll4TableCode(boolean showFlag);
+
+	/**
+	 * 根据表名和字段名查找字段定义
+	 * @param code
+	 * @param fieldName
+	 * @param b
+	 * @return
+	 */
+	JTableFieldDict getByTableCodeAndName(String code, String fieldName);
 
 }
