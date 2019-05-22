@@ -3,6 +3,9 @@ package com.callan.service.provider.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +13,7 @@ import com.callan.service.provider.dao.mapper.JSensitiveWordMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.NativeCacheable;
 import com.callan.service.provider.pojo.db.JSensitiveWord;
+import com.callan.service.provider.service.IJRightService;
 import com.callan.service.provider.service.IJSensitiveWordService;
 
 @Service

@@ -13,5 +13,4 @@ public interface IJShowViewService {
 
 	JShowView getOne(Long id, boolean activityFlag);
 
-
 }

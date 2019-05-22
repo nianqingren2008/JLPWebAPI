@@ -27,3 +27,4 @@ logging:
          service:
            provider : debug
 
+executorService.threedMax : 100

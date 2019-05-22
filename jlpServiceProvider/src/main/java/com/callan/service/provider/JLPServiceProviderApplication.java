@@ -9,11 +9,15 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @SpringBootApplication
 @EnableAutoConfiguration
 @MapperScan("com.callan.service.provider.dao.mapper")
-@EnableAspectJAutoProxy(exposeProxy = true)
+@EnableAspectJAutoProxy(proxyTargetClass=true,exposeProxy = true)
 public class JLPServiceProviderApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(JLPServiceProviderApplication.class, args);
+    	try {
+    		SpringApplication.run(JLPServiceProviderApplication.class, args);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}
     }
 
 }

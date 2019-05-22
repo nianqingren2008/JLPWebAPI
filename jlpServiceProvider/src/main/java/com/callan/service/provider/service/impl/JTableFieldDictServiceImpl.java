@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.aop.framework.AopContext;
@@ -17,6 +19,7 @@ import com.callan.service.provider.pojo.cache.NativeCacheable;
 import com.callan.service.provider.pojo.db.JShowView;
 import com.callan.service.provider.pojo.db.JTableFieldDict;
 import com.callan.service.provider.service.IJShowViewService;
+import com.callan.service.provider.service.IJTableDictService;
 import com.callan.service.provider.service.IJTableFieldDictService;
 
 @Service
@@ -56,6 +59,7 @@ public class JTableFieldDictServiceImpl implements IJTableFieldDictService {
 		}
 	}
 	@NativeCacheable
+	@PostConstruct
 	@Override
 	public CacheResponse getAll4Id() {
 		Map<Long, JTableFieldDict> map = new HashMap<>();
@@ -68,6 +72,7 @@ public class JTableFieldDictServiceImpl implements IJTableFieldDictService {
 		response.setData(map);
 		return response;
 	}
+	
 	@NativeCacheable
 	@Override
 	public CacheResponse getAll4TableCode() {
@@ -104,6 +109,7 @@ public class JTableFieldDictServiceImpl implements IJTableFieldDictService {
 		List<JTableFieldDict> entity = data.get(tableCode);
 		return entity;
 	}
+	
 	@NativeCacheable
 	@Override
 	public CacheResponse getAll4TableCode(boolean showFlag) {

@@ -97,23 +97,23 @@ public class NativeCacheAop {
 		declaringTypeName = declaringTypeName.substring(declaringTypeName.lastIndexOf(".")+1,declaringTypeName.length());
     	String methonName = declaringTypeName + "." + pjp.getSignature().getName();
     	
-    	    logger.debug(methonName + ",开始从缓存获取， key:" + key);
+//    	    logger.debug(methonName + ",from cache start ,  key:" + key);
     	    value = NativeData.getData(key);	//从缓存获取数据  
     	    if(value != null) {
-    	    	logger.info(methonName + ",[GET SUCCESS] 命中缓存，key:" + key);//+ "，value:" + value);
+    	    	logger.info(methonName + ",[GET SUCCESS],key:" + key);//+ "，value:" + value);
              	return value; //如果有数据,则直接返回  
     	    }
 	    try {
-	    	logger.info(methonName + ",[GET FAIL] 没有命中缓存，继续执行原有方法。");
+	    	logger.info(methonName + ",[GET FAIL] , will proceed");
 			value = pjp.proceed(); //跳过缓存,到后端查询数据  
 			
 			if(value instanceof CacheResponse) {
 				CacheResponse vo = (CacheResponse)value;
 				if(vo.getCode() == 0){
-					logger.info(methonName + ",本次方法返回了正确的结果，将结果缓存起来。。。");
+					logger.info(methonName + ",excuter success,will cache result");
 					NativeData.setData(key,value);
 				}else{
-					logger.info(methonName + ",本次方法返回了错误结果，不缓存结果。。。");
+					logger.info(methonName + ",excuter fail,will not do cache");
 				}
 			}else if(value != null){
 				NativeData.setData(key,value);
@@ -151,9 +151,9 @@ public class NativeCacheAop {
           
         Object[] args = pjp.getArgs();
         if(keyMode == KeyMode.DEFAULT) {
-        	logger.debug("方法参数个数:" + args.length);
+//        	logger.debug("方法参数个数:" + args.length);
             Annotation[][] pas = ((MethodSignature)pjp.getSignature()).getMethod().getParameterAnnotations();
-            logger.debug("申明cacheKey个数:" + pas.length);
+//            logger.debug("申明cacheKey个数:" + pas.length);
             for(int i=0;i<pas.length;i++) {
                 for(Annotation an : pas[i]) {
                     if(an instanceof CacheKey) {
@@ -177,7 +177,7 @@ public class NativeCacheAop {
                 buf.append(".").append(arg);
             }
         }
-        logger.debug("最终拼装字符串：" + buf.toString());
+//        logger.debug("最终拼装字符串：" + buf.toString());
 		String serialObject = /* Sha1Util.getEncrypteWord( */buf.toString()/* ) */;
 //        logger.debug("序列化后的签名：" + serialObject);
         return serialObject;  

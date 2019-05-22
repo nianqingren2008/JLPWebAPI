@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.NativeCacheable;
 import com.callan.service.provider.pojo.db.JRight;
 import com.callan.service.provider.service.IJRightService;
+import com.callan.service.provider.service.IJShowDetailViewService;
 
 @Service
 public class JRightServiceImpl implements IJRightService {
@@ -26,7 +29,6 @@ public class JRightServiceImpl implements IJRightService {
 		JRight jRight = data.get(id);
 		return jRight;
 	}
-
 	
 	@NativeCacheable
 	@Override

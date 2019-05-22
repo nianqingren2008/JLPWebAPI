@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,7 @@ import com.callan.service.provider.dao.mapper.JShowViewMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.NativeCacheable;
 import com.callan.service.provider.pojo.db.JShowView;
+import com.callan.service.provider.service.IJSensitiveWordService;
 import com.callan.service.provider.service.IJShowViewService;
 
 @Service

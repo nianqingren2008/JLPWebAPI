@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -68,12 +70,20 @@ public class JShowDetailViewServiceImpl implements IJShowDetailViewService {
 		for(JShowDetailView jShowDetailView : list) {
 			if(map.get(jShowDetailView.getViewid()) == null) {
 				List<JShowDetailView> viewIdList = new ArrayList<JShowDetailView>();
-				if("1".equals(jShowDetailView.getActiveflag())) {
+				if(activeFlag) {
+					if("1".equals(jShowDetailView.getActiveflag())) {
+						viewIdList.add(jShowDetailView);
+					}
+				}else {
 					viewIdList.add(jShowDetailView);
 				}
 				map.put(jShowDetailView.getViewid(), viewIdList);
 			}else {
-				if("1".equals(jShowDetailView.getActiveflag())) {
+				if(activeFlag) {
+					if("1".equals(jShowDetailView.getActiveflag())) {
+						map.get(jShowDetailView.getViewid()).add(jShowDetailView);
+					}
+				}else {
 					map.get(jShowDetailView.getViewid()).add(jShowDetailView);
 				}
 			}
