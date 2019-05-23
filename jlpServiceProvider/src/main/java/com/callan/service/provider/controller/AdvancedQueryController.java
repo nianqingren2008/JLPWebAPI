@@ -80,7 +80,7 @@ public class AdvancedQueryController {
 	private IJSensitiveWordService jSensitiveWordService;
 
 	@ApiOperation(value = "病例检索", notes = "111")
-	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.GET, RequestMethod.POST })
+	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST })
 	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpSession session) {
 		AdvanceQueryRequest advanceQueryRequest = null;
 		try {
