@@ -172,23 +172,52 @@ public class AdvancedQueryController {
 		List<QueryConds> queryCondsList = advanceQueryRequest.getQueries().getQueryConds();
 
 		Set<String> tableNameMainWheres = new HashSet<String>();
-		Set<String> tableNameWhereMainValues = new HashSet<String>();
-		Set<String> whereFieldsMain = new HashSet<String>();
-		Set<String> whereFieldTypesMain = new HashSet<String>();
+//		Set<String> tableNameWhereMainValues = new HashSet<String>();
+//		List<String> whereFieldsMain = new ArrayList<String>();
+//		List<String> whereFieldTypesMain = new ArrayList<String>();
 		String sqlWhereMain = "";
 
 		for (QueryConds queryConds : queryCondsList) {
 			String tableName = queryConds.getCondition().split("\\.")[0].toUpperCase();
 			tableNameMainWheres.add(tableName);
 			String fieldName = queryConds.getCondition().split("\\.")[1].toUpperCase();
-			
-			if (queryConds.getFieldType() == 1) {
-				tableNameWhereMainValues.add(queryConds.getCondValue().split("\\.")[0].toUpperCase());
-			}
-			whereFieldsMain.add(queryConds.getCondition().toUpperCase());
+//			
+//			if (queryConds.getFieldType() == 1) {
+//				tableNameWhereMainValues.add(queryConds.getCondValue().split("\\.")[0].toUpperCase());
+//			}
+			String condition = queryConds.getCondition().toUpperCase();
 			JTableDict jTableDict = jTableDictService.getByName(tableName, true);
 			JTableFieldDict jTableFieldDict = jTableFieldDictService.getByTableCodeAndName (jTableDict.getCode(),fieldName);
-			whereFieldTypesMain.add(jTableFieldDict.getType());
+//			whereFieldTypesMain.add(jTableFieldDict.getType());
+			
+			String relation = queryConds.getRelation();
+			//如果是is not null 则不拼装value
+			if(!relation.contains("null")) {
+				String condValue = queryConds.getCondValue() == null ? "" : queryConds.getCondValue();
+				if("like".equalsIgnoreCase(relation)) {
+					condValue = "%" + condValue + "%";
+				}
+				if("VARCHAR2".equalsIgnoreCase(jTableFieldDict.getType()) || "CHAR".equalsIgnoreCase(jTableFieldDict.getType()) ) {
+					condValue = "'" + condValue + "'";
+				}
+				if("DATE".equalsIgnoreCase(jTableFieldDict.getType())) {
+					condValue = "to_date('" + condValue + "','yyyy/mm/dd')";
+				}
+				sqlWhereMain += condition + " " 
+						+ queryConds.getRelation() + " " 
+						+ condValue
+						+ " and ";
+			}else {
+				sqlWhereMain += condition + " " 
+						+ queryConds.getRelation() + " " 
+						+ " and ";
+			}
+			
+			
+		}
+		//去掉最后的and
+		if(sqlWhereMain.length() > 4) {
+			sqlWhereMain = sqlWhereMain.substring(0,sqlWhereMain.length()-4);
 		}
 //        queryMainDetails.ForEach(x =>
 //        {
@@ -214,7 +243,7 @@ public class AdvancedQueryController {
 					+ JShowDetailView.getjTableFieldDict().getName()).toUpperCase()));
 			fieldShowNames.add(JShowDetailView.getjTableFieldDict().getName().toLowerCase());
 		}
-
+		tableNames.addAll(tableNameMainWheres);
 //        String SqlWhereMain = queryMainDetails.Select(x => x.ToArray().ToStringEx(" ")).ToArray().ToStringEx(" and ");
 //        tableNames.AddRange(tableNameMainWheres);
 //        tableNames.AddRange(tableNameWhereMainValues);
@@ -283,7 +312,7 @@ public class AdvancedQueryController {
 			}
 		}
 		String finalSelectFields = fieldNames.toString().substring(1,fieldNames.toString().length()-1);
-		String finalTables = tableNames.toString().substring(1,tableNames.toString().length()-1);
+		String finalTables =  toTableString(tableNames, tempSql);
 		String tableKeys = fieldNames.toString().substring(1,fieldNames.toString().length()-1);
 
 		String tempSqlWhere = " where 1=1 ";
@@ -298,24 +327,32 @@ public class AdvancedQueryController {
 //        #region 组装返回值
 		String sortStr = PatientGlobalTable + "__Id";
 //
-		String sql = "select distinct " + tableKeys + " from " + finalTables + " " + tempSqlWhere;
+		String sql = "select distinct " + PatientGlobalTable + ".ID" + " from " + finalTables + " " + tempSqlWhere;
 		String sqlCount = " select count(1) count from (" + sql + ") countsql";
-		log.info("sql : " + sql);
+//		log.info("sql : " + sql);
 		log.info("sqlCount : " + sqlCount);
-		if (isTotals) {
-			int totals = jlpService.queryForSQL(sqlCount, new Object[] {}).size();
-			response.setTotals(totals);
-		} else {
-			String SqlKeys = getPageSql(sql,pageNumInt,pageSizeInt);
-			log.info("SqlKeys : " + SqlKeys);
+//		if (isTotals) {
+			List<Map<String,Object>> countList = jlpService.queryForSQL(sqlCount, new Object[] {});
+			if(countList != null && countList.size() > 0) {
+				response.setTotals(Integer.parseInt(countList.get(0).get("count")+""));
+			}else {
+				response.setTotals(0);
+			}
+//		} else {
+//			String SqlKeys = getPageSql(sql,pageNumInt,pageSizeInt);
+//			log.info("SqlKeys : " + SqlKeys);
 //			List<Map<String, Object>> dataGrid = jlpService.queryForSQLStreaming(SqlKeys, new Object[] {});
 
 //			String keyIdWhere = getKeysWhere(dataGrid);
 			List<Map<String, Object>> retData = new ArrayList<Map<String, Object>>();
 //			if (keyIdWhere.length() > 0) {
-				String SqlData = "select distinct " + finalSelectFields + " from " + tableNames.toString().substring(1,tableNames.toString().length()-1) + " " + tempSqlWhere
-//						+ " and " + keyIdWhere 
+//			String countSql = "select count(1) count from " + tableNames.toString().substring(1,tableNames.toString().length()-1) + " " + tempSqlWhere
+//					+ " order by " + PatientGlobalTable + ".Id";
+//			List<Map<String, Object>> countData = jlpService.queryForSQL(countSql, new Object[] {});
+			
+				String SqlData = "select distinct " + finalSelectFields + " from " + finalTables + " " + tempSqlWhere
 						+ " order by " + PatientGlobalTable + ".Id";
+				SqlData = getPageSql(SqlData,pageNumInt,pageSizeInt);
 				log.info("SqlData : " + SqlData);
 				retData = jlpService.queryForSQLStreaming(SqlData, new Object[] {});
 
@@ -332,10 +369,9 @@ public class AdvancedQueryController {
 					}
 				}
 //			}
-			response.setTotals(retData.size());
 			response.setColumns(columns);
 			response.setContent(retData);
-		}
+//		}
 
 		return response.toJsonString();
 	}
@@ -346,41 +382,41 @@ public class AdvancedQueryController {
 		String pageSql = "SELECT *" + 
 				"  FROM (SELECT tt.*, ROWNUM AS rowno" + 
 				"          FROM (  " + sql + ") tt" + 
-				"         WHERE ROWNUM <= " + (pageNum+1)*pageSize + ") table_alias" + 
-				" WHERE table_alias.rowno >= " + pageNum*pageSize;
+				"         WHERE ROWNUM <= " + pageNum * pageSize + ") table_alias" + 
+				" WHERE table_alias.rowno >= " + (pageNum -1) * pageSize;
 		return pageSql;
 	}
 
 
-	private String getKeysWhere(List<Map<String, Object>> dataGrid) {
-		String ret = "";
-		if (dataGrid == null || dataGrid.size() == 0) {
-			return ret;
-		}
-		Map<String, String> dict = new HashMap<String, String>();
-		for (Map<String, Object> map : dataGrid) {
-			Set<String> set = map.keySet();
-			for (String item : set) {
-				Object tempValue = map.get(item);
-				if (item.contains("__") && map.get(item) != null) {
-					String tempKey = item.replace("__", ".");
-					if (!dict.containsKey(tempKey)) {
-						dict.put(tempKey, tempValue + "");
-					} else {
-						dict.put(tempKey, dict.get(item) + "," + tempValue);
-					}
-				}
-			}
-		}
-		for (String item : dict.keySet()) {
-			if (ret.length() == 0) {
-				ret = item + "  in (" + dict.get(item) + ")";
-			} else {
-				ret += " and " + item + " in (" + dict.get(item) + ")";
-			}
-		}
-		return ret;
-	}
+//	private String getKeysWhere(List<Map<String, Object>> dataGrid) {
+//		String ret = "";
+//		if (dataGrid == null || dataGrid.size() == 0) {
+//			return ret;
+//		}
+//		Map<String, String> dict = new HashMap<String, String>();
+//		for (Map<String, Object> map : dataGrid) {
+//			Set<String> set = map.keySet();
+//			for (String item : set) {
+//				Object tempValue = map.get(item);
+//				if (item.contains("__") && map.get(item) != null) {
+//					String tempKey = item.replace("__", ".");
+//					if (!dict.containsKey(tempKey)) {
+//						dict.put(tempKey, tempValue + "");
+//					} else {
+//						dict.put(tempKey, dict.get(item) + "," + tempValue);
+//					}
+//				}
+//			}
+//		}
+//		for (String item : dict.keySet()) {
+//			if (ret.length() == 0) {
+//				ret = item + "  in (" + dict.get(item) + ")";
+//			} else {
+//				ret += " and " + item + " in (" + dict.get(item) + ")";
+//			}
+//		}
+//		return ret;
+//	}
 
 	public String toTableString(Set<String> tableArray, String advancedQueryWhere) {
 	    String ret = "";
@@ -425,8 +461,8 @@ public class AdvancedQueryController {
 
 	public String queryEx(QueryIncludesEXCondition queryIncludesEXCondition, String tempadvancedQueryType,
 			List<String> cludeSqlList) {
-		List<String> tempTableNames = new ArrayList<String>();
-		List<String> tempFieldNames = new ArrayList<String>();
+//		List<String> tempTableNames = new ArrayList<String>();
+		Set<String> tempFieldNames = new HashSet<String>();
 
 		tempFieldNames.add(PatientGlobalTable + ".Id");
 
@@ -435,30 +471,59 @@ public class AdvancedQueryController {
 		}
 
 		Set<String> tableNameWheres = new HashSet<String>();
-		Set<String> tableNameWhereValues = new HashSet<String>();
-		Set<String> whereFields = new HashSet<String>();
-		Set<String> whereFieldTypes = new HashSet<String>();
+//		Set<String> tableNameWhereValues = new HashSet<String>();
+//		Set<String> whereFields = new HashSet<String>();
+//		Set<String> whereFieldTypes = new HashSet<String>();
+		String SqlWhere = "";
 		for (QueryConds queryConds : queryIncludesEXCondition.getConds()) {
 			String tableName = queryConds.getCondition().split("\\.")[0].toUpperCase();
 			tableNameWheres.add(tableName);
 			String fieldName = queryConds.getCondition().split("\\.")[1].toUpperCase();
-
-			if (queryConds.getFieldType() == 1) {
-				tableNameWhereValues.add(queryConds.getCondValue().split("\\.")[0].toUpperCase());
-			}
-			whereFields.add(queryConds.getCondition().toUpperCase());
+//			tempFieldNames.add(fieldName);
+//			if (queryConds.getFieldType() == 1) {
+//				tableNameWhereValues.add(queryConds.getCondValue().split("\\.")[0].toUpperCase());
+//			}
+			String condition = queryConds.getCondition().toUpperCase();
 			JTableDict jTableDict = jTableDictService.getByName(tableName, true);
 			JTableFieldDict jTableFieldDict = jTableFieldDictService.getByTableCodeAndName(jTableDict.getCode(),
 					fieldName);
-			whereFieldTypes.add(jTableFieldDict.getType());
+//			whereFieldTypes.add(jTableFieldDict.getType());
+			
+			
+			String relation = queryConds.getRelation();
+			//如果是is not null 则不拼装value
+			if(!relation.contains("null")) {
+				String condValue = queryConds.getCondValue() == null ? "" : queryConds.getCondValue();
+				if("like".equalsIgnoreCase(relation)) {
+					condValue = "%" + condValue + "%";
+				}
+				if("VARCHAR2".equalsIgnoreCase(jTableFieldDict.getType()) || "CHAR".equalsIgnoreCase(jTableFieldDict.getType()) ) {
+					condValue = "'" + condValue + "'";
+				}
+				if("DATE".equalsIgnoreCase(jTableFieldDict.getType())) {
+					condValue = "to_date('" + condValue + "','yyyy/mm/dd')";
+				}
+				SqlWhere += condition + " " 
+						+ queryConds.getRelation() + " " 
+						+ condValue
+						+ " and ";
+			}else {
+				SqlWhere += condition + " " 
+						+ queryConds.getRelation() + " " 
+						+ " and ";
+			}
+			
 		}
-		String SqlWhere = "";
+		//去掉最后的and
+		if(SqlWhere.length() > 4) {
+			SqlWhere = SqlWhere.substring(0,SqlWhere.length()-4);
+		}
 //     var SqlWhere = queryDetails.Select(x => x.ToArray().ToStringEx(" ")).ToArray().ToStringEx(" and ");
 
 //     #region 获取查询结果和数量
 		String tableWhere = toTableString(tableNameWheres, "");
 
-		String TempSql = queryIncludesEXCondition.getLeftqueto() + " select distinct " + tempTableNames.toString()
+		String TempSql = queryIncludesEXCondition.getLeftqueto() + " select distinct " + PatientGlobalTable + ".Id" 
 				+ " from " + tableWhere + " " + (StringUtils.isBlank(SqlWhere) ? " " : " where " + SqlWhere) + "   "
 				+ queryIncludesEXCondition.getRightqueto();
 
