@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.swing.JTable;
 
@@ -80,10 +82,10 @@ public class AdvancedQueryController {
 	@Autowired
 	private IJSensitiveWordService jSensitiveWordService;
 
-	@CrossOrigin(origins = {"http://localhost:3000", "null"})
+	@CrossOrigin(origins = "*",maxAge = 3600)
 	@ApiOperation(value = "病例检索", notes = "111")
-	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST })
-	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpSession session) {
+	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST  })
+	public String query(String advanceQuery, String pageNum, String pageSize, HttpSession session) {
 		AdvanceQueryRequest advanceQueryRequest = null;
 		try {
 			advanceQueryRequest = JSONObject.toJavaObject(JSONObject.parseObject(advanceQuery),
@@ -172,50 +174,52 @@ public class AdvancedQueryController {
 
 		// 获取查询所有表名
 		List<QueryConds> queryCondsList = advanceQueryRequest.getQueries().getQueryConds();
-
 		Set<String> tableNameMainWheres = new HashSet<String>();
-//		Set<String> tableNameWhereMainValues = new HashSet<String>();
-//		List<String> whereFieldsMain = new ArrayList<String>();
-//		List<String> whereFieldTypesMain = new ArrayList<String>();
-		String sqlWhereMain = "";
-
-		for (QueryConds queryConds : queryCondsList) {
-			String tableName = queryConds.getCondition().split("\\.")[0].toUpperCase();
-			tableNameMainWheres.add(tableName);
-			String fieldName = queryConds.getCondition().split("\\.")[1].toUpperCase();
-//			
-//			if (queryConds.getFieldType() == 1) {
-//				tableNameWhereMainValues.add(queryConds.getCondValue().split("\\.")[0].toUpperCase());
-//			}
-			String condition = queryConds.getCondition().toUpperCase();
-			JTableDict jTableDict = jTableDictService.getByName(tableName, true);
-			JTableFieldDict jTableFieldDict = jTableFieldDictService.getByTableCodeAndName (jTableDict.getCode(),fieldName);
-//			whereFieldTypesMain.add(jTableFieldDict.getType());
+		//		Set<String> tableNameWhereMainValues = new HashSet<String>();
+		//		List<String> whereFieldsMain = new ArrayList<String>();
+		//		List<String> whereFieldTypesMain = new ArrayList<String>();
+				String sqlWhereMain = "";
+		if(queryCondsList != null) {
 			
-			String relation = queryConds.getRelation();
-			//如果是is not null 则不拼装value
-			if(!relation.contains("null")) {
-				String condValue = queryConds.getCondValue() == null ? "" : queryConds.getCondValue();
-				if("like".equalsIgnoreCase(relation)) {
-					condValue = "%" + condValue + "%";
+	
+			for (QueryConds queryConds : queryCondsList) {
+				String tableName = queryConds.getCondition().split("\\.")[0].toUpperCase();
+				tableNameMainWheres.add(tableName);
+				String fieldName = queryConds.getCondition().split("\\.")[1].toUpperCase();
+	//			
+	//			if (queryConds.getFieldType() == 1) {
+	//				tableNameWhereMainValues.add(queryConds.getCondValue().split("\\.")[0].toUpperCase());
+	//			}
+				String condition = queryConds.getCondition().toUpperCase();
+				JTableDict jTableDict = jTableDictService.getByName(tableName, true);
+				JTableFieldDict jTableFieldDict = jTableFieldDictService.getByTableCodeAndName (jTableDict.getCode(),fieldName);
+	//			whereFieldTypesMain.add(jTableFieldDict.getType());
+				
+				String relation = queryConds.getRelation();
+				//如果是is not null 则不拼装value
+				if(!relation.contains("null")) {
+					String condValue = queryConds.getCondValue() == null ? "" : queryConds.getCondValue();
+					if("like".equalsIgnoreCase(relation)) {
+						condValue = "%" + condValue + "%";
+					}
+					if("VARCHAR2".equalsIgnoreCase(jTableFieldDict.getType()) || "CHAR".equalsIgnoreCase(jTableFieldDict.getType()) ) {
+						condValue = "'" + condValue + "'";
+					}
+					if("DATE".equalsIgnoreCase(jTableFieldDict.getType())) {
+						condValue = "to_date('" + condValue + "','yyyy/mm/dd')";
+					}
+					sqlWhereMain += condition + " " 
+							+ queryConds.getRelation() + " " 
+							+ condValue
+							+ " and ";
+				}else {
+					sqlWhereMain += condition + " " 
+							+ queryConds.getRelation() + " " 
+							+ " and ";
 				}
-				if("VARCHAR2".equalsIgnoreCase(jTableFieldDict.getType()) || "CHAR".equalsIgnoreCase(jTableFieldDict.getType()) ) {
-					condValue = "'" + condValue + "'";
-				}
-				if("DATE".equalsIgnoreCase(jTableFieldDict.getType())) {
-					condValue = "to_date('" + condValue + "','yyyy/mm/dd')";
-				}
-				sqlWhereMain += condition + " " 
-						+ queryConds.getRelation() + " " 
-						+ condValue
-						+ " and ";
-			}else {
-				sqlWhereMain += condition + " " 
-						+ queryConds.getRelation() + " " 
-						+ " and ";
+				
+				
 			}
-			
-			
 		}
 		//去掉最后的and
 		if(sqlWhereMain.length() > 4) {
@@ -374,7 +378,6 @@ public class AdvancedQueryController {
 			response.setColumns(columns);
 			response.setContent(retData);
 //		}
-
 		return response.toJsonString();
 	}
 
