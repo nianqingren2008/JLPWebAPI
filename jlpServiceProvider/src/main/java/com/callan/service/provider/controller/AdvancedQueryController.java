@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -79,6 +80,7 @@ public class AdvancedQueryController {
 	@Autowired
 	private IJSensitiveWordService jSensitiveWordService;
 
+	@CrossOrigin(origins = {"http://localhost:3000", "null"})
 	@ApiOperation(value = "病例检索", notes = "111")
 	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST })
 	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpSession session) {
