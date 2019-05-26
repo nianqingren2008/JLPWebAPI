@@ -82,10 +82,10 @@ public class AdvancedQueryController {
 	@Autowired
 	private IJSensitiveWordService jSensitiveWordService;
 
-	@CrossOrigin(origins = "*",maxAge = 3600)
+//	@CrossOrigin(origins = "*",maxAge = 3600)
 	@ApiOperation(value = "病例检索", notes = "111")
 	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST  })
-	public String query(String advanceQuery, String pageNum, String pageSize, HttpSession session) {
+	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpSession session) {
 		AdvanceQueryRequest advanceQueryRequest = null;
 		try {
 			advanceQueryRequest = JSONObject.toJavaObject(JSONObject.parseObject(advanceQuery),

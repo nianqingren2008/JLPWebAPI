@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: jlp-service-provider
+  main:
+     allow-bean-definition-overriding: true
+
 
 spring.datasource.driver-class-name: oracle.jdbc.driver.OracleDriver
 spring.datasource.url: jdbc:oracle:thin:@192.168.17.165:1521:orcl
