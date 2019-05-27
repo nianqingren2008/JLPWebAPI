@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
+import com.callan.service.provider.dao.mapper.JRoleMapper;
 import com.callan.service.provider.pojo.AdvanceQueryRequest;
 import com.callan.service.provider.pojo.AdvanceQueryResponse;
 import com.callan.service.provider.pojo.advanceQueryBase.ColunmsModel;
@@ -39,6 +40,7 @@ import com.callan.service.provider.pojo.advanceQueryBase.QueryIncludesEXConditio
 import com.callan.service.provider.pojo.advanceQueryBase.Sorted;
 import com.callan.service.provider.pojo.base.FieldName;
 import com.callan.service.provider.pojo.db.JRight;
+import com.callan.service.provider.pojo.db.JRole;
 import com.callan.service.provider.pojo.db.JSensitiveWord;
 import com.callan.service.provider.pojo.db.JShowDetailView;
 import com.callan.service.provider.pojo.db.JShowView;
@@ -88,6 +90,9 @@ public class AdvancedQueryController {
 
 	@Autowired
 	private IJUserService jUserService;
+	
+	@Autowired
+	private JRoleMapper roleMapper;
 	
 //	@CrossOrigin(origins = "*",maxAge = 3600)
 	@ApiOperation(value = "病例检索", notes = "病例检索模糊查询")
@@ -385,6 +390,9 @@ public class AdvancedQueryController {
 			
 			
 			JUser user = jUserService.getOne(6L);
+			
+			JRole role = roleMapper.getOne(1L);
+			
 			if(user != null) {
 				if(user.getjRole() != null) {
 					if(user.getjRole().getRoleRightList() != null && user.getjRole().getRoleRightList().size() > 0 ) {
