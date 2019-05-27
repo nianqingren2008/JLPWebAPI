@@ -31,9 +31,9 @@ public interface JRoleMapper {
 	 */
     @Select("SELECT * FROM J_ROLE WHERE id = #{id}")
     @Results({
-		@Result(property="roleid",column="roleid"),
+		@Result(property="id",column="id"),
 		//users映射List<User> users，many=@Many是调用关联查询方法，"id"是关联查询条件，FetchType.LAZY是延迟加载
-		@Result(property="role",column="roleid", 
+		@Result(property="roleRightList",column="roleid", 
 			many=@Many(select="com.callan.service.provider.dao.mapper.JRoleRightMapper.getByRoleId",fetchType=FetchType.LAZY))
     })
     JRole getOne(Long id);

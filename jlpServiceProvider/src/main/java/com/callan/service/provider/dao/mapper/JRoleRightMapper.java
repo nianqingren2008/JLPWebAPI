@@ -43,7 +43,7 @@ public interface JRoleRightMapper {
     @Results({
 		@Result(property="rightid",column="rightid"),
 		//users映射List<User> users，many=@Many是调用关联查询方法，"id"是关联查询条件，FetchType.LAZY是延迟加载
-		@Result(property="id",column="id", 
+		@Result(property="jRight",column="id", 
 			one=@One(select="com.callan.service.provider.dao.mapper.JRightMapper.getOne",fetchType=FetchType.LAZY))
     })
     List<JRoleRight> getByRoleId(Long roleId);
