@@ -32,7 +32,7 @@ public interface JUserMapper {
 	 */
     @Select("SELECT * FROM J_USERS WHERE id = #{id}")
     @Results({
-		@Result(property="userrole",column="userrole"),
+		@Result(property="id",column="id"),
 		//users映射List<User> users，many=@Many是调用关联查询方法，"id"是关联查询条件，FetchType.LAZY是延迟加载
 		@Result(property="users",column="userrole", 
 			one=@One(select="com.callan.service.provider.dao.mapper.JRoleMapper.getOne",fetchType=FetchType.LAZY))
