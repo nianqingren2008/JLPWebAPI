@@ -11,7 +11,7 @@ import com.callan.service.provider.pojo.base.BaseResponse;
 public class AdvanceQueryResponse {
 	private BaseResponse response = new BaseResponse();
 	private Integer totals;
-	private Set<ColunmsModel> columns;
+	private List<ColunmsModel> columns;
 	private List<Map<String, Object>> content;
 
 	public BaseResponse getResponse() {
@@ -30,11 +30,11 @@ public class AdvanceQueryResponse {
 		this.totals = totals;
 	}
 
-	public Set<ColunmsModel> getColumns() {
+	public List<ColunmsModel> getColumns() {
 		return columns;
 	}
 
-	public void setColumns(Set<ColunmsModel> columns) {
+	public void setColumns(List<ColunmsModel> columns) {
 		this.columns = columns;
 	}
 

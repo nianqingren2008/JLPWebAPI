@@ -44,7 +44,7 @@ public class JLPDaoImpl   implements IJLPDao {
             while (rs.next()) {
                 Map<String, Object> hm = new LinkedCaseInsensitiveMap<Object>();
                 for (int i = 1; i <= count; i++) {
-                    String key = rsmd.getColumnLabel(i);
+                    String key = rsmd.getColumnLabel(i).toLowerCase();
                     Object value = rs.getObject(i);
                     hm.put(key, value);
                 }

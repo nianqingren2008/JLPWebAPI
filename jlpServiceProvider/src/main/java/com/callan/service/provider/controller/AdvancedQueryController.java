@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
+//import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+//import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
@@ -83,9 +85,12 @@ public class AdvancedQueryController {
 	private IJSensitiveWordService jSensitiveWordService;
 
 //	@CrossOrigin(origins = "*",maxAge = 3600)
-	@ApiOperation(value = "病例检索", notes = "111")
+	@ApiOperation(value = "病例检索", notes = "病例检索模糊查询")
 	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST  })
 	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpSession session) {
+		long start = System.currentTimeMillis();
+		log.info("");
+		log.info("advanceQuery-->" + advanceQuery);
 		AdvanceQueryRequest advanceQueryRequest = null;
 		try {
 			advanceQueryRequest = JSONObject.toJavaObject(JSONObject.parseObject(advanceQuery),
@@ -124,6 +129,10 @@ public class AdvancedQueryController {
 		for (JShowDetailView jShowDetailView : jShowDetailViewList) {
 			long fieldId = jShowDetailView.getFieldid();
 			JTableFieldDict jTableFieldDict = jTableFieldDictService.getOne(fieldId, true);
+			if(jTableFieldDict == null) {
+				log.warn("fieldId 为 " + fieldId + " 未找到j_tablefielddict 记录 ");
+				continue;
+			}
 			jTableFieldDictList.add(jTableFieldDict);
 			jTableFieldDict.setjShowDetailView(jShowDetailView);
 			jShowDetailView.setjTableFieldDict(jTableFieldDict);
@@ -161,7 +170,7 @@ public class AdvancedQueryController {
 			return response.toJsonString();
 		}
 
-		Set<ColunmsModel> columns = new HashSet<ColunmsModel>();
+		List<ColunmsModel> columns = new ArrayList<ColunmsModel>();
 		for (JTableFieldDict jTableFieldDict : jTableFieldDictList) {
 			ColunmsModel colunmsModel = new ColunmsModel();
 			colunmsModel.setDataIndex(jTableFieldDict.getName().toLowerCase());
@@ -174,8 +183,8 @@ public class AdvancedQueryController {
 
 		// 获取查询所有表名
 		List<QueryConds> queryCondsList = advanceQueryRequest.getQueries().getQueryConds();
-		Set<String> tableNameMainWheres = new HashSet<String>();
-		//		Set<String> tableNameWhereMainValues = new HashSet<String>();
+		SortedSet<String> tableNameMainWheres = new TreeSet<String>();
+		SortedSet<String> tableNameWhereMainValues = new TreeSet<String>();
 		//		List<String> whereFieldsMain = new ArrayList<String>();
 		//		List<String> whereFieldTypesMain = new ArrayList<String>();
 				String sqlWhereMain = "";
@@ -187,9 +196,9 @@ public class AdvancedQueryController {
 				tableNameMainWheres.add(tableName);
 				String fieldName = queryConds.getCondition().split("\\.")[1].toUpperCase();
 	//			
-	//			if (queryConds.getFieldType() == 1) {
-	//				tableNameWhereMainValues.add(queryConds.getCondValue().split("\\.")[0].toUpperCase());
-	//			}
+				if (queryConds.getFieldType() == 1) {
+					tableNameWhereMainValues.add(queryConds.getCondValue().split("\\.")[0].toUpperCase());
+				}
 				String condition = queryConds.getCondition().toUpperCase();
 				JTableDict jTableDict = jTableDictService.getByName(tableName, true);
 				JTableFieldDict jTableFieldDict = jTableFieldDictService.getByTableCodeAndName (jTableDict.getCode(),fieldName);
@@ -240,16 +249,24 @@ public class AdvancedQueryController {
 //                x.LastOrDefault().combinator = "";
 //            }
 //        });
-		Set<String> tableNames = new HashSet<String>();
+		SortedSet<String> tableNames = new TreeSet<String>();
 		List<FieldName> fieldNames = new ArrayList<FieldName>();
-		Set<String> fieldShowNames = new HashSet<String>();
+		// 增加隐藏主键
+		fieldNames.add(new FieldName(PatientGlobalTable + ".Id as hide_key"));
+		SortedSet<String> fieldShowNames = new TreeSet<String>();
 		for(JShowDetailView JShowDetailView : jShowDetailViewListShow) {
 			tableNames.add(JShowDetailView.getjTableDict().getName());
 			fieldNames.add(new FieldName((JShowDetailView.getjTableDict().getName() + "." 
-					+ JShowDetailView.getjTableFieldDict().getName()).toUpperCase()));
+					+ JShowDetailView.getjTableFieldDict().getName()).toLowerCase()));
 			fieldShowNames.add(JShowDetailView.getjTableFieldDict().getName().toLowerCase());
 		}
 		tableNames.addAll(tableNameMainWheres);
+//		for(String tableName : tableNames) {
+//			if(PatientGlobalTable.equals(tableName.toUpperCase())) {
+//				tableNames.remove(tableName);
+//			}
+//		}
+		
 //        String SqlWhereMain = queryMainDetails.Select(x => x.ToArray().ToStringEx(" ")).ToArray().ToStringEx(" and ");
 //        tableNames.AddRange(tableNameMainWheres);
 //        tableNames.AddRange(tableNameWhereMainValues);
@@ -270,44 +287,43 @@ public class AdvancedQueryController {
 			sorts = sorts.substring(0, sorts.length()-1);
 		}
 
-		List<String> includeSqlList = new ArrayList<String>();
-		List<String> excludeSqlList = new ArrayList<String>();
-		String tempadvancedQueryType = "";
+//		String includeSqlList = "";
+//		String tempSql = "";
+//		String tempadvancedQueryType = "";
 		
-		List<QueryIncludesEXCondition> includes = new ArrayList<QueryIncludesEXCondition>();
-		List<QueryIncludesEXCondition> excludes = new ArrayList<QueryIncludesEXCondition>();
+//		List<QueryIncludesEXCondition> includes = new ArrayList<QueryIncludesEXCondition>();
+//		List<QueryIncludesEXCondition> excludes = new ArrayList<QueryIncludesEXCondition>();
 		QueryIncludesEX  queryIncludesEX = advanceQueryRequest.getQueries().getQueryIncludesEX();
-		if(queryIncludesEX != null) {
-			includes = queryIncludesEX.getIncludes();
-			excludes = queryIncludesEX.getExcludes();
-		}
+//		if(queryIncludesEX != null) {
+//			includes = queryIncludesEX.getIncludes();
+//			excludes = queryIncludesEX.getExcludes();
+//		}
 		//处理纳入
-		for (QueryIncludesEXCondition queryIncludesEXCondition : includes) {
-			queryEx(queryIncludesEXCondition,tempadvancedQueryType,includeSqlList);
-		}
+//		for (QueryIncludesEXCondition queryIncludesEXCondition : includes) {
+		String tempSql = queryEx(queryIncludesEX);
+//		}
         //处理排除
 		
-		for (QueryIncludesEXCondition queryIncludesEXCondition : excludes) {
-			queryEx(queryIncludesEXCondition,tempadvancedQueryType,excludeSqlList);
-		}
+//		for (QueryIncludesEXCondition queryIncludesEXCondition : excludes) {
+//			excludeSqlList = queryEx(queryIncludesEX,tempadvancedQueryType);
+//		}
+			
+			
+			
 		
-		// 增加隐藏主键
-		fieldNames.add(new FieldName(PatientGlobalTable + ".Id as hide_key"));
-		StringBuilder includeBuilder = new StringBuilder();
-		for (String includeSql : includeSqlList) {
-			includeBuilder.append(includeSql);
-		}
-		StringBuilder excludeBuilder = new StringBuilder();
-		for (String excludeSql : excludeSqlList) {
-			excludeBuilder.append(excludeSql);
-		}
-		String tempSql = "";
-		if (includeBuilder.length() > 0) {
-			tempSql += "select Id from (" + includeBuilder.toString() + ")";
-			if (excludeBuilder.length() > 0) {
-				tempSql += " minus (" + excludeBuilder.toString() + ")";
-			}
-		}
+//		String includeBuilder = "";
+//		for (String includeSql : includeSqlList) {
+//			if(includeBuilder.length() > 0) {
+//				includeBuilder += " inner join " + includeSqlList ;
+//			}else {
+//				includeBuilder += "  " + includeSqlList ;
+//			}
+//		}
+//		StringBuilder excludeBuilder = new StringBuilder();
+//		for (String excludeSql : excludeSqlList) {
+//			excludeBuilder.append(includeSqlList);
+//		}
+		
 		
 		
 		for (int i = 0;i<fieldNames.size() ;i++) {
@@ -319,7 +335,7 @@ public class AdvancedQueryController {
 		}
 		String finalSelectFields = fieldNames.toString().substring(1,fieldNames.toString().length()-1);
 		String finalTables =  toTableString(tableNames, tempSql);
-		String tableKeys = fieldNames.toString().substring(1,fieldNames.toString().length()-1);
+		String tableKeys = toTableKeys(tableNames);
 
 		String tempSqlWhere = " where 1=1 ";
 		tempSqlWhere += " and D_PATIENTGLOBAL.jlactiveflag='1'";
@@ -333,7 +349,7 @@ public class AdvancedQueryController {
 //        #region 组装返回值
 		String sortStr = PatientGlobalTable + "__Id";
 //
-		String sql = "select distinct " + PatientGlobalTable + ".ID" + " from " + finalTables + " " + tempSqlWhere;
+		String sql = "select distinct " + tableKeys + " from " + finalTables + " " + tempSqlWhere;
 		String sqlCount = " select count(1) count from (" + sql + ") countsql";
 //		log.info("sql : " + sql);
 		log.info("sqlCount : " + sqlCount);
@@ -378,6 +394,9 @@ public class AdvancedQueryController {
 			response.setColumns(columns);
 			response.setContent(retData);
 //		}
+		long end = System.currentTimeMillis();
+		log.info("serviceTime " + (end - start) + "ms");
+		log.info(" ");
 		return response.toJsonString();
 	}
 
@@ -423,7 +442,7 @@ public class AdvancedQueryController {
 //		return ret;
 //	}
 
-	public String toTableString(Set<String> tableArray, String advancedQueryWhere) {
+	private String toTableString(SortedSet<String> tableArray, String advancedQueryWhere) {
 	    String ret = "";
 	    if (tableArray != null) {
 	        String patientTable = PatientGlobalTable.toLowerCase();
@@ -463,82 +482,106 @@ public class AdvancedQueryController {
 	    return ret;
 	}
 
-
-	public String queryEx(QueryIncludesEXCondition queryIncludesEXCondition, String tempadvancedQueryType,
-			List<String> cludeSqlList) {
-//		List<String> tempTableNames = new ArrayList<String>();
-		Set<String> tempFieldNames = new HashSet<String>();
-
-		tempFieldNames.add(PatientGlobalTable + ".Id");
-
-		if (queryIncludesEXCondition.getConds().isEmpty()) {
-			return null;
+	/**
+	 * 解析incule和exclude，拼装sql
+	 * @param queryIncludesEX
+	 * @return
+	 */
+	private String queryEx(QueryIncludesEX queryIncludesEX) {
+		SortedSet<String> tableNameWheres = new TreeSet<String>();
+		if (queryIncludesEX == null) {
+			return "";
 		}
+		String includeSql = cludeSqlExcutor(queryIncludesEX.getIncludes(), tableNameWheres);
+		String excludeSql = cludeSqlExcutor(queryIncludesEX.getExcludes(), tableNameWheres);
 
-		Set<String> tableNameWheres = new HashSet<String>();
-//		Set<String> tableNameWhereValues = new HashSet<String>();
-//		Set<String> whereFields = new HashSet<String>();
-//		Set<String> whereFieldTypes = new HashSet<String>();
-		String SqlWhere = "";
-		for (QueryConds queryConds : queryIncludesEXCondition.getConds()) {
-			String tableName = queryConds.getCondition().split("\\.")[0].toUpperCase();
-			tableNameWheres.add(tableName);
-			String fieldName = queryConds.getCondition().split("\\.")[1].toUpperCase();
-//			tempFieldNames.add(fieldName);
-//			if (queryConds.getFieldType() == 1) {
-//				tableNameWhereValues.add(queryConds.getCondValue().split("\\.")[0].toUpperCase());
-//			}
-			String condition = queryConds.getCondition().toUpperCase();
-			JTableDict jTableDict = jTableDictService.getByName(tableName, true);
-			JTableFieldDict jTableFieldDict = jTableFieldDictService.getByTableCodeAndName(jTableDict.getCode(),
-					fieldName);
-//			whereFieldTypes.add(jTableFieldDict.getType());
-			
-			
-			String relation = queryConds.getRelation();
-			//如果是is not null 则不拼装value
-			if(!relation.contains("null")) {
-				String condValue = queryConds.getCondValue() == null ? "" : queryConds.getCondValue();
-				if("like".equalsIgnoreCase(relation)) {
-					condValue = "%" + condValue + "%";
-				}
-				if("VARCHAR2".equalsIgnoreCase(jTableFieldDict.getType()) || "CHAR".equalsIgnoreCase(jTableFieldDict.getType()) ) {
-					condValue = "'" + condValue + "'";
-				}
-				if("DATE".equalsIgnoreCase(jTableFieldDict.getType())) {
-					condValue = "to_date('" + condValue + "','yyyy/mm/dd')";
-				}
-				SqlWhere += condition + " " 
-						+ queryConds.getRelation() + " " 
-						+ condValue
-						+ " and ";
-			}else {
-				SqlWhere += condition + " " 
-						+ queryConds.getRelation() + " " 
-						+ " and ";
+		String tempSql = "";
+		if (includeSql.length() > 0) {
+			tempSql += "select Id from (" + includeSql.toString() + ")";
+			if (excludeSql.length() > 0) {
+				tempSql += " minus (" + excludeSql.toString() + ")";
 			}
-			
 		}
-		//去掉最后的and
-		if(SqlWhere.length() > 4) {
-			SqlWhere = SqlWhere.substring(0,SqlWhere.length()-4);
-		}
-//     var SqlWhere = queryDetails.Select(x => x.ToArray().ToStringEx(" ")).ToArray().ToStringEx(" and ");
-
-//     #region 获取查询结果和数量
-		String tableWhere = toTableString(tableNameWheres, "");
-
-		String TempSql = queryIncludesEXCondition.getLeftqueto() + " select distinct " + PatientGlobalTable + ".Id" 
-				+ " from " + tableWhere + " " + (StringUtils.isBlank(SqlWhere) ? " " : " where " + SqlWhere) + "   "
-				+ queryIncludesEXCondition.getRightqueto();
-
-		if (cludeSqlList.size() > 0) {
-			cludeSqlList.add(tempadvancedQueryType);
-		}
-		cludeSqlList.add(TempSql);
-
-		return tempadvancedQueryType = queryIncludesEXCondition.getSetCombinator();
+		return tempSql;
 	}
 
+	private String cludeSqlExcutor(List<QueryIncludesEXCondition> queryIncludesEX, SortedSet<String> tableNameWheres) {
+		String includeSql = " select distinct " + PatientGlobalTable + ".Id   from ";
+		String allSqlWhere = "";
+		for (QueryIncludesEXCondition queryIncludesEXCondition : queryIncludesEX) {
+			if (queryIncludesEXCondition.getConds().isEmpty()) {
+				continue;
+			}
+
+			String SqlWhere = "";
+			for (QueryConds queryConds : queryIncludesEXCondition.getConds()) {
+				String tableName = queryConds.getCondition().split("\\.")[0].toUpperCase();
+				tableNameWheres.add(tableName);
+				String fieldName = queryConds.getCondition().split("\\.")[1].toUpperCase();
+				String condition = queryConds.getCondition().toUpperCase();
+				JTableDict jTableDict = jTableDictService.getByName(tableName, true);
+				JTableFieldDict jTableFieldDict = jTableFieldDictService.getByTableCodeAndName(jTableDict.getCode(),
+						fieldName);
+//				whereFieldTypes.add(jTableFieldDict.getType());
+
+				String relation = queryConds.getRelation();
+				// 如果是is not null 则不拼装value
+				if (!relation.contains("null")) {
+					String condValue = queryConds.getCondValue() == null ? "" : queryConds.getCondValue();
+					if ("like".equalsIgnoreCase(relation)) {
+						condValue = "%" + condValue + "%";
+					}
+					if ("VARCHAR2".equalsIgnoreCase(jTableFieldDict.getType())
+							|| "CHAR".equalsIgnoreCase(jTableFieldDict.getType())) {
+						condValue = "'" + condValue + "'";
+					}
+					if ("DATE".equalsIgnoreCase(jTableFieldDict.getType())) {
+						condValue = "to_date('" + condValue + "','yyyy/mm/dd')";
+					}
+					SqlWhere += condition + " " + queryConds.getRelation() + " " + condValue + " and ";
+				} else {
+					SqlWhere += condition + " " + queryConds.getRelation() + " " + " and ";
+				}
+
+			}
+			// 去掉最后的and
+			if (SqlWhere.length() > 4) {
+				SqlWhere = SqlWhere.substring(0, SqlWhere.length() - 4);
+			}
+			allSqlWhere += " and " + queryIncludesEXCondition.getLeftqueto() + " " + SqlWhere + " "
+					+ queryIncludesEXCondition.getRightqueto();
+//	     var SqlWhere = queryDetails.Select(x => x.ToArray().ToStringEx(" ")).ToArray().ToStringEx(" and ");
+		}
+		if(allSqlWhere.length() == 0) {
+			return "";
+		}
+//	     #region 获取查询结果和数量
+		String tableWhere = toTableString(tableNameWheres, "");
+		includeSql += tableWhere + " where 1=1 " + allSqlWhere;
+		return includeSql;
+	}
+
+	private String toTableKeys(SortedSet<String> tables) {
+		String ret = "";
+		if (tables == null || tables.size() == 0) {
+			return PatientGlobalTable + ".id";
+		}
+		List<String> tempTables = new ArrayList<String>();
+		tempTables.add(PatientGlobalTable);
+		tables.remove(PatientGlobalTable);
+		tempTables.addAll(tables);
+//        Dictionary<string, Type> keyValues = new Dictionary<string, Type>();
+		for (String item : tempTables) {
+//            keyValues.Add($"{item}__Id", typeof(long));
+			if (ret.length() == 0) {
+				ret = item + ".Id as " + item + "__Id";
+			} else {
+				ret += "," + item + ".Id as " + item + "__Id";
+			}
+		}
+//        type = CreateType(keyValues);
+		return ret;
+	}
+	
 
 }
