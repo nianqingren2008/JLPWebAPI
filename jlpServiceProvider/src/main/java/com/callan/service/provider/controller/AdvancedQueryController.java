@@ -44,6 +44,7 @@ import com.callan.service.provider.pojo.db.JShowDetailView;
 import com.callan.service.provider.pojo.db.JShowView;
 import com.callan.service.provider.pojo.db.JTableDict;
 import com.callan.service.provider.pojo.db.JTableFieldDict;
+import com.callan.service.provider.pojo.db.JUser;
 import com.callan.service.provider.service.IJLpService;
 import com.callan.service.provider.service.IJRightService;
 import com.callan.service.provider.service.IJSensitiveWordService;
@@ -51,6 +52,7 @@ import com.callan.service.provider.service.IJShowDetailViewService;
 import com.callan.service.provider.service.IJShowViewService;
 import com.callan.service.provider.service.IJTableDictService;
 import com.callan.service.provider.service.IJTableFieldDictService;
+import com.callan.service.provider.service.IJUserService;
 
 import ch.qos.logback.core.joran.action.IADataForComplexProperty;
 import io.swagger.annotations.Api;
@@ -84,6 +86,9 @@ public class AdvancedQueryController {
 	@Autowired
 	private IJSensitiveWordService jSensitiveWordService;
 
+	@Autowired
+	private IJUserService jUserService;
+	
 //	@CrossOrigin(origins = "*",maxAge = 3600)
 	@ApiOperation(value = "病例检索", notes = "病例检索模糊查询")
 	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST  })
@@ -372,24 +377,34 @@ public class AdvancedQueryController {
 //					+ " order by " + PatientGlobalTable + ".Id";
 //			List<Map<String, Object>> countData = jlpService.queryForSQL(countSql, new Object[] {});
 			
-				String SqlData = "select distinct " + finalSelectFields + " from " + finalTables + " " + tempSqlWhere
-						+ " order by " + PatientGlobalTable + ".Id";
-				SqlData = getPageSql(SqlData,pageNumInt,pageSizeInt);
-				log.info("SqlData : " + SqlData);
-				retData = jlpService.queryForSQLStreaming(SqlData, new Object[] {});
+			String SqlData = "select distinct " + finalSelectFields + " from " + finalTables + " " + tempSqlWhere
+					+ " order by " + PatientGlobalTable + ".Id";
+			SqlData = getPageSql(SqlData,pageNumInt,pageSizeInt);
+			log.info("SqlData : " + SqlData);
+			retData = jlpService.queryForSQLStreaming(SqlData, new Object[] {});
+			
+			
+			JUser user = jUserService.getOne(6L);
+			if(user != null) {
+				if(user.getjRole() != null) {
+					if(user.getjRole().getRoleRightList() != null && user.getjRole().getRoleRightList().size() > 0 ) {
+						JRight jRight = user.getjRole().getRoleRightList().get(0).getjRight();
+							if (jRight == null || jRight.getId() != 4L) {
+								// 获取敏感字段配置
+								List<JSensitiveWord> jSensitiveWordList = 
+										(List<JSensitiveWord>) jSensitiveWordService.getAll(true).getData();
 
-				JRight jRight = (JRight) session.getAttribute("jRight");
-				if (jRight == null || jRight.getId() != 4L) {
-					// 获取敏感字段配置
-					List<JSensitiveWord> jSensitiveWordList = 
-							(List<JSensitiveWord>) jSensitiveWordService.getAll(true).getData();
-
-					if (jSensitiveWordList.size() > 0) {
-						// 将敏感字段设置为 ***
-						// TODO
-//                        retData = retData.sensitiveWord(jSensitiveWordList);
+								if (jSensitiveWordList.size() > 0) {
+									// 将敏感字段设置为 ***
+									// TODO
+//				                        retData = retData.sensitiveWord(jSensitiveWordList);
+								}
+						}
 					}
+						
 				}
+			}
+			
 //			}
 			response.setColumns(columns);
 			response.setContent(retData);

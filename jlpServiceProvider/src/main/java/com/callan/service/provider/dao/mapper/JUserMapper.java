@@ -4,8 +4,12 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.One;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.mapping.FetchType;
 
 import com.callan.service.provider.pojo.db.JShowView;
 import com.callan.service.provider.pojo.db.JUser;
@@ -17,7 +21,7 @@ public interface JUserMapper {
 	 * 
 	 * @return
 	 */
-	@Select("SELECT * FROM J_USER")
+	@Select("SELECT * FROM J_USERS")
     public List<JUser> getAll();
 	
 	
@@ -26,7 +30,13 @@ public interface JUserMapper {
 	 * @param id
 	 * @return
 	 */
-    @Select("SELECT * FROM J_USER WHERE id = #{id}")
+    @Select("SELECT * FROM J_USERS WHERE id = #{id}")
+    @Results({
+		@Result(property="userrole",column="userrole"),
+		//users映射List<User> users，many=@Many是调用关联查询方法，"id"是关联查询条件，FetchType.LAZY是延迟加载
+		@Result(property="users",column="userrole", 
+			one=@One(select="com.callan.service.provider.dao.mapper.JRoleMapper.getOne",fetchType=FetchType.LAZY))
+    })
     JUser getOne(Long id);
     
 
@@ -34,16 +44,16 @@ public interface JUserMapper {
      * 
      * @param id
      */
-    @Delete("DELETE FROM J_USER WHERE id =#{id}")
+    @Delete("DELETE FROM J_USERS WHERE id =#{id}")
     void delete(Long id);
     
     /**
      * 
      * @param user
      */
-    @Update("UPDATE J_USER SET Loginpwd=#{Loginpwd} WHERE id =#{id}")
+    @Update("UPDATE J_USERS SET Loginpwd=#{Loginpwd} WHERE id =#{id}")
     void updatePwd(JUser entity);
 
-    @Select("SELECT * FROM J_USER WHERE logincode = #{logincode} and loginpwd = #{loginpwd}")
+    @Select("SELECT * FROM J_USERS WHERE logincode = #{logincode} and loginpwd = #{loginpwd}")
 	public List<JUser> getUserByCodeAndPwd(String logincode, String loginpwd);
 }

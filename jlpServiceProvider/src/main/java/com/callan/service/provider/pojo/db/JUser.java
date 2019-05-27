@@ -1,5 +1,6 @@
 package com.callan.service.provider.pojo.db;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.validation.constraints.NotBlank;
@@ -11,13 +12,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 
 @Api
-public class JUser {
+public class JUser implements Serializable {
 	/*
 	 * 用户ID
 	 */
 	@JSONField(label = "Id")
 	@ApiParam("用户ID")
-	public Long Id;
+	private Long Id;
 
 	/*
 	 * 登录号
@@ -26,14 +27,14 @@ public class JUser {
 	@ApiParam("登录名")
 	@NotBlank(message = "登录名不能为空")
 	@Size(max = 16, min = 4, message = "登录名长度应该在4-16位之间")
-	public String Logincode;
+	private String Logincode;
 
 	/*
 	 * 姓名
 	 */
 	@JSONField(label = "Name")
 	@ApiParam("姓名")
-	public String Name;
+	private String Name;
 	/*
 	 * 登录密码
 	 */
@@ -41,14 +42,14 @@ public class JUser {
 	@ApiParam("登录密码")
 	@NotBlank(message = "密码不能为空")
 	@Size(max = 32, min = 32, message = "密码长度不对")
-	public String Loginpwd;
+	private String Loginpwd;
 
 	/*
 	 * 性别
 	 */
 	@JSONField(label = "Sex")
 	@ApiParam("性别")
-	public String Sex;
+	private String Sex;
 
 	/*
 	 * 身份证
@@ -62,7 +63,7 @@ public class JUser {
 	 */
 	@JSONField(label = "Birthday")
 	@ApiParam("生日")
-	public Date Birthday;
+	private Date Birthday;
 
 	/*
 	 * 手机号
@@ -76,28 +77,33 @@ public class JUser {
 	 */
 	@JSONField(label = "Secretkey")
 	@ApiParam("秘钥")
-	public String Secretkey;
+	private String Secretkey;
 
 	/*
 	 * 登录凭证
 	 */
 	@JSONField(label = "Token")
 	@ApiParam("登录凭证")
-	public String Token;
+	private String Token;
 
 	/*
 	 * 启用标识
 	 */
 	@JSONField(label = "Activeflag")
 	@ApiParam("启用标识")
-	public String Activeflag;
+	private String Activeflag;
 
 	/*
 	 * 用户角色
 	 */
 	@JSONField(label = "Userrole")
 	@ApiParam("用户角色")
-	public Long Userrole;
+	private Long Userrole;
+
+	/*
+	 * 级联 角色信息
+	 */
+	private JRole jRole;
 
 	public Long getId() {
 		return Id;
@@ -193,6 +199,14 @@ public class JUser {
 
 	public void setUserrole(Long userrole) {
 		Userrole = userrole;
+	}
+
+	public JRole getjRole() {
+		return jRole;
+	}
+
+	public void setjRole(JRole jRole) {
+		this.jRole = jRole;
 	}
 
 }
