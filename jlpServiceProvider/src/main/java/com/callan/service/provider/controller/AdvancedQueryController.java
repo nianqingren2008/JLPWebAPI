@@ -94,7 +94,7 @@ public class AdvancedQueryController {
 	@Autowired
 	private JRoleMapper roleMapper;
 	
-//	@CrossOrigin(origins = "*",maxAge = 3600)
+//	@CrossOrigin(origins = "*",maxAge = 3600)  //跨域
 	@ApiOperation(value = "病例检索", notes = "病例检索模糊查询")
 	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST  })
 	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpSession session) {
