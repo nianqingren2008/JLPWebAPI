@@ -1,13 +1,9 @@
 package com.callan.service.provider.service;
 
-import com.callan.service.provider.pojo.base.CacheResponse;
-import com.callan.service.provider.pojo.db.JRight;
+import com.callan.service.provider.pojo.db.JRole;
 
 public interface IJRoleService {
 
-	JRight getOne(Long id);
+	JRole getOne(Long id);
 	
-	CacheResponse getAll4Id();
-
-	JRight getOne(Long id, boolean activityFlag);
 }

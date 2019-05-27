@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 //import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -41,6 +42,7 @@ import com.callan.service.provider.pojo.advanceQueryBase.Sorted;
 import com.callan.service.provider.pojo.base.FieldName;
 import com.callan.service.provider.pojo.db.JRight;
 import com.callan.service.provider.pojo.db.JRole;
+import com.callan.service.provider.pojo.db.JRoleRight;
 import com.callan.service.provider.pojo.db.JSensitiveWord;
 import com.callan.service.provider.pojo.db.JShowDetailView;
 import com.callan.service.provider.pojo.db.JShowView;
@@ -49,6 +51,8 @@ import com.callan.service.provider.pojo.db.JTableFieldDict;
 import com.callan.service.provider.pojo.db.JUser;
 import com.callan.service.provider.service.IJLpService;
 import com.callan.service.provider.service.IJRightService;
+import com.callan.service.provider.service.IJRoleRightService;
+import com.callan.service.provider.service.IJRoleService;
 import com.callan.service.provider.service.IJSensitiveWordService;
 import com.callan.service.provider.service.IJShowDetailViewService;
 import com.callan.service.provider.service.IJShowViewService;
@@ -91,8 +95,9 @@ public class AdvancedQueryController {
 	@Autowired
 	private IJUserService jUserService;
 	
+	
 	@Autowired
-	private JRoleMapper roleMapper;
+	private IJRoleRightService roleRightService;
 	
 //	@CrossOrigin(origins = "*",maxAge = 3600)
 	@ApiOperation(value = "病例检索", notes = "病例检索模糊查询")
@@ -388,29 +393,23 @@ public class AdvancedQueryController {
 			log.info("SqlData : " + SqlData);
 			retData = jlpService.queryForSQLStreaming(SqlData, new Object[] {});
 			
-			
+			//TODO  前台传入用户
 			JUser user = jUserService.getOne(6L);
-			
-			JRole role = roleMapper.getOne(1L);
-			
 			if(user != null) {
-				if(user.getjRole() != null) {
-					if(user.getjRole().getRoleRightList() != null && user.getjRole().getRoleRightList().size() > 0 ) {
-						JRight jRight = user.getjRole().getRoleRightList().get(0).getjRight();
-							if (jRight == null || jRight.getId() != 4L) {
-								// 获取敏感字段配置
-								List<JSensitiveWord> jSensitiveWordList = 
-										(List<JSensitiveWord>) jSensitiveWordService.getAll(true).getData();
-
-								if (jSensitiveWordList.size() > 0) {
-									// 将敏感字段设置为 ***
-									// TODO
-//				                        retData = retData.sensitiveWord(jSensitiveWordList);
-								}
+				List<JRoleRight> roleRightList = roleRightService.getByRoleId(user.getUserrole());
+					if(roleRightList != null && roleRightList.size() > 0) {
+						JRight jRight = roleRightList.get(0).getjRight();
+						if (jRight == null || jRight.getId() != 4L) {
+							// 获取敏感字段配置
+							Map<String,JSensitiveWord> sensitiveWordMap = 
+									(Map<String, JSensitiveWord>) jSensitiveWordService.getAll4Name(true).getData();
+							if (!sensitiveWordMap.isEmpty()) {
+								// 将敏感字段设置为 ***
+				            	retData = sensitiveWord(retData,sensitiveWordMap);
+							}
 						}
 					}
 						
-				}
 			}
 			
 //			}
@@ -425,6 +424,67 @@ public class AdvancedQueryController {
 
 	
 	
+	private List<Map<String, Object>> sensitiveWord(List<Map<String, Object>> retData,
+			Map<String,JSensitiveWord> sensitiveWordMap) {
+		if (retData == null || retData.size() == 0) {
+			return retData;
+		}
+		if (sensitiveWordMap == null || sensitiveWordMap.isEmpty()) {
+			return retData;
+		}
+
+		for (Map<String, Object> data : retData) {
+			Set<String> keySet = data.keySet();
+			for (String key : keySet) {
+				if (sensitiveWordMap.containsKey(key)) {
+					String value = data.get(key) + "";
+					data.put(key, toSensitivewordEx(value));
+				}
+			}
+		}
+		return retData;
+	}
+
+	private String toSensitivewordEx(String str) {
+		if (StringUtils.isBlank(str)) {
+			return str;
+		}
+		String ret = str;
+		switch (str.length()) {
+		case 1:
+			ret = "*";
+			break;
+		case 2:
+			ret = str.substring(0, 1) + "*";
+			break;
+		case 3:
+			ret = str.substring(0, 1) + "**";
+			break;
+		default:
+			int wordCount = str.length() / 4;
+			int sensitivityCount = str.length() - (str.length() / 2);
+			ret = padRight(str.substring(0, wordCount), sensitivityCount, '*')
+					+ str.substring(str.length() - wordCount, str.length());
+			break;
+		}
+		return ret;
+	}
+
+	private String padRight(String src, int len, char ch) {
+		int diff = len - src.length();
+	    if (diff <= 0) {
+	      return src;
+	    }
+
+	    char[] charr = new char[len];
+	    System.arraycopy(src.toCharArray(), 0, charr, 0, src.length());
+	    for (int i = src.length(); i < len; i++) {
+	      charr[i] = ch;
+	    }
+	    return new String(charr);
+	  }
+
+
 	private String getPageSql(String sql, int pageNum, int pageSize) {
 		String pageSql = "SELECT *" + 
 				"  FROM (SELECT tt.*, ROWNUM AS rowno" + 

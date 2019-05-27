@@ -1,5 +1,6 @@
 package com.callan.service.provider.service;
 
+import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.db.JUser;
 
 public interface IJUserService {
@@ -11,6 +12,7 @@ public interface IJUserService {
 	 */
 	JUser getOne(Long id);
 	
+	CacheResponse getAll4Id();
 	/**
 	 * 修改密码
 	 * @param user

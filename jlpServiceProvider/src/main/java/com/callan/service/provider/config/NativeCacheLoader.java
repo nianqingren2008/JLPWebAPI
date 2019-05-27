@@ -9,11 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.callan.service.provider.service.IJRightService;
+import com.callan.service.provider.service.IJRoleRightService;
 import com.callan.service.provider.service.IJSensitiveWordService;
 import com.callan.service.provider.service.IJShowDetailViewService;
 import com.callan.service.provider.service.IJShowViewService;
 import com.callan.service.provider.service.IJTableDictService;
 import com.callan.service.provider.service.IJTableFieldDictService;
+import com.callan.service.provider.service.IJUserService;
 
 @Service
 public class NativeCacheLoader implements InitializingBean{
@@ -25,6 +27,8 @@ public class NativeCacheLoader implements InitializingBean{
 	@Autowired IJTableDictService jTableDictService;
 	@Autowired IJTableFieldDictService jTableFieldDictService;
 	@Autowired ExecutorService executorService;
+	@Autowired IJUserService userService;
+	@Autowired IJRoleRightService roleRightService;
 	
 	Log logger = LogFactory.getLog(NativeCacheLoader.class);
 	
@@ -38,6 +42,7 @@ public class NativeCacheLoader implements InitializingBean{
 					jRightService.getAll4Id();
 					
 					jSensitiveWordService.getAll(true);
+					jSensitiveWordService.getAll4Name(true);
 					
 					jShowDetailViewService.getAll4Id();
 					jShowDetailViewService.getAll4ViewId();
@@ -52,6 +57,10 @@ public class NativeCacheLoader implements InitializingBean{
 					jTableFieldDictService.getAll4Id();
 					jTableFieldDictService.getAll4TableCode();
 					jTableFieldDictService.getAll4TableCode(false);
+					
+					userService.getAll4Id();
+					
+					roleRightService.getAll4RoleId();
 				}
 			});
 			

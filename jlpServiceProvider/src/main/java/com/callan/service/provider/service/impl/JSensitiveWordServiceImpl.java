@@ -1,7 +1,9 @@
 package com.callan.service.provider.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
@@ -39,6 +41,23 @@ public class JSensitiveWordServiceImpl implements IJSensitiveWordService {
 		CacheResponse response = new CacheResponse();
 		response.setCode(0);
 		response.setData(result);
+		return response;
+	}
+
+	@NativeCacheable
+	@Override
+	public CacheResponse getAll4Name(boolean activeflag) {
+		List<JSensitiveWord> all = jSensitiveWordMapper.getAll();
+		Map<String,JSensitiveWord> map = new HashMap<String,JSensitiveWord>();
+		for(JSensitiveWord jSensitiveWord : all) {
+			if("1".equals(jSensitiveWord.getActiveflag())){
+				map.put(jSensitiveWord.getName(),jSensitiveWord);
+			}
+		}
+		
+		CacheResponse response = new CacheResponse();
+		response.setCode(0);
+		response.setData(map);
 		return response;
 	}
 }

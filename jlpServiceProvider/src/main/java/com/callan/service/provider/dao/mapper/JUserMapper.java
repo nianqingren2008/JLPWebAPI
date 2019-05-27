@@ -31,12 +31,12 @@ public interface JUserMapper {
 	 * @return
 	 */
     @Select("SELECT * FROM J_USERS WHERE id = #{id}")
-    @Results({
-		@Result(property="id",column="id"),
-		//users映射List<User> users，many=@Many是调用关联查询方法，"id"是关联查询条件，FetchType.LAZY是延迟加载
-		@Result(property="jRole",column="userrole", 
-			one=@One(select="com.callan.service.provider.dao.mapper.JRoleMapper.getOne",fetchType=FetchType.LAZY))
-    })
+//    @Results({
+//		@Result(property="id",column="id"),
+//		//users映射List<User> users，many=@Many是调用关联查询方法，"id"是关联查询条件，FetchType.LAZY是延迟加载
+//		@Result(property="jRole",column="userrole", 
+//			one=@One(select="com.callan.service.provider.dao.mapper.JRoleMapper.getOne"))
+//    })
     JUser getOne(Long id);
     
 

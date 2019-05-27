@@ -24,7 +24,7 @@ public class JRole {
 	 */
 	private Date  createdate;
 	
-	private List<JRoleRight> roleRightList;
+	private List<JRoleRight> list;
 	
 	public Long getId() {
 		return id;
@@ -50,11 +50,12 @@ public class JRole {
 	public void setCreatedate(Date createdate) {
 		this.createdate = createdate;
 	}
-	public List<JRoleRight> getRoleRightList() {
-		return roleRightList;
+	public List<JRoleRight> getList() {
+		return list;
 	}
-	public void setRoleRightList(List<JRoleRight> roleRightList) {
-		this.roleRightList = roleRightList;
+	public void setList(List<JRoleRight> list) {
+		this.list = list;
 	}
+	
 	
 }
