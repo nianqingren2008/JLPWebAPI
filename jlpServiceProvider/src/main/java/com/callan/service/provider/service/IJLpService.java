@@ -9,9 +9,11 @@ public interface IJLpService {
 	 * 流式加载执行sql
 	 * @param sql  sql语句
 	 * @param params   参数数组
+	 * @param pageSize 
+	 * @param sqlData 
 	 * @return
 	 */
-	public List<Map<String, Object>> queryForSQLStreaming(String sql,Object[] params);
+	public List<Map<String, Object>> queryForSQLStreaming(String sql,Object[] params, int pageNum, int pageSize);
 	
 	public List<Map<String, Object>> queryForSQL(String sql,Object[] params);
 }

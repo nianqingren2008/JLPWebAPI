@@ -10,3 +10,13 @@ http://192.168.17.46   test1/123456
 
 tj/tjpacs
 
+
+
+阿里云服务器（windows server 2008）IP地址：    47.94.170.104 
+ 
+用户名：administrator
+密码：TJwantup2018!?
+
+
+nianqingren2008   
+zhangyuehua123

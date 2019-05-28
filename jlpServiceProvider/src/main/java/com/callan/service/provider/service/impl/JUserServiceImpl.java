@@ -56,4 +56,10 @@ public class JUserServiceImpl implements IJUserService {
 		response.setData(map);
 		return response;
 	}
+
+	@Override
+	public Long getByToken(String authorization) {
+		
+		return jUserMapper.getByToken(authorization);
+	}
 }

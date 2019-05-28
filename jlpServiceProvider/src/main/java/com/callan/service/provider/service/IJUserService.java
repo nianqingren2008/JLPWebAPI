@@ -26,4 +26,11 @@ public interface IJUserService {
 	 * @return
 	 */
 	JUser login(String logincode, String loginpwd);
+	
+	/**
+	 * 根据token查找用户角色
+	 * @param authorization
+	 * @return
+	 */
+	Long getByToken(String authorization);
 }

@@ -3,9 +3,6 @@ package com.callan.service.provider.controller;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-//import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,35 +10,28 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.swing.JTable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
-import com.callan.service.provider.dao.mapper.JRoleMapper;
 import com.callan.service.provider.pojo.AdvanceQueryRequest;
 import com.callan.service.provider.pojo.AdvanceQueryResponse;
 import com.callan.service.provider.pojo.advanceQueryBase.ColunmsModel;
-import com.callan.service.provider.pojo.advanceQueryBase.Queries;
 import com.callan.service.provider.pojo.advanceQueryBase.QueryConds;
 import com.callan.service.provider.pojo.advanceQueryBase.QueryIncludesEX;
 import com.callan.service.provider.pojo.advanceQueryBase.QueryIncludesEXCondition;
 import com.callan.service.provider.pojo.advanceQueryBase.Sorted;
 import com.callan.service.provider.pojo.base.FieldName;
 import com.callan.service.provider.pojo.db.JRight;
-import com.callan.service.provider.pojo.db.JRole;
 import com.callan.service.provider.pojo.db.JRoleRight;
 import com.callan.service.provider.pojo.db.JSensitiveWord;
 import com.callan.service.provider.pojo.db.JShowDetailView;
@@ -50,9 +40,7 @@ import com.callan.service.provider.pojo.db.JTableDict;
 import com.callan.service.provider.pojo.db.JTableFieldDict;
 import com.callan.service.provider.pojo.db.JUser;
 import com.callan.service.provider.service.IJLpService;
-import com.callan.service.provider.service.IJRightService;
 import com.callan.service.provider.service.IJRoleRightService;
-import com.callan.service.provider.service.IJRoleService;
 import com.callan.service.provider.service.IJSensitiveWordService;
 import com.callan.service.provider.service.IJShowDetailViewService;
 import com.callan.service.provider.service.IJShowViewService;
@@ -60,7 +48,6 @@ import com.callan.service.provider.service.IJTableDictService;
 import com.callan.service.provider.service.IJTableFieldDictService;
 import com.callan.service.provider.service.IJUserService;
 
-import ch.qos.logback.core.joran.action.IADataForComplexProperty;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -100,12 +87,13 @@ public class AdvancedQueryController {
 	private IJRoleRightService roleRightService;
 	
 //	@CrossOrigin(origins = "*",maxAge = 3600)  //跨域
+	@SuppressWarnings("unchecked")
 	@ApiOperation(value = "病例检索", notes = "病例检索模糊查询")
 	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST  })
-	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpSession session) {
+	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize,HttpServletRequest request) {
 		long start = System.currentTimeMillis();
 		log.info("");
-		log.info("advanceQuery-->" + advanceQuery);
+		log.info("request --> " + advanceQuery);
 		AdvanceQueryRequest advanceQueryRequest = null;
 		try {
 			advanceQueryRequest = JSONObject.toJavaObject(JSONObject.parseObject(advanceQuery),
@@ -362,7 +350,7 @@ public class AdvancedQueryController {
 		}
 		tempSqlWhere += " and " + mainTable.getName() + ".Id is not null";
 //        #region 组装返回值
-		String sortStr = PatientGlobalTable + "__Id";
+//		String sortStr = PatientGlobalTable + "__Id";
 //
 		String sql = "select distinct " + tableKeys + " from " + finalTables + " " + tempSqlWhere;
 		String sqlCount = " select count(1) count from (" + sql + ") countsql";
@@ -389,14 +377,16 @@ public class AdvancedQueryController {
 			
 			String SqlData = "select distinct " + finalSelectFields + " from " + finalTables + " " + tempSqlWhere
 					+ " order by " + PatientGlobalTable + ".Id";
-			SqlData = getPageSql(SqlData,pageNumInt,pageSizeInt);
-			log.info("SqlData : " + SqlData);
-			retData = jlpService.queryForSQLStreaming(SqlData, new Object[] {});
 			
-			//TODO  前台传入用户
-			JUser user = jUserService.getOne(6L);
-			if(user != null) {
-				List<JRoleRight> roleRightList = roleRightService.getByRoleId(user.getUserrole());
+			retData = jlpService.queryForSQLStreaming(SqlData, new Object[] {} ,pageNumInt,pageSizeInt);
+			
+			//从前台header中获取token参数
+			String authorization= request.getHeader("Authorization")
+					== null ? "" : request.getHeader("Authorization");
+			
+			Long userRole = jUserService.getByToken(authorization);
+			if(userRole != null && userRole != 0L) {
+				List<JRoleRight> roleRightList = roleRightService.getByRoleId(userRole);
 					if(roleRightList != null && roleRightList.size() > 0) {
 						JRight jRight = roleRightList.get(0).getjRight();
 						if (jRight == null || jRight.getId() != 4L) {
@@ -417,6 +407,7 @@ public class AdvancedQueryController {
 			response.setContent(retData);
 //		}
 		long end = System.currentTimeMillis();
+		log.info("response --> " + response.toJsonString());
 		log.info("serviceTime " + (end - start) + "ms");
 		log.info(" ");
 		return response.toJsonString();
@@ -483,16 +474,6 @@ public class AdvancedQueryController {
 	    }
 	    return new String(charr);
 	  }
-
-
-	private String getPageSql(String sql, int pageNum, int pageSize) {
-		String pageSql = "SELECT *" + 
-				"  FROM (SELECT tt.*, ROWNUM AS rowno" + 
-				"          FROM (  " + sql + ") tt" + 
-				"         WHERE ROWNUM <= " + pageNum * pageSize + ") table_alias" + 
-				" WHERE table_alias.rowno >= " + (pageNum -1) * pageSize;
-		return pageSql;
-	}
 
 
 //	private String getKeysWhere(List<Map<String, Object>> dataGrid) {

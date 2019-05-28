@@ -56,4 +56,8 @@ public interface JUserMapper {
 
     @Select("SELECT * FROM J_USERS WHERE logincode = #{logincode} and loginpwd = #{loginpwd}")
 	public List<JUser> getUserByCodeAndPwd(String logincode, String loginpwd);
+
+
+    @Select("SELECT userrole FROM J_USERS WHERE token = #{token}")
+	public Long getByToken(String token);
 }
