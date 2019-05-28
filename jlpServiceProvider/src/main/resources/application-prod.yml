@@ -4,9 +4,12 @@ server:
 spring:
   application:
     name: jlp-service-provider
+  main:
+     allow-bean-definition-overriding: true
+
 
 spring.datasource.driver-class-name: oracle.jdbc.driver.OracleDriver
-spring.datasource.url: jdbc:oracle:thin:@192.168.17.165:1521:orcl
+spring.datasource.url: jdbc:oracle:thin:@192.168.17.46:1521:orcl
 spring.datasource.username: jlp
 spring.datasource.password: jlp
 
@@ -28,4 +31,13 @@ logging:
            provider : debug
 
 executorService.threedMax : 100
+
+
+#session存储类型
+#spring.session.store-type : redis
+#设置session超时时间
+#server.session.timeout : 2000
+#spring.redis.host : 127.0.0.1
+#spring.redis.port : 6379
+
 

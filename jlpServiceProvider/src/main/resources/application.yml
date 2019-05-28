@@ -3,4 +3,4 @@ spring:
     active: dev
 
 #分页数据存活时间
-sqlData.overTime.timeMinute: 1
+sqlData.overTime.timeMinute: 60

@@ -31,7 +31,7 @@ public class OverTimeDataClear {
 			Properties props = new Properties();
 			props.load(is);
 			timeMinuteStr = props.getProperty("sqlData.overTime.timeMinute");
-			timeMinuteInt = Integer.parseInt(timeMinuteStr == null ? "1" : timeMinuteStr);
+			timeMinuteInt = Integer.parseInt(timeMinuteStr == null ? "60" : timeMinuteStr);
 		} catch (IOException e) {
 			e.printStackTrace();
 			timeMinuteInt = 60;
