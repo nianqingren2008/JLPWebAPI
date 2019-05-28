@@ -31,16 +31,16 @@ public class JLPServiceImpl implements IJLpService{
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Map<String, Object>> queryForSQLStreaming( String sql,Object[] params,int pageNum,int pageSize){
+	public List<Map<String, Object>> queryForSQLStreaming( String sql,int pageNum,int pageSize){
 		try {
-			String key = sql + SerializeUtil.getValueByType(params);
+			String key = sql;
         	String serialKey = Sha1Util.getEncrypteWord(key);
         	if(NativeSqlData.getData(serialKey) == null) {
         		executorService.execute(new Runnable() {
     				@Override
     				public void run() {
     					try {
-    						List<Map<String, Object>> allData = dao.queryForSQLStreaming(sql, params);
+    						List<Map<String, Object>> allData = dao.queryForSQLStreaming(sql, new Object[] {});
     						Map<String,Object> dataMap = new HashMap<String, Object>();
     						dataMap.put("lastActiveTime", new Date());
     						dataMap.put("data", allData);
@@ -50,22 +50,22 @@ public class JLPServiceImpl implements IJLpService{
     					}
     				}
     			});
-        		String  pageSql = getPageSql(sql,pageNum,pageSize);
+        		String  pageSql = null;
+        		if(pageSize != 0) {
+        			pageSql = getPageSql(sql,pageNum,pageSize);
+        		}else {
+        			pageSql = sql;
+        		}
     			log.info("queryForSQLStreaming -- > pageSql : " + pageSql );
-    			return dao.queryForSQLStreaming(pageSql, params);
+    			return dao.queryForSQLStreaming(pageSql, new Object[] {});
         	} else {
+        		
         		log.info("[GET SQLDATA SUCCESS]  pageNum : " + pageNum + "  pageSize : " + pageSize);
         		List<Map<String, Object>> allData = (List<Map<String, Object>>) NativeSqlData.getData(serialKey).get("data");
         		//获取缓存数据时，更新时间
         		NativeSqlData.getData(serialKey).put("lastActiveTime", new Date());
         		List<Map<String, Object>> pageList = new ArrayList<>(); 
-				if(null != allData && allData.size()>0){
-					for(int i=(pageNum-1)*pageSize;i<pageNum*pageSize;i++){
-						if(allData.size()>i){
-							pageList.add(allData.get(i));
-						}
-					}
-				}
+        		pageList = allData.subList((pageNum-1)*pageSize, pageNum*pageSize);
 				return pageList;
         	}
         	

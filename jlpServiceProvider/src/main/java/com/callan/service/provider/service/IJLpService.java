@@ -13,7 +13,7 @@ public interface IJLpService {
 	 * @param sqlData 
 	 * @return
 	 */
-	public List<Map<String, Object>> queryForSQLStreaming(String sql,Object[] params, int pageNum, int pageSize);
+	public List<Map<String, Object>> queryForSQLStreaming(String sql, int pageNum, int pageSize);
 	
 	public List<Map<String, Object>> queryForSQL(String sql,Object[] params);
 }
