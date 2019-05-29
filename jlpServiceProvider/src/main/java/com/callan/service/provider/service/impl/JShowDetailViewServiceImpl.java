@@ -11,6 +11,7 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.dao.mapper.JShowDetailViewMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.NativeCacheable;
@@ -35,7 +36,7 @@ public class JShowDetailViewServiceImpl implements IJShowDetailViewService {
 		Map<Long,JShowDetailView> map = (Map<Long, JShowDetailView>) base.getAll4Id().getData();
 		JShowDetailView entity = map.get(id);
 		if (activeFlag && entity != null) {
-			if ("1".equals(entity.getActiveflag())) {
+			if (JLPConts.ActiveFlag.equals(entity.getActiveflag())) {
 				return entity;
 			} else {
 				return null;
@@ -71,7 +72,7 @@ public class JShowDetailViewServiceImpl implements IJShowDetailViewService {
 			if(map.get(jShowDetailView.getViewid()) == null) {
 				List<JShowDetailView> viewIdList = new ArrayList<JShowDetailView>();
 				if(activeFlag) {
-					if("1".equals(jShowDetailView.getActiveflag())) {
+					if(JLPConts.ActiveFlag.equals(jShowDetailView.getActiveflag())) {
 						viewIdList.add(jShowDetailView);
 					}
 				}else {
@@ -80,7 +81,7 @@ public class JShowDetailViewServiceImpl implements IJShowDetailViewService {
 				map.put(jShowDetailView.getViewid(), viewIdList);
 			}else {
 				if(activeFlag) {
-					if("1".equals(jShowDetailView.getActiveflag())) {
+					if(JLPConts.ActiveFlag.equals(jShowDetailView.getActiveflag())) {
 						map.get(jShowDetailView.getViewid()).add(jShowDetailView);
 					}
 				}else {

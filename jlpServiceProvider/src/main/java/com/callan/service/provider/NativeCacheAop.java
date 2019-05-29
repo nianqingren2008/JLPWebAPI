@@ -100,7 +100,7 @@ public class NativeCacheAop {
 //    	    logger.debug(methonName + ",from cache start ,  key:" + key);
     	    value = NativeData.getData(key);	//从缓存获取数据  
     	    if(value != null) {
-    	    	logger.info(methonName + ",[GET SUCCESS],key:" + key);//+ "，value:" + value);
+//    	    	logger.info(methonName + ",[GET SUCCESS],key:" + key);//+ "，value:" + value);
              	return value; //如果有数据,则直接返回  
     	    }
 	    try {

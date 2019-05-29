@@ -59,5 +59,11 @@ public interface JUserMapper {
 
 
     @Select("SELECT userrole FROM J_USERS WHERE token = #{token}")
-	public Long getByToken(String token);
+	public Long getUserRoleByToken(String token);
+    
+    @Select("SELECT id FROM J_USERS WHERE token = #{token}")
+	public Long getIdByToken(String token);
+    
 }
+
+

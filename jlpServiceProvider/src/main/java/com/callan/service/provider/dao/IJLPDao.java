@@ -16,7 +16,7 @@ public interface IJLPDao  {
      * @return
      * @throws Exception 
      */
-    public List<Map<String, Object>> queryForSQLStreaming(String sql, Object[] params) throws Exception;
+    public List<Map<String, Object>> queryForSQLStreaming(String sql, int pageNum,int pageSize) throws Exception;
     
     public List<Map<String, Object>> queryForSQL(String sql, Object[] params) throws Exception;
 

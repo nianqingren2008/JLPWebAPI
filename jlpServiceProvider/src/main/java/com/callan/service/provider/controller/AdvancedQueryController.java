@@ -3,6 +3,7 @@ package com.callan.service.provider.controller;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
+import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.pojo.AdvanceQueryRequest;
 import com.callan.service.provider.pojo.AdvanceQueryResponse;
 import com.callan.service.provider.pojo.advanceQueryBase.ColunmsModel;
@@ -55,8 +57,6 @@ import io.swagger.annotations.ApiOperation;
 @Api(description = "病例检索查询")
 public class AdvancedQueryController {
 	Log log = LogFactory.getLog(AdvancedQueryController.class);
-
-	public final String PatientGlobalTable = "D_PATIENTGLOBAL";
 
 	@Autowired
 	private IJShowViewService jShowviewService;
@@ -179,7 +179,7 @@ public class AdvancedQueryController {
 			colunmsModel.setKey(jTableFieldDict.getName().toLowerCase());
 			colunmsModel.setTitle(jTableFieldDict.getjShowDetailView().getFieldtitle());
 			colunmsModel.setIsLongStr("clob".equals(jTableFieldDict.getType()));
-			colunmsModel.setIsSearched("1".equals(jTableFieldDict.getQueryflag()));
+			colunmsModel.setIsSearched(JLPConts.ActiveFlag.equals(jTableFieldDict.getQueryflag()));
 			columns.add(colunmsModel);
 		}
 
@@ -189,7 +189,9 @@ public class AdvancedQueryController {
 		SortedSet<String> tableNameWhereMainValues = new TreeSet<String>();
 		// List<String> whereFieldsMain = new ArrayList<String>();
 		// List<String> whereFieldTypesMain = new ArrayList<String>();
+		String patientTableWhere = " where 1=1 ";
 		String sqlWhereMain = "";
+		Map<String,List<String> > tableWhere = new HashMap<String, List<String>>();
 		if (queryCondsList != null) {
 
 			for (QueryConds queryConds : queryCondsList) {
@@ -221,6 +223,14 @@ public class AdvancedQueryController {
 						condValue = "to_date('" + condValue + "','yyyy/mm/dd')";
 					}
 					sqlWhereMain += condition + " " + queryConds.getRelation() + " " + condValue + " and ";
+					List<String> list = tableWhere.get(tableName);
+					if(list == null) {
+						list = new ArrayList<String>();
+					}
+					list.add(" and " + condition + " " + queryConds.getRelation() + " " + condValue);
+					if(condition.contains(JLPConts.PatientGlobalTable)){
+						patientTableWhere += " and " + condition + " " + queryConds.getRelation() + " " + condValue ;
+					}
 				} else {
 					sqlWhereMain += condition + " " + queryConds.getRelation() + " " + " and ";
 				}
@@ -249,7 +259,7 @@ public class AdvancedQueryController {
 		SortedSet<String> tableNames = new TreeSet<String>();
 		List<FieldName> fieldNames = new ArrayList<FieldName>();
 		// 增加隐藏主键
-		fieldNames.add(new FieldName(PatientGlobalTable + ".Id as hide_key"));
+		fieldNames.add(new FieldName(JLPConts.PatientGlobalTable + ".Id as hide_key"));
 		SortedSet<String> fieldShowNames = new TreeSet<String>();
 		for (JShowDetailView JShowDetailView : jShowDetailViewListShow) {
 			tableNames.add(JShowDetailView.getjTableDict().getName());
@@ -298,7 +308,7 @@ public class AdvancedQueryController {
 //		}
 		// 处理纳入
 //		for (QueryIncludesEXCondition queryIncludesEXCondition : includes) {
-		String tempSql = queryEx(queryIncludesEX);
+		String tempSql = queryEx(queryIncludesEX,tableWhere);
 //		}
 		// 处理排除
 
@@ -326,16 +336,16 @@ public class AdvancedQueryController {
 				fieldName.setFieldName("to_char(" + fieldName.getFieldName() + ",'yyyy/mm/dd') as birthday");
 			}
 		}
-		String finalSelectFields = fieldNames.toString().substring(1, fieldNames.toString().length() - 1);
-		String finalTables = toTableString(tableNames, tempSql);
-		String tableKeys = toTableKeys(tableNames);
+		
 
-		String tempSqlWhere = " where 1=1 ";
-		tempSqlWhere += " and D_PATIENTGLOBAL.jlactiveflag='1'";
+		
+		patientTableWhere += " and "+JLPConts.PatientGlobalTable+".jlactiveflag='1'";
 		if (advanceQueryRequest.getPatientGlobalId() != null
 				&& advanceQueryRequest.getPatientGlobalId().longValue() > 0) {
-			tempSqlWhere += " and D_PATIENTGLOBAL.Id = " + advanceQueryRequest.getPatientGlobalId();
+			patientTableWhere += " and "+JLPConts.PatientGlobalTable+".Id = "
+				+ advanceQueryRequest.getPatientGlobalId();
 		}
+		String tempSqlWhere = " where 1=1 ";
 		if (sqlWhereMain.length() > 0) {
 			tempSqlWhere += " and  " + sqlWhereMain;
 		}
@@ -343,12 +353,18 @@ public class AdvancedQueryController {
 //        #region 组装返回值
 //		String sortStr = PatientGlobalTable + "__Id";
 //
-		String sql = "select distinct " + tableKeys + " from " + finalTables + " " + tempSqlWhere;
+		String finalSelectFields = fieldNames.toString().substring(1, fieldNames.toString().length() - 1);
+		String finalTables4Count = toTableString(tableNames, tempSql,tableWhere);
+		String finalTables4PageData = toTableString(tableNames, tempSql,pageNumInt,pageSizeInt,patientTableWhere,tableWhere);
+		String tableKeys = toTableKeys(tableNames);
+		
+		
+		String sql = "select " + tableKeys + " from " + finalTables4Count + " " + tempSqlWhere;
 		String sqlCount = " select count(1) count from (" + sql + ") countsql";
 //		log.info("sql : " + sql);
 		log.info("sqlCount : " + sqlCount);
 //		if (isTotals) {
-		List<Map<String, Object>> countList = jlpService.queryForSQLStreaming(sqlCount,0,0);
+		List<Map<String, Object>> countList = jlpService.queryForSQL(sqlCount,new Object[] {});
 		if (countList != null && countList.size() > 0) {
 			response.setTotals(Integer.parseInt(countList.get(0).get("count") + ""));
 		} else {
@@ -366,13 +382,19 @@ public class AdvancedQueryController {
 //					+ " order by " + PatientGlobalTable + ".Id";
 //			List<Map<String, Object>> countData = jlpService.queryForSQL(countSql, new Object[] {});
 
-		String SqlData = "select distinct " + finalSelectFields + " from " + finalTables + " " + tempSqlWhere
-				+ " order by " + PatientGlobalTable + ".Id";
-		retData = jlpService.queryForSQLStreaming(SqlData, pageNumInt, pageSizeInt);
+		String SqlAllData = "select distinct " + finalSelectFields + " from " + finalTables4Count + " " + tempSqlWhere
+				+ " order by " + JLPConts.PatientGlobalTable + ".Id";
+		
+		if(StringUtils.isBlank(sqlWhereMain)) {
+			
+		}
+		String SqlPageData = "select distinct " + finalSelectFields + " from " + finalTables4PageData + " " + tempSqlWhere
+				+ " order by " + JLPConts.PatientGlobalTable + ".Id";
+		retData = jlpService.queryForSQLStreaming(SqlPageData,SqlAllData, pageNumInt, pageSizeInt);
 		// 从前台header中获取token参数
 		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
 
-		Long userRole = jUserService.getByToken(authorization);
+		Long userRole = jUserService.getUserRoleByToken(authorization);
 		if (userRole != null && userRole != 0L) {
 			List<JRoleRight> roleRightList = roleRightService.getByRoleId(userRole);
 			if (roleRightList != null && roleRightList.size() > 0) {
@@ -490,11 +512,67 @@ public class AdvancedQueryController {
 //		}
 //		return ret;
 //	}
-
-	private String toTableString(SortedSet<String> tableArray, String advancedQueryWhere) {
+	
+	/**
+	 * 
+	 * @param tableArray
+	 * @param advancedQueryWhere
+	 * @param pageNum
+	 * @param pageSize
+	 * @return
+	 */
+	private String toTableString(SortedSet<String> tableArray, String advancedQueryWhere,int pageNum,int pageSize
+			,String patientTableWhere,Map<String,List<String>> tableWhere) {
 		String ret = "";
 		if (tableArray != null) {
-			String patientTable = PatientGlobalTable.toLowerCase();
+			String patientTable = JLPConts.PatientGlobalTable.toLowerCase();
+			ret = "( select * from (select * from " + patientTable + " " + patientTableWhere
+					+ " order by "+JLPConts.PatientGlobalTable+".Id ) "
+					+ " where rownum<" + pageNum * pageSize 
+					+ ") d_patientglobal";
+
+			if (StringUtils.isNotBlank(advancedQueryWhere)) {
+				ret += " inner join (" + advancedQueryWhere + ") a on " + patientTable + ".Id=a.Id ";
+			}
+
+			boolean IsInner = tableArray.size() <= 1;
+			if (!IsInner && tableArray.size() == 2) {
+				if (tableArray.contains("D_LABMASTERINFO") && tableArray.contains("D_LABRESULTS")) {
+					IsInner = true;
+				}
+			}
+			boolean IsLabResult = false;
+			boolean IsLabMaster = false;
+
+			for (String item : tableArray) {
+				if ("D_LABMASTERINFO".equals(item.toUpperCase())) {
+					IsLabMaster = true;
+				} else if ("D_LABRESULTS".equalsIgnoreCase(item)) {
+					IsLabResult = true;
+					continue;
+				} else if (item.toLowerCase().equals(patientTable)) {
+					continue;
+				}
+				ret += (IsInner ? " inner" : " left") + " join " + item + " on " + patientTable + ".Id = " + item
+						+ ".patientglobalid ";
+			}
+			if (IsLabResult) {
+				if (!IsLabMaster) {
+					ret += (IsInner ? "inner" : "left") + " join D_LABMASTERINFO on " + patientTable
+							+ ".Id = D_LABMASTERINFO.patientglobalid ";
+				}
+				ret += (IsInner ? " inner" : " left")
+						+ " join D_LABRESULTS on D_LABRESULTS.APPLYNO = D_LABMASTERINFO.APPLYNO ";
+			}
+		}
+		return ret;
+	}
+	
+	private String toTableString(SortedSet<String> tableArray, String advancedQueryWhere,Map<String,List<String>> tableWhere) {
+		String ret = "";
+		if (tableArray != null) {
+			
+			String patientTable = JLPConts.PatientGlobalTable.toLowerCase();
 			ret = patientTable;
 
 			if (StringUtils.isNotBlank(advancedQueryWhere)) {
@@ -540,13 +618,13 @@ public class AdvancedQueryController {
 	 * @param queryIncludesEX
 	 * @return
 	 */
-	private String queryEx(QueryIncludesEX queryIncludesEX) {
+	private String queryEx(QueryIncludesEX queryIncludesEX,Map<String,List<String>> tableWhere) {
 		SortedSet<String> tableNameWheres = new TreeSet<String>();
 		if (queryIncludesEX == null) {
 			return "";
 		}
-		String includeSql = cludeSqlExcutor(queryIncludesEX.getIncludes(), tableNameWheres);
-		String excludeSql = cludeSqlExcutor(queryIncludesEX.getExcludes(), tableNameWheres);
+		String includeSql = cludeSqlExcutor(queryIncludesEX.getIncludes(), tableNameWheres,tableWhere);
+		String excludeSql = cludeSqlExcutor(queryIncludesEX.getExcludes(), tableNameWheres,tableWhere);
 
 		String tempSql = "";
 		if (includeSql.length() > 0) {
@@ -558,8 +636,8 @@ public class AdvancedQueryController {
 		return tempSql;
 	}
 
-	private String cludeSqlExcutor(List<QueryIncludesEXCondition> queryIncludesEX, SortedSet<String> tableNameWheres) {
-		String includeSql = " select distinct " + PatientGlobalTable + ".Id   from ";
+	private String cludeSqlExcutor(List<QueryIncludesEXCondition> queryIncludesEX, SortedSet<String> tableNameWheres,Map<String,List<String>> tableWhere) {
+		String includeSql = " select distinct " + JLPConts.PatientGlobalTable + ".Id   from ";
 		String allSqlWhere = "";
 		for (QueryIncludesEXCondition queryIncludesEXCondition : queryIncludesEX) {
 			if (queryIncludesEXCondition.getConds().isEmpty()) {
@@ -609,19 +687,19 @@ public class AdvancedQueryController {
 			return "";
 		}
 //	     #region 获取查询结果和数量
-		String tableWhere = toTableString(tableNameWheres, "");
-		includeSql += tableWhere + " where 1=1 " + allSqlWhere;
+		String tableWhere1 = toTableString(tableNameWheres, "",tableWhere);
+		includeSql += tableWhere1 + " where 1=1 " + allSqlWhere;
 		return includeSql;
 	}
 
 	private String toTableKeys(SortedSet<String> tables) {
 		String ret = "";
 		if (tables == null || tables.size() == 0) {
-			return PatientGlobalTable + ".id";
+			return JLPConts.PatientGlobalTable + ".id";
 		}
 		List<String> tempTables = new ArrayList<String>();
-		tempTables.add(PatientGlobalTable);
-		tables.remove(PatientGlobalTable);
+		tempTables.add(JLPConts.PatientGlobalTable);
+		tables.remove(JLPConts.PatientGlobalTable);
 		tempTables.addAll(tables);
 //        Dictionary<string, Type> keyValues = new Dictionary<string, Type>();
 		for (String item : tempTables) {

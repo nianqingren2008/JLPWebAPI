@@ -48,6 +48,12 @@ public class OverTimeDataClear {
 					Map<String, Map<String, Object>> allDataMap = NativeSqlData.getAllData();
 					for (String key : allDataMap.keySet()) {
 						Map<String, Object> map = allDataMap.get(key);
+						
+						//如果数据状态不是完成，则跳过
+						if(!"finish".equals(map.get("status"))) {
+							continue;
+						}
+						
 						Date lastActiveTime = (Date) map.get("lastActiveTime");
 						Calendar cal = Calendar.getInstance();
 						cal.setTime(new Date());

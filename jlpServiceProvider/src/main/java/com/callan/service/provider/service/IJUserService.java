@@ -32,5 +32,7 @@ public interface IJUserService {
 	 * @param authorization
 	 * @return
 	 */
-	Long getByToken(String authorization);
+	Long getUserRoleByToken(String authorization);
+
+	Long getIdByToken(String authorization);
 }

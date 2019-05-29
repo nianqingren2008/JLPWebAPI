@@ -13,6 +13,7 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.dao.mapper.JTableFiledDictMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.NativeCacheable;
@@ -49,7 +50,7 @@ public class JTableFieldDictServiceImpl implements IJTableFieldDictService {
 		}
 		
 		if (showFlag) {
-			if ("1".equals(entity.getShowflag())) {
+			if (JLPConts.ActiveFlag.equals(entity.getShowflag())) {
 				return entity;
 			} else {
 				return null;
@@ -119,7 +120,7 @@ public class JTableFieldDictServiceImpl implements IJTableFieldDictService {
 			if(map.get(entity.getTablecode()) == null){
 				List<JTableFieldDict> fieldDictList = new ArrayList<JTableFieldDict>();
 				if(showFlag) {
-					if("1".equals(entity.getShowflag())) {
+					if(JLPConts.ActiveFlag.equals(entity.getShowflag())) {
 						fieldDictList.add(entity);
 					}
 				}else {
@@ -128,7 +129,7 @@ public class JTableFieldDictServiceImpl implements IJTableFieldDictService {
 				map.put(entity.getTablecode(), fieldDictList);
 			}else {
 				if(showFlag) {
-					if("1".equals(entity.getShowflag())) {
+					if(JLPConts.ActiveFlag.equals(entity.getShowflag())) {
 						map.get(entity.getTablecode()).add(entity);
 					}
 				}else {

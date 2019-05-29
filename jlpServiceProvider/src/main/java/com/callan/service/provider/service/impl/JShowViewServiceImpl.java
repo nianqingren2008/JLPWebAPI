@@ -10,6 +10,7 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.dao.mapper.JShowViewMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.NativeCacheable;
@@ -50,7 +51,7 @@ public class JShowViewServiceImpl implements IJShowViewService {
 		Map<Long, JShowView> data = (Map<Long, JShowView>) base.getAll4Id().getData();
 		JShowView jShowView = data.get(id);
 		if(activityFlag && jShowView != null) {
-			if("1".equals(jShowView.getActiveflag())){
+			if(JLPConts.ActiveFlag.equals(jShowView.getActiveflag())){
 				return jShowView;
 			}else {
 				return null;

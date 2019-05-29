@@ -28,7 +28,7 @@ logging:
     com:
       callan:
          service:
-           provider : debug
+           provider : info
 
 executorService.threedMax : 100
 

@@ -12,6 +12,7 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.dao.mapper.JTableDictMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.NativeCacheable;
@@ -41,7 +42,7 @@ public class JTableDictServiceImpl implements IJTableDictService {
 		Map<Long, JTableDict> map = (Map<Long, JTableDict>) base.getAll4Id().getData();
 		JTableDict jTableDict = map.get(id);
 		if (activeFlag) {
-			if ("1".equals(jTableDict.getActiveflag())) {
+			if (JLPConts.ActiveFlag.equals(jTableDict.getActiveflag())) {
 				return jTableDict;
 			} else {
 				return null;
@@ -81,7 +82,7 @@ public class JTableDictServiceImpl implements IJTableDictService {
 			return null;
 		}
 		if(activeFlag) {
-			if("1".equals(entity.getActiveflag())) {
+			if(JLPConts.ActiveFlag.equals(entity.getActiveflag())) {
 				return entity;
 			}else {
 				return null;
@@ -126,7 +127,7 @@ public class JTableDictServiceImpl implements IJTableDictService {
 			return null;
 		}
 		if(activeFlag) {
-			if("1".equals(entity.getActiveflag())) {
+			if(JLPConts.ActiveFlag.equals(entity.getActiveflag())) {
 				return entity;
 			}else {
 				return null;

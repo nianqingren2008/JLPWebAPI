@@ -58,8 +58,12 @@ public class JUserServiceImpl implements IJUserService {
 	}
 
 	@Override
-	public Long getByToken(String authorization) {
-		
-		return jUserMapper.getByToken(authorization);
+	public Long getUserRoleByToken(String authorization) {
+		return jUserMapper.getUserRoleByToken(authorization);
+	}
+
+	@Override
+	public Long getIdByToken(String authorization) {
+		return jUserMapper.getIdByToken(authorization);
 	}
 }

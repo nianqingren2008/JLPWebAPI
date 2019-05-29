@@ -11,6 +11,7 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.dao.mapper.JSensitiveWordMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.NativeCacheable;
@@ -34,7 +35,7 @@ public class JSensitiveWordServiceImpl implements IJSensitiveWordService {
 		List<JSensitiveWord> all = jSensitiveWordMapper.getAll();
 		List<JSensitiveWord> result = new ArrayList<JSensitiveWord>();
 		for(JSensitiveWord jSensitiveWord : all) {
-			if("1".equals(jSensitiveWord.getActiveflag())){
+			if(JLPConts.ActiveFlag.equals(jSensitiveWord.getActiveflag())){
 					result.add(jSensitiveWord);
 			}
 		}
@@ -50,7 +51,7 @@ public class JSensitiveWordServiceImpl implements IJSensitiveWordService {
 		List<JSensitiveWord> all = jSensitiveWordMapper.getAll();
 		Map<String,JSensitiveWord> map = new HashMap<String,JSensitiveWord>();
 		for(JSensitiveWord jSensitiveWord : all) {
-			if("1".equals(jSensitiveWord.getActiveflag())){
+			if(JLPConts.ActiveFlag.equals(jSensitiveWord.getActiveflag())){
 				map.put(jSensitiveWord.getName(),jSensitiveWord);
 			}
 		}

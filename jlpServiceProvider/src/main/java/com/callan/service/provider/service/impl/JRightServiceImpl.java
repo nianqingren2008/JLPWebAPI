@@ -10,6 +10,7 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.dao.mapper.JRightMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.NativeCacheable;
@@ -50,7 +51,7 @@ public class JRightServiceImpl implements IJRightService {
 		Map<Long, JRight> data = (Map<Long, JRight>) base.getAll4Id().getData();
 		JRight jRight = data.get(id);
 		if(activityFlag && jRight != null) {
-			if("1".equals(jRight.getActiveflag())){
+			if(JLPConts.ActiveFlag.equals(jRight.getActiveflag())){
 				return jRight;
 			}else {
 				return null;
