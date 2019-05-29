@@ -10,7 +10,7 @@ http://192.168.17.46   test1/123456
 
 tj/tjpacs
 
-
+http://192.168.17.165/jlpapi/swagger/ui/index#/
 
 阿里云服务器（windows server 2008）IP地址：    47.94.170.104 
  
