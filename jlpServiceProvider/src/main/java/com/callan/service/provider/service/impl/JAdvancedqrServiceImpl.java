@@ -18,6 +18,21 @@ public class JAdvancedqrServiceImpl implements IJAdvancedqrService {
 	public List<JAdvancedqr> getByUserId(Long userId) {
 		return advancedqrMapper.getByUserId(userId);
 	}
+
+	@Override
+	public JAdvancedqr getOne(Long id) {
+		return advancedqrMapper.getOne(id);
+	}
+
+	@Override
+	public List<JAdvancedqr> getByProjectId(Long projectId) {
+		return advancedqrMapper.getByProjectId(projectId);
+	}
+
+	@Override
+	public void save(JAdvancedqr jAdvancedqr) {
+		advancedqrMapper.save(jAdvancedqr);
+	}
 	
 
 }

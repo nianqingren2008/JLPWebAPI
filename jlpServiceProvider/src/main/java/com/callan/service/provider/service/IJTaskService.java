@@ -1,7 +1,6 @@
 package com.callan.service.provider.service;
 
-import com.callan.service.provider.pojo.db.JUser;
-import com.callan.service.provider.pojo.task.JQueryrecorddetails;
+import com.callan.service.provider.pojo.db.JQueryrecordDetails;
 import com.callan.service.provider.pojo.task.JTask;
 import com.callan.service.provider.pojo.task.JTaskdownload;
 
@@ -10,7 +9,7 @@ public interface IJTaskService {
 	 * 添加 查询记录 详细 信息
 	 * @param queryrecorddetails
 	 */
-	void AddQueryrecorddetails(JQueryrecorddetails queryrecorddetails);
+	void AddQueryrecorddetails(JQueryrecordDetails queryrecorddetails);
 
 	/**
 	 * 添加 任务

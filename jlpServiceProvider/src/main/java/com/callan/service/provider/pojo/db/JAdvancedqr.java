@@ -1,6 +1,7 @@
 package com.callan.service.provider.pojo.db;
 
 import java.util.Date;
+import java.util.List;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -12,32 +13,34 @@ public class JAdvancedqr {
 	/*
 	 * 主键
 	 */
-	public Long id;
+	private Long id;
 	/*
 	 * 用户ID
 	 */
-	public Long userid;
+	private Long userid;
 	/*
 	 * 课题主键
 	 */
-	public Long projectid;
+	private Long projectid;
 	/*
 	 * 名称
 	 */
-	public String aqname;
+	private String aqname;
 	/*
 	 * 排序号
 	 */
-	public Integer sortno;
+	private Integer sortno;
 	/*
 	 * 创建时间
 	 */
 	@JSONField(format="yyyy/MM/dd HH:mm:ss")
-	public Date createdate;
+	private Date createdate;
 	/*
 	 * 启用标志
 	 */
-	public String activeflag;
+	private String activeflag;
+
+	private List<JAdvancedqrItem> itemList;
 
 	public Long getId() {
 		return id;
@@ -95,4 +98,13 @@ public class JAdvancedqr {
 		this.activeflag = activeflag;
 	}
 
+	public List<JAdvancedqrItem> getItemList() {
+		return itemList;
+	}
+
+	public void setItemList(List<JAdvancedqrItem> itemList) {
+		this.itemList = itemList;
+	}
+	
+	
 }

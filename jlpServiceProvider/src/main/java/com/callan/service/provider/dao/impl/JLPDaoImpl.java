@@ -82,4 +82,19 @@ public class JLPDaoImpl   implements IJLPDao {
 		return jdbcTemplate.queryForList(sql, params);
 	}
 
+	@Override
+	public long getNexSeq(String sql) throws Exception {
+		long seq = 0;
+        try {
+            List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
+            if (null != list && !list.isEmpty()) {
+                seq = Long.parseLong(list.get(0).get("NVAL").toString());
+            }
+
+        } catch (Exception e) {
+            throw new Exception("获取序列出错 "+e.getMessage());
+        }
+        return seq;
+	}
+
 }

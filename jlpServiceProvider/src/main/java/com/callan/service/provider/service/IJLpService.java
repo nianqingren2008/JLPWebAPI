@@ -16,4 +16,12 @@ public interface IJLpService {
 	public List<Map<String, Object>> queryForSQLStreaming(String sqlPageData,String sqlAllData, int pageNum, int pageSize);
 	
 	public List<Map<String, Object>> queryForSQL(String sql,Object[] params);
+	
+	/**
+	 * 获取序列下一个值
+	 * @param seqName
+	 * @return
+	 * @throws Exception 
+	 */
+	public long getNextSeq(String seqName);
 }

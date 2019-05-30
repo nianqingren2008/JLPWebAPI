@@ -20,4 +20,6 @@ public interface IJLPDao  {
     
     public List<Map<String, Object>> queryForSQL(String sql, Object[] params) throws Exception;
 
+	public long getNexSeq(String sql) throws Exception;
+
 }

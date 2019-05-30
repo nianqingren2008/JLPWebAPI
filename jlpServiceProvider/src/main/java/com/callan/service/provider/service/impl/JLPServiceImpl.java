@@ -170,4 +170,16 @@ public class JLPServiceImpl implements IJLpService {
 		return pageSql;
 	}
 
+	@Override
+	public long getNextSeq(String seqName)  {
+		JLPLog log = ThreadPoolConfig.getBaseContext();
+		String sql = "select seq_"+seqName+"_id.nextval seq as Id from dual";
+		try {
+			return dao.getNexSeq(sql);
+		} catch (Exception e) {
+			log.error("获取序列出错 " + seqName,e);
+		}
+		return 0;
+	}
+
 }

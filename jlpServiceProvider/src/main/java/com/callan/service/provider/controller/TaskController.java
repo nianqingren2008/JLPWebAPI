@@ -12,13 +12,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.callan.service.provider.pojo.ControllerBaseResponse;
+import com.callan.service.provider.pojo.db.JQueryrecord;
+import com.callan.service.provider.pojo.db.JQueryrecordDetails;
 import com.callan.service.provider.pojo.db.JUser;
-import com.callan.service.provider.pojo.task.JQueryrecord;
-import com.callan.service.provider.pojo.task.JQueryrecorddetails;
 import com.callan.service.provider.pojo.task.JTask;
 import com.callan.service.provider.pojo.task.JTaskProjectModel;
 import com.callan.service.provider.pojo.task.JTaskdownload;
 import com.callan.service.provider.service.IJTaskService;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -58,17 +59,17 @@ public class TaskController {
 			
 			 JQueryrecord queryrecord = new JQueryrecord();
 			 queryrecord.setActiveflag("");  //TOD  从静态变量取值
-			 queryrecord.setCount(0);
+			 queryrecord.setCount(0L);
 			 queryrecord.setCreatedate(new Date());
 			 queryrecord.setQueryname("");
 			 queryrecord.setUserid(user.getId());
 			 queryrecord.setSortno(1);
 			 for(int i=0;i< taskProject.getQueryConds().size();i++)
 			 {
-				 JQueryrecorddetails  queryrecorddetails = new JQueryrecorddetails();
+				 JQueryrecordDetails  queryrecorddetails = new JQueryrecordDetails();
 				 queryrecorddetails.setActiveflag("1");//TOD  从静态变量取值
 				 queryrecorddetails.setCreatedate(new Date());
-				 queryrecorddetails.setId(i+1);
+				 queryrecorddetails.setId(i+1L);
 				 queryrecorddetails.setFieldname(taskProject.getQueryConds().get(i).getCondition());
 				 queryrecorddetails.setFieldvalue(taskProject.getQueryConds().get(i).getCondValue());
 				 queryrecorddetails.setFieldvaluetype(taskProject.getQueryConds().get(i).getFieldType());
