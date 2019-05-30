@@ -2,5 +2,5 @@ spring:
   profiles:
     active: prod
 
-#分页数据存活时间
-sqlData.overTime.timeMinute: 60
+#分页数据存活时间(天数)
+sqlData.overTime.timeDay: 10

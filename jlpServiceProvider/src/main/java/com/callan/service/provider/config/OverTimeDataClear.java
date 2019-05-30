@@ -11,8 +11,6 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Component;
 
 import com.callan.service.provider.pojo.cache.NativeSqlData;
@@ -21,7 +19,7 @@ import com.callan.service.provider.pojo.cache.NativeSqlData;
 public class OverTimeDataClear {
 
 
-	static int timeMinuteInt;
+	static int timeDayInt;
 
 	static {
 		String timeMinuteStr = null;
@@ -29,11 +27,11 @@ public class OverTimeDataClear {
 			InputStream is = OverTimeDataClear.class.getResourceAsStream("/application.yml");
 			Properties props = new Properties();
 			props.load(is);
-			timeMinuteStr = props.getProperty("sqlData.overTime.timeMinute");
-			timeMinuteInt = Integer.parseInt(timeMinuteStr == null ? "60" : timeMinuteStr);
+			timeMinuteStr = props.getProperty("sqlData.overTime.timeDay");
+			timeDayInt = Integer.parseInt(timeMinuteStr == null ? "10" : timeMinuteStr);
 		} catch (IOException e) {
 			e.printStackTrace();
-			timeMinuteInt = 60;
+			timeDayInt = 10;
 		}
 		
 	}
@@ -57,10 +55,10 @@ public class OverTimeDataClear {
 						Date lastActiveTime = (Date) map.get("lastActiveTime");
 						Calendar cal = Calendar.getInstance();
 						cal.setTime(new Date());
-						cal.add(Calendar.MINUTE, -timeMinuteInt);
+						cal.add(Calendar.DAY_OF_YEAR, -timeDayInt);
 						if (lastActiveTime.before(cal.getTime())) {
 							log.info("key : " + key + " ,lastActiveTime : " + lastActiveTime + " has idel more than "
-									+ timeMinuteInt + " minute, it will be clear...");
+									+ timeDayInt + " minute, it will be clear...");
 							allDataMap.remove(key);
 						}
 					}
@@ -68,6 +66,6 @@ public class OverTimeDataClear {
 					log.error(e);
 				}
 			}
-		}), timeMinuteInt, timeMinuteInt, TimeUnit.MINUTES);
+		}), timeDayInt, timeDayInt, TimeUnit.MINUTES);
 	}
 }
