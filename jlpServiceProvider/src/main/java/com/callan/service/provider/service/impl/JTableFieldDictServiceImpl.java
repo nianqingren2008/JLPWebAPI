@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.callan.service.provider.config.JLPConts;
+import com.callan.service.provider.config.JLPLog;
+import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.dao.mapper.JTableFiledDictMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.NativeCacheable;
@@ -26,7 +28,6 @@ import com.callan.service.provider.service.IJTableFieldDictService;
 @Service
 public class JTableFieldDictServiceImpl implements IJTableFieldDictService {
 	
-	Log logger = LogFactory.getLog(JTableFieldDictServiceImpl.class);
 	
 	@Autowired
 	private JTableFiledDictMapper jTableFiledDictMapper;
@@ -41,11 +42,12 @@ public class JTableFieldDictServiceImpl implements IJTableFieldDictService {
 
 	@Override
 	public JTableFieldDict getOne(Long id, boolean showFlag) {
+		JLPLog log = ThreadPoolConfig.getBaseContext();
 		IJTableFieldDictService base = (IJTableFieldDictService) AopContext.currentProxy();
 		Map<Long, JTableFieldDict> data = (Map<Long, JTableFieldDict>) base.getAll4Id().getData();
 		JTableFieldDict entity = data.get(id);
 		if(entity == null) {
-			logger.error("没有查到对象，id: " + id);
+			log.error("没有查到对象，id: " + id);
 			return null;
 		}
 		

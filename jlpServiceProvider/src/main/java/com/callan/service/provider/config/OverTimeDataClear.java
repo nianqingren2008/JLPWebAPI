@@ -20,7 +20,6 @@ import com.callan.service.provider.pojo.cache.NativeSqlData;
 @Component
 public class OverTimeDataClear {
 
-	Log logger = LogFactory.getLog(OverTimeDataClear.class);
 
 	static int timeMinuteInt;
 
@@ -41,6 +40,7 @@ public class OverTimeDataClear {
 
 	@PostConstruct
 	public void start() {
+		JLPLog log = ThreadPoolConfig.getBaseContext();
 		(Executors.newScheduledThreadPool(1)).scheduleAtFixedRate(new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -59,13 +59,13 @@ public class OverTimeDataClear {
 						cal.setTime(new Date());
 						cal.add(Calendar.MINUTE, -timeMinuteInt);
 						if (lastActiveTime.before(cal.getTime())) {
-							logger.info("key : " + key + " ,lastActiveTime : " + lastActiveTime + " has idel more than "
+							log.info("key : " + key + " ,lastActiveTime : " + lastActiveTime + " has idel more than "
 									+ timeMinuteInt + " minute, it will be clear...");
 							allDataMap.remove(key);
 						}
 					}
 				}catch(Exception e) {
-					logger.error(e);
+					log.error(e);
 				}
 			}
 		}), timeMinuteInt, timeMinuteInt, TimeUnit.MINUTES);

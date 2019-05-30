@@ -30,11 +30,11 @@ public class NativeCacheLoader implements InitializingBean{
 	@Autowired IJUserService userService;
 	@Autowired IJRoleRightService roleRightService;
 	
-	Log logger = LogFactory.getLog(NativeCacheLoader.class);
 	
 	@Override
 	public void afterPropertiesSet() {
-		logger.info("-----开始初始化内存数据-----");
+		JLPLog log = ThreadPoolConfig.getBaseContext();
+		log.info("-----开始初始化内存数据-----");
 		try {
 			executorService.execute(new Runnable() {
 				@Override
@@ -65,9 +65,9 @@ public class NativeCacheLoader implements InitializingBean{
 			});
 			
 		}catch(Throwable t) {
-			logger.error("初始化内存数据出错",t);
+			log.error("初始化内存数据出错",t);
 		}
-		logger.info("-----内存数据初始化完毕------");
+		log.info("-----内存数据初始化完毕------");
 	}
 
 }

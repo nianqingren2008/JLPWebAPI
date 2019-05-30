@@ -10,13 +10,11 @@ import java.util.Set;
 //import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
 import com.callan.service.provider.config.JLPConts;
+import com.callan.service.provider.config.JLPLog;
+import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.AdvanceQueryRequest;
 import com.callan.service.provider.pojo.AdvanceQueryResponse;
 import com.callan.service.provider.pojo.advanceQueryBase.ColunmsModel;
@@ -40,7 +40,6 @@ import com.callan.service.provider.pojo.db.JShowDetailView;
 import com.callan.service.provider.pojo.db.JShowView;
 import com.callan.service.provider.pojo.db.JTableDict;
 import com.callan.service.provider.pojo.db.JTableFieldDict;
-import com.callan.service.provider.pojo.db.JUser;
 import com.callan.service.provider.service.IJLpService;
 import com.callan.service.provider.service.IJRoleRightService;
 import com.callan.service.provider.service.IJSensitiveWordService;
@@ -56,7 +55,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @Api(description = "病例检索查询")
 public class AdvancedQueryController {
-	Log log = LogFactory.getLog(AdvancedQueryController.class);
+	
 
 	@Autowired
 	private IJShowViewService jShowviewService;
@@ -90,8 +89,8 @@ public class AdvancedQueryController {
 	@ApiOperation(value = "病例检索", notes = "病例检索模糊查询")
 	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST })
 	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpServletRequest request) {
+		JLPLog log = ThreadPoolConfig.getBaseContext();
 		long start = System.currentTimeMillis();
-		log.info("");
 		log.info("request --> " + advanceQuery);
 		AdvanceQueryRequest advanceQueryRequest = null;
 		try {
@@ -261,8 +260,10 @@ public class AdvancedQueryController {
 		// 增加隐藏主键
 		fieldNames.add(new FieldName(JLPConts.PatientGlobalTable + ".Id as hide_key"));
 		SortedSet<String> fieldShowNames = new TreeSet<String>();
+		SortedSet<String> showTableNames = new TreeSet<String>();
 		for (JShowDetailView JShowDetailView : jShowDetailViewListShow) {
 			tableNames.add(JShowDetailView.getjTableDict().getName());
+			showTableNames.add(JShowDetailView.getjTableDict().getName());
 			fieldNames.add(new FieldName(
 					(JShowDetailView.getjTableDict().getName() + "." + JShowDetailView.getjTableFieldDict().getName())
 							.toLowerCase()));
@@ -345,7 +346,7 @@ public class AdvancedQueryController {
 			patientTableWhere += " and "+JLPConts.PatientGlobalTable+".Id = "
 				+ advanceQueryRequest.getPatientGlobalId();
 		}
-		String tempSqlWhere = " where 1=1 ";
+		String tempSqlWhere = " where 1=1 and " + JLPConts.PatientGlobalTable+".jlactiveflag='1' ";;
 		if (sqlWhereMain.length() > 0) {
 			tempSqlWhere += " and  " + sqlWhereMain;
 		}
@@ -356,10 +357,12 @@ public class AdvancedQueryController {
 		String finalSelectFields = fieldNames.toString().substring(1, fieldNames.toString().length() - 1);
 		String finalTables4Count = toTableString(tableNames, tempSql,tableWhere);
 		String finalTables4PageData = toTableString(tableNames, tempSql,pageNumInt,pageSizeInt,patientTableWhere,tableWhere);
-		String tableKeys = toTableKeys(tableNames);
+		
+		String tableKeys = toTableKeys(showTableNames);
 		
 		
-		String sql = "select " + tableKeys + " from " + finalTables4Count + " " + tempSqlWhere;
+		
+		String sql = "select distinct " + tableKeys + " from " + finalTables4Count + " " + tempSqlWhere;
 		String sqlCount = " select count(1) count from (" + sql + ") countsql";
 //		log.info("sql : " + sql);
 		log.info("sqlCount : " + sqlCount);
@@ -419,7 +422,7 @@ public class AdvancedQueryController {
 		log.info("response --> " + response.toJsonString());
 		long end = System.currentTimeMillis();
 		log.info("serviceTime " + (end - start) + "ms");
-		log.info(" ");
+		//清理上下文
 		return response.toJsonString();
 	}
 
@@ -528,7 +531,7 @@ public class AdvancedQueryController {
 			String patientTable = JLPConts.PatientGlobalTable.toLowerCase();
 			ret = "( select * from (select * from " + patientTable + " " + patientTableWhere
 					+ " order by "+JLPConts.PatientGlobalTable+".Id ) "
-					+ " where rownum<" + pageNum * pageSize 
+					+ " where rownum<" + pageNum * pageSize * 10
 					+ ") d_patientglobal";
 
 			if (StringUtils.isNotBlank(advancedQueryWhere)) {

@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.callan.service.provider.config.JLPConts;
+import com.callan.service.provider.config.JLPLog;
+import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.dao.mapper.JTableDictMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.NativeCacheable;
@@ -24,7 +26,6 @@ import com.callan.service.provider.service.IJTableDictService;
 
 @Service
 public class JTableDictServiceImpl implements IJTableDictService {
-	Log logger = LogFactory.getLog(JTableDictServiceImpl.class);
 	
 	@Autowired
 	private JTableDictMapper jTableDictMapper;
@@ -74,11 +75,12 @@ public class JTableDictServiceImpl implements IJTableDictService {
 
 	@Override
 	public JTableDict getByName(String tableName, boolean activeFlag) {
+		JLPLog log = ThreadPoolConfig.getBaseContext();
 		IJTableDictService base = (IJTableDictService) AopContext.currentProxy();
 		Map<Long, JTableDict> map = (Map<Long, JTableDict>) base.getAll4Name().getData();
 		JTableDict entity = map.get(tableName);
 		if(entity == null) {
-			logger.error("没有查到对象，name: " + tableName);
+			log.error("没有查到对象，name: " + tableName);
 			return null;
 		}
 		if(activeFlag) {
@@ -117,13 +119,15 @@ public class JTableDictServiceImpl implements IJTableDictService {
 		return map.get(tableCode);
 	}
 
+	@SuppressWarnings({ "unchecked", "unlikely-arg-type" })
 	@Override
 	public JTableDict getByCode(String tableCode, boolean activeFlag) {
+		JLPLog log = ThreadPoolConfig.getBaseContext();
 		IJTableDictService base = (IJTableDictService) AopContext.currentProxy();
 		Map<Long, JTableDict> map = (Map<Long, JTableDict>) base.getAll4Code().getData();
 		JTableDict entity = map.get(tableCode);
 		if(entity == null) {
-			logger.error("没有查到对象，code: " + tableCode);
+			log.error("没有查到对象，code: " + tableCode);
 			return null;
 		}
 		if(activeFlag) {

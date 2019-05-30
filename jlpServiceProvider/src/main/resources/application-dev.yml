@@ -21,14 +21,7 @@ feign:
 mybatis:
   mapper-locations: classpath:mapping/*Mapper.xml
   type-aliases-package: com.callan.service.provider
- 
-#showSql
-logging:
-  level:
-    com:
-      callan:
-         service:
-           provider : debug
+
 
 executorService.threedMax : 100
 

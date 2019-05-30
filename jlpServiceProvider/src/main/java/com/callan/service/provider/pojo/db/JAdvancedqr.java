@@ -2,6 +2,8 @@ package com.callan.service.provider.pojo.db;
 
 import java.util.Date;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 /**
  * 纳排查询记录表
  *
@@ -30,6 +32,7 @@ public class JAdvancedqr {
 	/*
 	 * 创建时间
 	 */
+	@JSONField(format="yyyy/MM/dd HH:mm:ss")
 	public Date createdate;
 	/*
 	 * 启用标志

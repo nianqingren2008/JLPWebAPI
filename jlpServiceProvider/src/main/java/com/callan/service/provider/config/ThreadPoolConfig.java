@@ -11,6 +11,25 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ThreadPoolConfig {
 	
+	private static final ThreadLocal<JLPLog> context = new ThreadLocal<JLPLog>();
+	
+    public static void setBaseContext(JLPLog log) {
+    	context.set(log);
+    }
+    
+    public static JLPLog getBaseContext() {
+    	JLPLog log = context.get();
+    	if(log == null) {
+    		log = JLPLog.getInstance("jlp", "");
+    	}
+        return log;
+    }
+
+    public static void clearBaseContext() {
+    	context.remove();
+    }
+    
+    
 	@Value("${executorService.threedMax}")
 	private String threedMax;
 	

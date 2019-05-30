@@ -9,24 +9,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
+import com.callan.service.provider.config.JLPLog;
+import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.dao.IJLPDao;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
 @Repository
 public class JLPDaoImpl   implements IJLPDao {
-	Log logger = LogFactory.getLog(JLPDaoImpl.class);
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Override
     public List<Map<String, Object>> queryForSQLStreaming(String sql,int pageNum, int pageSize) throws Exception {
+    	JLPLog log = ThreadPoolConfig.getBaseContext();
         Connection conn = null;
         PreparedStatement pst = null;
         List dataList = new ArrayList<>();
@@ -43,11 +43,10 @@ public class JLPDaoImpl   implements IJLPDao {
 //            }
             ResultSet rs = pst.executeQuery();// 一般的数据读取
             long end = System.currentTimeMillis();
-            logger.info("dao ---11111---  " + (end-start));
+            log.info("---excuteQuery --fetchSize : 50 ------耗时  ---  " + (end-start));
             ResultSetMetaData rsmd = rs.getMetaData();
             int count = rsmd.getColumnCount();
             int index = 0;
-            start = System.currentTimeMillis();
             while (rs.next()) {
             	index++;
             	if(index >= pageNum * pageSize) {
@@ -63,8 +62,6 @@ public class JLPDaoImpl   implements IJLPDao {
                      }
             	}
             }
-            end = System.currentTimeMillis();
-            logger.info("dao -----22222-  " + (end-start));
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e.getMessage());

@@ -7,21 +7,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.callan.service.provider.config.JLPLog;
+import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.dao.IJLPDao;
-import com.callan.service.provider.pojo.cache.CacheKey;
 import com.callan.service.provider.pojo.cache.NativeSqlData;
-import com.callan.service.provider.pojo.cache.SerializeUtil;
 import com.callan.service.provider.pojo.cache.Sha1Util;
 import com.callan.service.provider.service.IJLpService;
 
 @Service
 public class JLPServiceImpl implements IJLpService {
-	Log log = LogFactory.getLog(JLPServiceImpl.class);
 
 	@Autowired
 	private IJLPDao dao;
@@ -29,10 +26,10 @@ public class JLPServiceImpl implements IJLpService {
 	@Autowired
 	private ExecutorService executorService;
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<Map<String, Object>> queryForSQLStreaming(String sqlPageData,String sqlAllData, int pageNum,
 			int pageSize) {
+		JLPLog log = ThreadPoolConfig.getBaseContext();
 		try {
 //			String key = sqlAllData;
 //			String serialKey = Sha1Util.getEncrypteWord(key);
@@ -103,8 +100,10 @@ public class JLPServiceImpl implements IJLpService {
 		return new ArrayList<Map<String, Object>>();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Map<String, Object>> queryForSQL(String sql, Object[] params) {
+		JLPLog log = ThreadPoolConfig.getBaseContext();
 		try {
 			String key = sql;
 			String serialKey = Sha1Util.getEncrypteWord(key);
@@ -151,7 +150,7 @@ public class JLPServiceImpl implements IJLpService {
 				long start = System.currentTimeMillis();
 				List<Map<String, Object>> pageData = dao.queryForSQL(sql, new Object[] {});
 				long end = System.currentTimeMillis();
-				log.info("sql for count--" + (end - start));
+				log.info("sql for count--" + (end - start) + "ms");
 
 				return pageData;
 
@@ -163,6 +162,7 @@ public class JLPServiceImpl implements IJLpService {
 		return new ArrayList<Map<String, Object>>();
 	}
 
+	@SuppressWarnings("unused")
 	private String getPageSql(String sql, int pageNum, int pageSize) {
 		String pageSql = "SELECT *" + "  FROM (SELECT tt.*, ROWNUM AS rowno" + "          FROM (  " + sql + ") tt"
 				+ "         WHERE ROWNUM <= " + pageNum * pageSize + ") table_alias" + " WHERE table_alias.rowno > "

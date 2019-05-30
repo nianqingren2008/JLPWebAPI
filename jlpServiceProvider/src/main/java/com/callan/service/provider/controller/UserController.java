@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.callan.service.provider.config.JLPLog;
+import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.AdvanceQueryResponse;
 import com.callan.service.provider.pojo.ControllerBaseResponse;
 import com.callan.service.provider.pojo.db.JUser;
@@ -22,7 +24,6 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @Api(description = "用户管理")
 public class UserController {
-	Log log = LogFactory.getLog(UserController.class);
 	
 	@Autowired
 	private IJUserService jUserService;
@@ -84,6 +85,7 @@ public class UserController {
 	@ApiOperation(value = "更改用户密码")
 	@RequestMapping(value = "/api/changepwd", method = { RequestMethod.POST })
     public String ChangePwd(UserChangePwd userChangePwd, HttpSession session) {
+		JLPLog log = ThreadPoolConfig.getBaseContext();
 		JUser user = (JUser) session.getAttribute("user");
 		ControllerBaseResponse response = new ControllerBaseResponse();
 		if(user.getLoginpwd() != userChangePwd.getUserPwd()) {

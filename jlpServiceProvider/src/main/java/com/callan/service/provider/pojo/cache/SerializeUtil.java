@@ -13,7 +13,6 @@ import com.caucho.hessian.io.HessianInput;
 import com.caucho.hessian.io.HessianOutput;
 
 public class SerializeUtil {
-	private static Log logger = LogFactory.getLog(SerializeUtil.class);
 	
     /**
      * 序列化
@@ -94,26 +93,19 @@ public class SerializeUtil {
     public static String getValueByType(Object argObj) {
 		String value = null;
 		if(argObj instanceof String) {
-			logger.debug("对象类型为String");
 			value = argObj.toString();
         } else if(argObj instanceof Integer || argObj instanceof Long || argObj instanceof Short) {
-        	logger.debug("对象类型为Integer");
         	value = argObj.toString();
         } else if(argObj instanceof Boolean) {
-        	logger.debug("对象类型为Boolean");
         	value = argObj.toString();
         } else if(argObj instanceof Date) {
-        	logger.debug("对象类型为Date");
         	value = argObj.toString();
         } else if(argObj instanceof Double) {
-        	logger.debug("对象类型为Double");
         	value = argObj.toString();
         } else if(argObj instanceof Float) {
-        	logger.debug("对象类型为Float");
         	value = argObj.toString();
         }else{
         	String objSerial = SerializeUtil.hessianSerialize(argObj);
-        	logger.debug("获取对象序列化值:" + objSerial);
         	value = objSerial;
         }
 		//预防StringBuffer添加null
