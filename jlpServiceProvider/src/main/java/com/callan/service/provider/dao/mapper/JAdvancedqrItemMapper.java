@@ -44,6 +44,6 @@ public interface JAdvancedqrItemMapper {
     		+ ", QUERYID, RIGHTQUETO, SETCOMBINATORTYPE"
     		+ ", MODELTYPE, CREATEDATE, ACTIVEFLAG) " + 
     		"values ( #{ID}, #{QRID}, #{ITEMTYPE}, #{ITEMNO}, #{LEFTQUETO}, #{MODELID }, #{QUERYID}"
-    		+ ", #{RIGHTQUETO},#{SETCOMBINATORTYPE, #{MODELTYPE}, #{CREATEDATE}, #{ACTIVEFLAG})")
+    		+ ", #{RIGHTQUETO},#{SETCOMBINATORTYPE}, #{MODELTYPE}, #{CREATEDATE}, #{ACTIVEFLAG})")
 	public void save(JAdvancedqrItem item);
 }

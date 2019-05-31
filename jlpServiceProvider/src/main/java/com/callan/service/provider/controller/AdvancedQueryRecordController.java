@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
 import com.callan.service.provider.config.JLPConts;
+import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ObjectUtil;
+import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.advanceQueryBase.AdvancedQueryRecordModel;
 import com.callan.service.provider.pojo.advanceQueryBase.Queries;
 import com.callan.service.provider.pojo.advanceQueryBase.QueryConds;
@@ -67,7 +69,7 @@ public class AdvancedQueryRecordController {
 	@ApiOperation(value = "", notes = "获取纳排条件列表")
 	@RequestMapping(value = "/api/AdvancedQueryRecord", method = { RequestMethod.GET })
 	public String getRecords(HttpServletRequest request) {
-//		JLPLog log = ThreadPoolConfig.getBaseContext();
+		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 从前台header中获取token参数
 		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
@@ -79,6 +81,7 @@ public class AdvancedQueryRecordController {
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
+		log.info("userId : " + userId);
 		List<JAdvancedqr> list = advancedqrService.getByUserId(userId);
 
 		Collections.sort(list, new Comparator<JAdvancedqr>() {
@@ -98,8 +101,11 @@ public class AdvancedQueryRecordController {
 		}
 
 		resultMap.put("response", new BaseResponse());
+		
 		resultMap.put("queryRecords", resultList);
-		return JSONObject.toJSONString(resultMap);
+		String json = JSONObject.toJSONString(resultMap);
+		log.info("response : " + json);
+		return json;
 	}
 
 	@ApiOperation(value = "", notes = "获取纳排详细条件")
@@ -241,8 +247,8 @@ public class AdvancedQueryRecordController {
 	 * @return
 	 */
 	@ApiOperation(value = "", notes = "添加纳排记录")
-	@RequestMapping(value = "/api/AdvancedQueryRecord/add", method = { RequestMethod.GET })
-	public String Post(@RequestBody AdvancedQueryRecordModel advancedQueryRecord, HttpServletRequest request) {
+	@RequestMapping(value = "/api/AdvancedQueryRecord/add", method = { RequestMethod.POST })
+	public String addRecord(@RequestBody AdvancedQueryRecordModel advancedQueryRecord, HttpServletRequest request) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 判断传入条件是否为空
 		if (advancedQueryRecord == null) {
