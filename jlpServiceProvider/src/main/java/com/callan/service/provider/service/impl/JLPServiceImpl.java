@@ -173,7 +173,7 @@ public class JLPServiceImpl implements IJLpService {
 	@Override
 	public long getNextSeq(String seqName)  {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
-		String sql = "select seq_"+seqName+"_id.nextval seq as Id from dual";
+		String sql = "select seq_"+seqName+"_id.nextval seq from dual";
 		try {
 			return dao.getNexSeq(sql);
 		} catch (Exception e) {

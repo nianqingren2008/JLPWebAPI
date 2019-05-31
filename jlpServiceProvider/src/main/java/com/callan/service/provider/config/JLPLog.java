@@ -63,7 +63,7 @@ public class JLPLog extends Logger {
 		try {
 			String confFilePath = getLocalPath();
 			logFullPath = getLogFullPath(serviceName, confFilePath);
-			System.out.println("-------------logFullPath-----------"+logFullPath);
+//			System.out.println("-------------logFullPath-----------"+logFullPath);
 			appender = new DailyRollingFileAppender(layout, logFullPath, "yyyy-MM-dd");
 			appender.setName("jlpLogAppender");
 		} catch (Exception e) {
@@ -84,6 +84,9 @@ public class JLPLog extends Logger {
 			logName = "jlp.log";
 		} else {
 			logName = serviceName + ".log";
+		}
+		if(confFilePath.contains("target")) {
+			confFilePath = confFilePath + "../../";
 		}
 		logFullPath = confFilePath + "/jlpLogs/" + (serviceName == null ? "" : serviceName) + "/" + logName;
 		

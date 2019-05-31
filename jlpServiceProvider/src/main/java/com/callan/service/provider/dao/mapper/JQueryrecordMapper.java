@@ -48,6 +48,6 @@ public interface JQueryrecordMapper {
 
 
     @Insert("insert into J_QUERYRECORD (ID, USERID, QUERYNAME, UPDATEDATE, CREATEDATE, ACTIVEFLAG, SORTNO, COUNT)"
-    		+ " values (#{ID}, #{USERID}, #{QUERYNAME}, #{UPDATEDATE}, #{CREATEDATE}, #{ACTIVEFLAG}, #{SORTNO}, #{COUNT})")
+    		+ " values (#{id}, #{userid}, #{queryname}, #{updatedate}, #{createdate}, #{activeflag}, #{sortno}, #{count})")
 	public void save(JQueryrecord queryrecord);
 }

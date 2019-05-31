@@ -86,7 +86,7 @@ public class AdvancedQueryController {
 
 //	@CrossOrigin(origins = "*",maxAge = 3600)  //跨域
 	@SuppressWarnings("unchecked")
-	@ApiOperation(value = "病例检索", notes = "病例检索模糊查询")
+	@ApiOperation(value = "病例检索模糊查询")
 	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST })
 	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpServletRequest request) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();

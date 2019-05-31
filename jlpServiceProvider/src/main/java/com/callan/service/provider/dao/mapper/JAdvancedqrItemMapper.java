@@ -43,7 +43,7 @@ public interface JAdvancedqrItemMapper {
     @Insert("insert into J_ADVANCEDQRITEM (ID, QRID, ITEMTYPE, ITEMNO, LEFTQUETO, MODELID"
     		+ ", QUERYID, RIGHTQUETO, SETCOMBINATORTYPE"
     		+ ", MODELTYPE, CREATEDATE, ACTIVEFLAG) " + 
-    		"values ( #{ID}, #{QRID}, #{ITEMTYPE}, #{ITEMNO}, #{LEFTQUETO}, #{MODELID }, #{QUERYID}"
-    		+ ", #{RIGHTQUETO},#{SETCOMBINATORTYPE}, #{MODELTYPE}, #{CREATEDATE}, #{ACTIVEFLAG})")
+    		"values ( #{id}, #{qrid}, #{itemtype}, #{itemno}, #{leftqueto}, #{modelid }, #{queryid}"
+    		+ ", #{rightqueto},#{setcombinatortype}, #{modeltype}, #{createdate}, #{activeflag})")
 	public void save(JAdvancedqrItem item);
 }

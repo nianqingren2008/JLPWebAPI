@@ -23,6 +23,7 @@ import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ObjectUtil;
 import com.callan.service.provider.config.ThreadPoolConfig;
+import com.callan.service.provider.pojo.AdvanceQueryRequest;
 import com.callan.service.provider.pojo.advanceQueryBase.AdvancedQueryRecordModel;
 import com.callan.service.provider.pojo.advanceQueryBase.Queries;
 import com.callan.service.provider.pojo.advanceQueryBase.QueryConds;
@@ -41,12 +42,14 @@ import com.callan.service.provider.service.IJQueryrecordDetailService;
 import com.callan.service.provider.service.IJQueryrecordService;
 import com.callan.service.provider.service.IJUserService;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
+@Api(description = "纳排记录查询")
 public class AdvancedQueryRecordController {
 	@Autowired
-	private IJUserService jUserService;
+	private IJUserService userService;
 
 	@Autowired
 	private IJAdvancedqrService advancedqrService;
@@ -66,14 +69,15 @@ public class AdvancedQueryRecordController {
 	@Autowired
 	private IJQueryrecordDetailService queryrecordDetailService;
 
-	@ApiOperation(value = "", notes = "获取纳排条件列表")
-	@RequestMapping(value = "/api/AdvancedQueryRecord", method = { RequestMethod.GET })
+	@ApiOperation(value = "获取纳排条件列表")
+	@RequestMapping(value = "/api/AdvancedQueryRecord/list", method = { RequestMethod.GET })
 	public String getRecords(HttpServletRequest request) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-		Long userId = jUserService.getIdByToken(authorization);
+		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+				: request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
 		if (userId == null || userId == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			baseResponse.setCode("0000");
@@ -101,26 +105,30 @@ public class AdvancedQueryRecordController {
 		}
 
 		resultMap.put("response", new BaseResponse());
-		
+
 		resultMap.put("queryRecords", resultList);
 		String json = JSONObject.toJSONString(resultMap);
 		log.info("response : " + json);
 		return json;
 	}
 
-	@ApiOperation(value = "", notes = "获取纳排详细条件")
-	@RequestMapping(value = "/api/AdvancedQueryRecord/detail", method = { RequestMethod.POST })
+	@ApiOperation(value = "获取纳排详细条件")
+	@RequestMapping(value = "/api/AdvancedQueryRecord/detail", method = { RequestMethod.GET })
 	public String getRecordDetail(HttpServletRequest request, @RequestParam Long id) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-		Long userId = jUserService.getIdByToken(authorization);
-		if(userId == null || userId == 0) {
+		JLPLog log = ThreadPoolConfig.getBaseContext();
+		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+				: request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
+		if (userId == null || userId == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			baseResponse.setCode("0000");
 			baseResponse.setText("用户信息获取失败，请检查请求头");
-			resultMap.put("response", baseResponse );
-			return JSONObject.toJSONString(resultMap);
+			resultMap.put("response", baseResponse);
+			String json = JSONObject.toJSONString(resultMap);
+			log.info("response : " + json);
+			return json;
 		}
 		JAdvancedqr advancedqr = advancedqrService.getOne(id);
 
@@ -129,7 +137,9 @@ public class AdvancedQueryRecordController {
 			baseResponse.setCode("0000");
 			baseResponse.setText("不存在此纳排记录");
 			resultMap.put("response", baseResponse);
-			return JSONObject.toJSONString(resultMap);
+			String json = JSONObject.toJSONString(resultMap);
+			log.info("response : " + json);
+			return json;
 		}
 		List<JQueryrecordDetails> condsDetailList = new ArrayList<JQueryrecordDetails>();
 		List<JAdvancedqrItem> includeDetailList = new ArrayList<JAdvancedqrItem>();
@@ -238,7 +248,9 @@ public class AdvancedQueryRecordController {
 		BaseResponse baseResponse = new BaseResponse();
 		resultMap.put("response", baseResponse);
 		resultMap.put("queryRecord", advancedQueryRecord);
-		return JSONObject.toJSONString(resultMap);
+		String json = JSONObject.toJSONString(resultMap);
+		log.info("response : " + json);
+		return json;
 	}
 
 	/**
@@ -246,46 +258,62 @@ public class AdvancedQueryRecordController {
 	 * 
 	 * @return
 	 */
-	@ApiOperation(value = "", notes = "添加纳排记录")
+	@ApiOperation(value = "添加纳排记录")
 	@RequestMapping(value = "/api/AdvancedQueryRecord/add", method = { RequestMethod.POST })
-	public String addRecord(@RequestBody AdvancedQueryRecordModel advancedQueryRecord, HttpServletRequest request) {
+	public String addRecord(@RequestBody String advancedQueryRecord, HttpServletRequest request) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
+		JLPLog log = ThreadPoolConfig.getBaseContext();
+		log.info("request --> " + advancedQueryRecord);
+		AdvancedQueryRecordModel advancedQueryRecordModel = null;
+		try {
+			advancedQueryRecordModel = JSONObject.toJavaObject(JSONObject.parseObject(advancedQueryRecord),
+					AdvancedQueryRecordModel.class);
+		} catch (Exception e) {
+			log.error(e);
+		}
+
 		// 判断传入条件是否为空
-		if (advancedQueryRecord == null) {
+		if (advancedQueryRecordModel == null) {
 			BaseResponse baseResponse = new BaseResponse();
 			baseResponse.setCode("0000");
 			baseResponse.setText("无有效的条件");
 			resultMap.put("response", baseResponse);
-			return JSONObject.toJSONString(resultMap);
-
+			String json = JSONObject.toJSONString(resultMap);
+			log.info("response --> " + json);
+			return json;
 		}
 
 		// 纳排记录主表信息
 		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-		Long userId = jUserService.getIdByToken(authorization);
+		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+				: request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
 		if (userId == null || userId == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			baseResponse.setCode("0000");
 			baseResponse.setText("用户信息获取失败，请检查请求头");
 			resultMap.put("response", baseResponse);
-			return JSONObject.toJSONString(resultMap);
+			String json = JSONObject.toJSONString(resultMap);
+			log.info("response --> " + json);
+			return json;
 		}
-		JAdvancedqr jAdvancedqr = advancedqrService.getOne(advancedQueryRecord.getId());
+		JAdvancedqr jAdvancedqr = advancedqrService.getOne(advancedQueryRecordModel.getId());
 
 		boolean IsNew = false;
 		if (jAdvancedqr == null || jAdvancedqr.getUserid() != userId) {
-			if (advancedQueryRecord.getId() != 0) {
+			if (advancedQueryRecordModel.getId() != 0) {
 				BaseResponse baseResponse = new BaseResponse();
 				baseResponse.setCode("0000");
 				baseResponse.setText("无有效的条件");
 				resultMap.put("response", baseResponse);
-				return JSONObject.toJSONString(resultMap);
+				String json = JSONObject.toJSONString(resultMap);
+				log.info("response --> " + json);
+				return json;
 			} else {
 				jAdvancedqr = new JAdvancedqr();
 				IsNew = true;
 			}
-		} 
+		}
 //		else {
 //			List<JAdvancedqrItem> itemList = jAdvancedqr.getItemList();
 //			for (JAdvancedqrItem item : itemList) {
@@ -295,15 +323,15 @@ public class AdvancedQueryRecordController {
 //		}
 
 		jAdvancedqr.setSortno(1);
-		jAdvancedqr.setAqname(advancedQueryRecord.getName());
-		if (advancedQueryRecord.getProjectId() > 0
-				&& projectService.getOne(advancedQueryRecord.getProjectId()) == null) {
-			List<JAdvancedqr> projectList = advancedqrService.getByProjectId(advancedQueryRecord.getProjectId());
+		jAdvancedqr.setAqname(advancedQueryRecordModel.getName());
+		if (advancedQueryRecordModel.getProjectId() > 0
+				&& projectService.getOne(advancedQueryRecordModel.getProjectId()) != null) {
+//			List<JAdvancedqr> projectList = advancedqrService.getByProjectId(advancedQueryRecordModel.getProjectId());
 
-			for (JAdvancedqr advancedqr : projectList) {
-				advancedqr.setProjectid(0L);
-			}
-			jAdvancedqr.setProjectid(advancedQueryRecord.getProjectId());
+//			for (JAdvancedqr advancedqr : projectList) {
+//				advancedqr.setProjectid(0L);
+//			}
+			jAdvancedqr.setProjectid(advancedQueryRecordModel.getProjectId());
 		}
 
 		jAdvancedqr.setCreatedate(new Date());
@@ -313,6 +341,9 @@ public class AdvancedQueryRecordController {
 			jAdvancedqr.setUserid(userId);
 			long seqId = jlpService.getNextSeq("J_ADVANCEDQR");
 			jAdvancedqr.setId(seqId);
+			if (jAdvancedqr.getProjectid() == null) {
+				jAdvancedqr.setProjectid(0L);
+			}
 			advancedqrService.save(jAdvancedqr);
 		} else {
 //             orclJlpContext.Entry(jAdvancedqr).State = System.Data.Entity.EntityState.Modified;
@@ -322,8 +353,8 @@ public class AdvancedQueryRecordController {
 		int itemNo = 0;
 
 //        #region 普通查询条件
-		if (advancedQueryRecord.getQueries().getQueryConds() != null
-				&& advancedQueryRecord.getQueries().getQueryConds().size() > 0) {
+		if (advancedQueryRecordModel.getQueries().getQueryConds() != null
+				&& advancedQueryRecordModel.getQueries().getQueryConds().size() > 0) {
 			JAdvancedqrItem advancedqrItem = new JAdvancedqrItem();
 			advancedqrItem.setActiveflag(JLPConts.ActiveFlag);
 			advancedqrItem.setCreatedate(new Date());
@@ -345,8 +376,12 @@ public class AdvancedQueryRecordController {
 			long queryId = jlpService.getNextSeq("J_QUERYRECORD");
 			queryrecord.setId(queryId);
 			advancedqrItem.setQueryid(queryId);
+			long queryItemId = jlpService.getNextSeq("J_ADVANCEDQRITEM");
+			advancedqrItem.setId(queryItemId);
+			queryrecord.setQueryname("");
+			queryrecord.setCount(0L);
 
-			List<QueryConds> condsList = advancedQueryRecord.getQueries().getQueryConds();
+			List<QueryConds> condsList = advancedQueryRecordModel.getQueries().getQueryConds();
 			List<JQueryrecordDetails> detailList = toJqueryrecorddetailList(condsList, queryId);
 			queryrecordService.save(queryrecord);
 			advancedqrItemService.save(advancedqrItem);
@@ -356,31 +391,35 @@ public class AdvancedQueryRecordController {
 		}
 
 //        #region 纳入条件
-		List<QueryIncludesEXCondition> includes = advancedQueryRecord.getQueries().getQueryIncludesEX().getIncludes();
-		if (includes != null) {
-			for (QueryIncludesEXCondition item : includes) {
-				try {
-					saveEx(advancedQueryRecord, userId, jAdvancedqr, itemNo, item);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+		if (advancedQueryRecordModel.getQueries().getQueryIncludesEX() != null) {
 
+			List<QueryIncludesEXCondition> includes = advancedQueryRecordModel.getQueries().getQueryIncludesEX()
+					.getIncludes();
+			if (includes != null) {
+				for (QueryIncludesEXCondition item : includes) {
+					try {
+						saveEx(advancedQueryRecordModel, userId, jAdvancedqr, itemNo, item);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+				}
 			}
-		}
 
 //        #region 排除条件
-		List<QueryIncludesEXCondition> excludes = advancedQueryRecord.getQueries().getQueryIncludesEX().getExcludes();
-		if (includes != null) {
-			for (QueryIncludesEXCondition item : excludes) {
-				try {
-					saveEx(advancedQueryRecord, userId, jAdvancedqr, itemNo, item);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			List<QueryIncludesEXCondition> excludes = advancedQueryRecordModel.getQueries().getQueryIncludesEX()
+					.getExcludes();
+			if (includes != null) {
+				for (QueryIncludesEXCondition item : excludes) {
+					try {
+						saveEx(advancedQueryRecordModel, userId, jAdvancedqr, itemNo, item);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 
+				}
 			}
 		}
-
 //        #region 返回值
 		BaseResponse baseResponse = new BaseResponse();
 		resultMap.put("response", baseResponse);
@@ -390,7 +429,9 @@ public class AdvancedQueryRecordController {
 		queryRecord.put("projectId", jAdvancedqr.getProjectid());
 		queryRecord.put("createDate", jAdvancedqr.getCreatedate());
 		resultMap.put("queryRecord", queryRecord);
-		return JSONObject.toJSONString(resultMap);
+		String json = JSONObject.toJSONString(resultMap);
+		log.info("response --> " + json);
+		return json;
 	}
 
 	private void saveEx(AdvancedQueryRecordModel advancedQueryRecord, Long userId, JAdvancedqr jAdvancedqr, int itemNo,
@@ -440,7 +481,7 @@ public class AdvancedQueryRecordController {
 				detail.setFieldvaluetype(conds.getFieldType());
 				detail.setLeftbrackets(conds.getLeftqueto());
 				detail.setLogicaltype(conds.getCombinator());
-				detail.setRelationtype(conds.getRelation());
+				detail.setRelationtype(ObjectUtil.objToString(conds.getRelation()));
 				detail.setRightbrackets(conds.getRightqueto());
 				detail.setUpdatedate(new Date());
 				detail.setQueryid(queryId);
@@ -463,12 +504,13 @@ public class AdvancedQueryRecordController {
 	 * @param Id
 	 * @return
 	 */
-	@ApiOperation(value = "", notes = "删除纳排记录")
+	@ApiOperation(value = "删除纳排记录")
 	@RequestMapping(value = "/api/AdvancedQueryRecord/delete", method = { RequestMethod.GET })
 	public String delete(@RequestParam long id, HttpServletRequest request) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-		Long userId = jUserService.getIdByToken(authorization);
+		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+				: request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
 		if (userId == null || userId == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			baseResponse.setCode("0000");

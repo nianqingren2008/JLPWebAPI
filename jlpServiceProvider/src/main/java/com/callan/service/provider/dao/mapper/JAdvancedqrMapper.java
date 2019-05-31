@@ -53,7 +53,7 @@ public interface JAdvancedqrMapper {
 	public List<JAdvancedqr> getByProjectId(Long projectid);
 
 
-  @Insert("INSERT INTO J_ADVANCEDQR(ID,userid,projectid,aqname,sortno) "
-  		+ " VALUES(#{id}, #{userid}, #{projectid},#{aqname},#{sortno})")
+  @Insert("INSERT INTO J_ADVANCEDQR(ID,userid,projectid,aqname,sortno,createdate,activeflag) "
+  		+ " VALUES(#{id}, #{userid}, #{projectid},#{aqname},#{sortno},#{createdate},#{activeflag})")
 	public void save(JAdvancedqr jAdvancedqr);
 }

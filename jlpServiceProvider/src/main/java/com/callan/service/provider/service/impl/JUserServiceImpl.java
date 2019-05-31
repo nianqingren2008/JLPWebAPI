@@ -8,6 +8,8 @@ import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.callan.service.provider.config.JLPLog;
+import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.dao.mapper.JUserMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.NativeCacheable;
@@ -64,6 +66,12 @@ public class JUserServiceImpl implements IJUserService {
 
 	@Override
 	public Long getIdByToken(String authorization) {
-		return jUserMapper.getIdByToken(authorization);
+		try {
+			return jUserMapper.getIdByToken(authorization);
+		}catch(Exception e) {
+			JLPLog log = ThreadPoolConfig.getBaseContext();
+			log.error(e);
+		}
+		return null;
 	}
 }

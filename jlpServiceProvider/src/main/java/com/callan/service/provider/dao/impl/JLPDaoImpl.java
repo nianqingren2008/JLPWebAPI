@@ -88,7 +88,7 @@ public class JLPDaoImpl   implements IJLPDao {
         try {
             List<Map<String, Object>> list = jdbcTemplate.queryForList(sql);
             if (null != list && !list.isEmpty()) {
-                seq = Long.parseLong(list.get(0).get("NVAL").toString());
+                seq = Long.parseLong(list.get(0).get("SEQ").toString());
             }
 
         } catch (Exception e) {

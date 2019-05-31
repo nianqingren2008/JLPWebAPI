@@ -6,11 +6,11 @@ public class AdvancedQueryRecordModel {
 	/*
     * 纳排条件ID(新建时为0)
     */
-	private Long id;
+	private long id;
     /*
     * 课题ID
     */
-    private Long projectId;
+    private long projectId;
     /*
     * 纳排条件名称
     */
@@ -22,19 +22,19 @@ public class AdvancedQueryRecordModel {
     */
     private Queries queries;
 
-	public Long getId() {
+	public long getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 
-	public Long getProjectId() {
+	public long getProjectId() {
 		return projectId;
 	}
 
-	public void setProjectId(Long projectId) {
+	public void setProjectId(long projectId) {
 		this.projectId = projectId;
 	}
 
