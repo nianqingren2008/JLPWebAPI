@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Many;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.One;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
@@ -33,12 +34,12 @@ public interface JAdvancedqrMapper {
 	 * @return
 	 */
     @Select("SELECT * FROM J_ADVANCEDQR WHERE id = #{id}")
-    @Results({
-		@Result(property="id",column="id"),
-		//users映射List<User> users，many=@Many是调用关联查询方法，"id"是关联查询条件，FetchType.LAZY是延迟加载
-		@Result(property="itemList",column="qrId", 
-			many=@Many(select="com.callan.service.provider.dao.mapper.JAdvancedqrItemMapper.getByQrId"))
-    })
+//    @Results({
+//		@Result(property="id",column="id"),
+//		//users映射List<User> users，many=@Many是调用关联查询方法，"id"是关联查询条件，FetchType.LAZY是延迟加载
+//		@Result(property="itemList",column="qrid", 
+//			one=@One(select="com.callan.service.provider.dao.mapper.JAdvancedqrItemMapper.getByQrId"))
+//    })
     JAdvancedqr getOne(Long id);
     
 

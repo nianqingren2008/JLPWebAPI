@@ -21,7 +21,7 @@ public interface JAdvancedqrItemMapper {
     public List<JAdvancedqrItem> getAll();
 	
 	
-	@Select("SELECT * FROM J_ADVANCEDQRITEM WHERE RQID = #{qrId} and activeflag='"+JLPConts.ActiveFlag+"'")
+	@Select("SELECT * FROM J_ADVANCEDQRITEM WHERE qrid = #{qrid} and activeflag='"+JLPConts.ActiveFlag+"'")
     public List<JAdvancedqrItem> getByQrId(long qrId);
 	
 	/**

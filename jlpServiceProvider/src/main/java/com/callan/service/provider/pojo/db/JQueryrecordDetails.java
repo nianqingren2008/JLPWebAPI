@@ -60,7 +60,7 @@ public class JQueryrecordDetails {
 	 */
 	private String activeflag;
 
-	private JQueryrecord queryrecord;
+//	private JQueryrecord queryrecord;
 	
 	public Long getId() {
 		return id;
@@ -166,12 +166,12 @@ public class JQueryrecordDetails {
 		this.activeflag = activeflag;
 	}
 
-	public JQueryrecord getQueryrecord() {
-		return queryrecord;
-	}
-
-	public void setQueryrecord(JQueryrecord queryrecord) {
-		this.queryrecord = queryrecord;
-	}
+//	public JQueryrecord getQueryrecord() {
+//		return queryrecord;
+//	}
+//
+//	public void setQueryrecord(JQueryrecord queryrecord) {
+//		this.queryrecord = queryrecord;
+//	}
 
 }
