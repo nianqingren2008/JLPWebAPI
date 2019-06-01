@@ -16,8 +16,10 @@ import com.callan.service.provider.dao.mapper.JSensitiveWordMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.NativeCacheable;
 import com.callan.service.provider.pojo.db.JSensitiveWord;
+import com.callan.service.provider.pojo.db.JShowDetailView;
 import com.callan.service.provider.service.IJRightService;
 import com.callan.service.provider.service.IJSensitiveWordService;
+import com.callan.service.provider.service.IJShowDetailViewService;
 
 @Service
 public class JSensitiveWordServiceImpl implements IJSensitiveWordService {
@@ -26,12 +28,15 @@ public class JSensitiveWordServiceImpl implements IJSensitiveWordService {
 	
 	@Override
 	public JSensitiveWord getOne(Long id) {
-		return jSensitiveWordMapper.getOne(id);
+		
+		IJSensitiveWordService base = (IJSensitiveWordService) AopContext.currentProxy();
+		Map<Long,JSensitiveWord> map = (Map<Long, JSensitiveWord>) base.getAll().getData();
+		return map.get(id);
 	}
 
 	@NativeCacheable
 	@Override
-	public CacheResponse getAll(boolean activeflag) {
+	public CacheResponse getAll() {
 		List<JSensitiveWord> all = jSensitiveWordMapper.getAll();
 		List<JSensitiveWord> result = new ArrayList<JSensitiveWord>();
 		for(JSensitiveWord jSensitiveWord : all) {
@@ -47,7 +52,7 @@ public class JSensitiveWordServiceImpl implements IJSensitiveWordService {
 
 	@NativeCacheable
 	@Override
-	public CacheResponse getAll4Name(boolean activeflag) {
+	public CacheResponse getAll4Name() {
 		List<JSensitiveWord> all = jSensitiveWordMapper.getAll();
 		Map<String,JSensitiveWord> map = new HashMap<String,JSensitiveWord>();
 		for(JSensitiveWord jSensitiveWord : all) {

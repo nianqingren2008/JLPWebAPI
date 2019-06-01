@@ -113,7 +113,7 @@ public class AdvancedQueryRecordController {
 	}
 
 	@ApiOperation(value = "获取纳排详细条件")
-	@RequestMapping(value = "/api/AdvancedQueryRecord/detail", method = { RequestMethod.GET })
+	@RequestMapping(value = "/api/AdvancedQueryRecord/detail/{id}", method = { RequestMethod.GET })
 	public String getRecordDetail(HttpServletRequest request, @RequestParam Long id) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 从前台header中获取token参数
@@ -511,7 +511,7 @@ public class AdvancedQueryRecordController {
 	 * @return
 	 */
 	@ApiOperation(value = "删除纳排记录")
-	@RequestMapping(value = "/api/AdvancedQueryRecord/delete", method = { RequestMethod.GET })
+	@RequestMapping(value = "/api/AdvancedQueryRecord/delete/{id}", method = { RequestMethod.GET })
 	public String delete(@RequestParam long id, HttpServletRequest request) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"

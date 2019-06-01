@@ -405,7 +405,7 @@ public class AdvancedQueryController {
 				if (jRight == null || jRight.getId() != 4L) {
 					// 获取敏感字段配置
 					Map<String, JSensitiveWord> sensitiveWordMap = (Map<String, JSensitiveWord>) jSensitiveWordService
-							.getAll4Name(true).getData();
+							.getAll4Name().getData();
 					if (!sensitiveWordMap.isEmpty()) {
 						// 将敏感字段设置为 ***
 						retData = sensitiveWord(retData, sensitiveWordMap);
