@@ -31,6 +31,18 @@ public class JTask {
    
   // 启用标志
    private String Activeflag ;
+   
+   //Url
+   private String Fileurl;
+   
+   
+public String getFileurl() {
+	return Fileurl;
+}
+
+public void setFileurl(String fileurl) {
+	Fileurl = fileurl;
+}
 
 public long getId() {
 	return Id;

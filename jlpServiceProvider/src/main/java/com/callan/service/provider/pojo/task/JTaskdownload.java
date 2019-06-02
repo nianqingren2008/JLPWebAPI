@@ -51,6 +51,19 @@ public class JTaskdownload {
     
     // 启用标志
     private String Activeflag ;
+    
+    //url
+    private String Url;
+    
+    
+
+	public String getUrl() {
+		return Url;
+	}
+
+	public void setUrl(String url) {
+		Url = url;
+	}
 
 	public long getId() {
 		return Id;
