@@ -1,6 +1,5 @@
 package com.callan.service.provider.controller;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -10,7 +9,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +22,6 @@ import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.ControllerBaseResponse;
 import com.callan.service.provider.pojo.base.BaseResponse;
-import com.callan.service.provider.pojo.db.JAdvancedqr;
 import com.callan.service.provider.pojo.db.JDownloadfile;
 import com.callan.service.provider.pojo.db.JQueryrecord;
 import com.callan.service.provider.pojo.db.JQueryrecordDetails;
