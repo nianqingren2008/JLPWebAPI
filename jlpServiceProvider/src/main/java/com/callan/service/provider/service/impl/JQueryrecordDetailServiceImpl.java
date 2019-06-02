@@ -1,5 +1,7 @@
 package com.callan.service.provider.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +18,7 @@ public class JQueryrecordDetailServiceImpl implements IJQueryrecordDetailService
 
 
 	@Override
-	public JQueryrecordDetails getOne(Long id) {
+	public JQueryrecordDetails getOne(long id) {
 		return queryrecordDetailMapper.getOne(id);
 	}
 
@@ -24,6 +26,12 @@ public class JQueryrecordDetailServiceImpl implements IJQueryrecordDetailService
 	@Override
 	public void save(JQueryrecordDetails queryrecord) {
 		queryrecordDetailMapper.save(queryrecord);
+	}
+
+
+	@Override
+	public List<JQueryrecordDetails> getByQueryId(long queryId) {
+		return queryrecordDetailMapper.getByQueryId(queryId);
 	}
 	
 

@@ -1,5 +1,7 @@
 package com.callan.service.provider.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +16,7 @@ public class JAdvancedqrItemServiceImpl implements IJAdvancedqrItemService {
 
 
 	@Override
-	public JAdvancedqrItem getOne(Long id) {
+	public JAdvancedqrItem getOne(long id) {
 		return advancedqrItemMapper.getOne(id);
 	}
 
@@ -22,6 +24,12 @@ public class JAdvancedqrItemServiceImpl implements IJAdvancedqrItemService {
 	@Override
 	public void save(JAdvancedqrItem item) {
 		advancedqrItemMapper.save(item);
+	}
+
+
+	@Override
+	public List<JAdvancedqrItem> getByQrId(long qrId) {
+		return advancedqrItemMapper.getByQrId(qrId);
 	}
 	
 

@@ -40,7 +40,6 @@ public class JAdvancedqr {
 	 */
 	private String activeflag;
 
-	private List<JAdvancedqrItem> itemList;
 
 	public Long getId() {
 		return id;
@@ -97,14 +96,4 @@ public class JAdvancedqr {
 	public void setActiveflag(String activeflag) {
 		this.activeflag = activeflag;
 	}
-
-	public List<JAdvancedqrItem> getItemList() {
-		return itemList;
-	}
-
-	public void setItemList(List<JAdvancedqrItem> itemList) {
-		this.itemList = itemList;
-	}
-	
-	
 }

@@ -113,12 +113,12 @@ public class AdvancedQueryRecordController {
 	}
 
 	@ApiOperation(value = "获取纳排详细条件")
-	@RequestMapping(value = "/api/AdvancedQueryRecord/detail", method = { RequestMethod.GET })
+	@RequestMapping(value = "/api/AdvancedQueryRecord/detail/{id}", method = { RequestMethod.GET })
 	public String getRecordDetail(HttpServletRequest request, @RequestParam Long id) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 从前台header中获取token参数
 		JLPLog log = ThreadPoolConfig.getBaseContext();
-		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+		String authorization = request.getHeader("Authorization") == null ? "f5d3689f6aa282f23d496907593b5176"
 				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null || userId == 0) {
@@ -141,27 +141,33 @@ public class AdvancedQueryRecordController {
 			log.info("response : " + json);
 			return json;
 		}
+		List<JAdvancedqrItem> itemList = advancedqrItemService.getByQrId(id);
+		
 		List<JQueryrecordDetails> condsDetailList = new ArrayList<JQueryrecordDetails>();
 		List<JAdvancedqrItem> includeDetailList = new ArrayList<JAdvancedqrItem>();
 		List<JAdvancedqrItem> excludeDetailList = new ArrayList<JAdvancedqrItem>();
-		for (JAdvancedqrItem item : advancedqr.getItemList()) {
-			JQueryrecord record = queryrecordService.getOne(item.getQueryid());
-//        	record.setAdvancedqrItem(item);
-			item.setQueryrecord(record);
-			for (JQueryrecordDetails detail : record.getDetailList()) {
-				detail.setQueryrecord(record);
+		if(itemList != null) {
+			for (JAdvancedqrItem item : itemList) {
+				JQueryrecord record = queryrecordService.getOne(item.getQueryid());
+				List<JQueryrecordDetails> detailList = queryrecordDetailService.getByQueryId(record.getId());
+				record.setDetailList(detailList);
+	//        	record.setAdvancedqrItem(item);
+				item.setQueryrecord(record);
+//				for (JQueryrecordDetails detail : record.getDetailList()) {
+//					detail.setQueryrecord(record);
+//				}
+	
+				if ("1".equals(item.getItemtype())) {
+					condsDetailList.addAll(detailList);
+				}
+				if ("2".equals(item.getItemtype())) {
+					includeDetailList.add(item);
+				}
+				if ("3".equals(item.getItemtype())) {
+					excludeDetailList.add(item);
+				}
+	
 			}
-
-			if ("1".equals(item.getItemtype())) {
-				condsDetailList.addAll(record.getDetailList());
-			}
-			if ("2".equals(item.getItemtype())) {
-				includeDetailList.add(item);
-			}
-			if ("3".equals(item.getItemtype())) {
-				excludeDetailList.add(item);
-			}
-
 		}
 		AdvancedQueryRecordModel advancedQueryRecord = new AdvancedQueryRecordModel();
 		advancedQueryRecord.setId(advancedqr.getId());
@@ -505,7 +511,7 @@ public class AdvancedQueryRecordController {
 	 * @return
 	 */
 	@ApiOperation(value = "删除纳排记录")
-	@RequestMapping(value = "/api/AdvancedQueryRecord/delete", method = { RequestMethod.GET })
+	@RequestMapping(value = "/api/AdvancedQueryRecord/delete/{id}", method = { RequestMethod.GET })
 	public String delete(@RequestParam long id, HttpServletRequest request) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"

@@ -30,12 +30,12 @@ public interface JQueryrecordMapper {
 	 * @return
 	 */
     @Select("SELECT * FROM J_QUERYRECORD WHERE id = #{id} and activeflag='"+JLPConts.ActiveFlag+"'")
-    @Results({
-		@Result(property="id",column="id"),
-		//users映射List<User> users，many=@Many是调用关联查询方法，"id"是关联查询条件，FetchType.LAZY是延迟加载
-		@Result(property="detailList",column="queryId", 
-			many=@Many(select="com.callan.service.provider.dao.mapper.JQueryrecordDetailMapper.getByQueryId"))
-    })
+//    @Results({
+//		@Result(property="id",column="id"),
+//		//users映射List<User> users，many=@Many是调用关联查询方法，"id"是关联查询条件，FetchType.LAZY是延迟加载
+//		@Result(property="detailList",column="queryId", 
+//			many=@Many(select="com.callan.service.provider.dao.mapper.JQueryrecordDetailMapper.getByQueryId"))
+//    })
     JQueryrecord getOne(Long id);
     
 
