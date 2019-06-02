@@ -16,7 +16,7 @@ public interface JSystemConfigMapper {
 	 * 
 	 * @return
 	 */
-	@Select("SELECT * FROM j_systemconfig and activeflag='"+JLPConts.ActiveFlag+"'")
+	@Select("SELECT * FROM j_systemconfig where activeflag='"+JLPConts.ActiveFlag+"'")
     public List<JSystemconfig> getAll();
 	
 	
