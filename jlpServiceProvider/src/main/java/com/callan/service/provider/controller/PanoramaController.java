@@ -13,7 +13,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.base.BaseResponse;
+import com.callan.service.provider.pojo.db.DPatientglobal;
 import com.callan.service.provider.pojo.db.JFiletype;
+import com.callan.service.provider.service.IDPatientglobalService;
 import com.callan.service.provider.service.IJFiletypeService;
 
 import io.swagger.annotations.Api;
@@ -24,24 +26,31 @@ import io.swagger.annotations.ApiOperation;
 public class PanoramaController {
 	@Autowired
 	private IJFiletypeService filetypeService;
+	@Autowired
+	private IDPatientglobalService dPatientglobalService;
 	
-	
-	@ApiOperation(value = "获取全景视图信息")
+	@ApiOperation(value = "获取全景视图患者住院列表")
 	@RequestMapping(value = "/api/Panorama/{PanoramaType}/{Id}", method = { RequestMethod.GET })
-    public String getPanoramaDetail(long id,  String pageSize,String pageNum) {
-//		bool hasPage = true;
-//        if (urlParameter == null || urlParameter.pageNum <= 0 || urlParameter.pageSize <= 0)
-//        {
-//            hasPage = false;
-//        }
-//
-//        DPatientglobal patientglobal = orclJlpContext.DPatientglobals.FirstOrDefault(x => x.Jlactiveflag == "1" && x.Id == Id);
-//        if (patientglobal is null)
-//        {
-//            return Content(HttpStatusCode.BadRequest, ResponseModel.Error(Text: "未找到该患者信息！").ToDictionaryObj());
-//        }
-//        DictionaryObj ret = new DictionaryObj();
-//        ResponseModel response = ResponseModel.Ok();
+    public String getPanoramaDetail(long id,  int pageSize,int pageNum) {
+		JLPLog log = ThreadPoolConfig.getBaseContext();
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		boolean hasPage = true;
+        if ( pageNum <= 0 || pageSize <= 0)
+        {
+            hasPage = false;
+        }
+
+        DPatientglobal patientglobal = dPatientglobalService.getOne(id);
+        if (patientglobal == null)
+        {
+        	BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("0000");
+			baseResponse.setText("未找到该患者信息！");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
+			
+        }
 //        var patientVisitQuery = orclJlpContext.DPatientvisits.Where(x => x.Jlactiveflag == "1" && x.Patientglobalid == patientglobal.Id).OrderBy(x => x.Rydatetime).AsQueryable();
 //        int patientVisitCount = patientVisitQuery.Count();
 //        if (hasPage)
@@ -83,7 +92,7 @@ public class PanoramaController {
 //        ret.Add("response", response);
 //        ret.Add("baseInfo", basePatientInfo);
 //        ret.Add("recordPatients", patientRecords);
-//
+
 
 		return null;
     }
