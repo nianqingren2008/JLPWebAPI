@@ -2,6 +2,9 @@ package com.callan.service.provider.dao.mapper;
 
 import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.pojo.db.DPatientglobal;
+
+import java.util.List;
+
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.InsertProvider;
@@ -109,4 +112,7 @@ public interface DPatientglobalMapper {
         "where ID = #{id,jdbcType=DECIMAL}"
     })
     int updateByPrimaryKey(DPatientglobal record);
+
+	@Select("SELECT * FROM D_PATIENTGLOBAL where JLACTIVEFLAG='"+JLPConts.ActiveFlag+"'")
+    public List<DPatientglobal> getAll();
 }
