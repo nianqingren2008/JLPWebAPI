@@ -48,7 +48,7 @@ public class DPatientvisitServiceImpl implements IDPatientvisitService{
 	@Override
 	public List<DPatientvisit> getByPatientGlobalId(Long id) {
 		
-		return null;
+		return dpatientvisitMapper.getByPatientGlobalId(id);
 	}
 	
 }
