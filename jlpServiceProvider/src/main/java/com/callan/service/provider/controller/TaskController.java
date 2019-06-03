@@ -41,7 +41,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(description = "下载管理")
 public class TaskController {
 
-	Log log = LogFactory.getLog(TaskController.class);
+//	Log log = LogFactory.getLog(TaskController.class);
 	@Autowired
 	private IJTaskService jTaskService;
 	@Autowired
@@ -52,6 +52,7 @@ public class TaskController {
 	@ApiOperation(value = "下载任务提交")
 	@RequestMapping(value = "/api/Task/Project/DownLoad", method = { RequestMethod.POST })
 	public String taskDownLoad(JTaskProjectModel taskProject,HttpSession session) {
+		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		ControllerBaseResponse response = new ControllerBaseResponse();
 		JUser user = (JUser) session.getAttribute("user");
@@ -154,7 +155,7 @@ public class TaskController {
 		try {
 			jTaskService.delete(id);
 		}catch(Exception e) {
-			log.error("添加下载任务失败",e);
+//			log.error("添加下载任务失败",e);
 			response.getResponse().setCode("400");
 			response.getResponse().setText(e.getMessage());
 			return response.toJsonString();
