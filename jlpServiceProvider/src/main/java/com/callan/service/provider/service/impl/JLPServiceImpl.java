@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.callan.service.provider.config.JLPConts;
+import com.callan.service.provider.config.JLPException;
 import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ObjectUtil;
 import com.callan.service.provider.config.RedisUtil;
@@ -47,6 +48,14 @@ public class JLPServiceImpl implements IJLpService {
 	@Value("${pagePlusCount}")
 	private int pagePlusCount;
 
+	/*
+	 * 加载中状态保存时长，防止意外中断导致key一直处于加载中状态，推荐300s
+	 */
+	@Value("${loadingSeconds}")
+	private int loadingSeconds;
+	
+	
+	
 	@Override
 	public List<Map<String, Object>> queryForSQLStreaming(String sql, int pageNum, int pageSize) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
@@ -133,6 +142,8 @@ public class JLPServiceImpl implements IJLpService {
 				Map<String, Object> dataMap = new HashMap<String, Object>();
 				dataMap.put("lastActiveTime", new Date());
 				dataMap.put("status", "loading");
+				//加载中状态最多保存300s
+				redisUtil.expire(serialKey, loadingSeconds);
 				redisUtil.set(serialKey, dataMap);
 				Map<String, String> sqlMap = getSqlMap(tableNames, tempSql, patientTableWhere, tableWhere,
 						finalSelectFields, tempSqlWhere, pageNum, pageSize);
@@ -167,7 +178,7 @@ public class JLPServiceImpl implements IJLpService {
 					redisUtil.set(serialKey, dataMap);
 					// 第一页和第二页存放30天，其他页存放1小时
 					if (pageNum == 1 || pageNum == 2) {
-						redisUtil.expire(serialKey, pageDataAliveSeconds * 24 * 30);
+						redisUtil.expire(serialKey, 3600 * 24 * 30);
 					} else {
 						redisUtil.expire(serialKey, pageDataAliveSeconds);
 					}
@@ -177,7 +188,21 @@ public class JLPServiceImpl implements IJLpService {
 				}
 //				end = System.currentTimeMillis();
 				return pageData;
-			} else {
+			} else if(redisUtil.get(serialKey) != null && "loading".equals(((Map<String,Object>)redisUtil.get(serialKey)).get("status"))){
+				int i = 0;
+				while(i < 50) {
+					log.info("[redis data is loading waiting 1s ], pageNum:" + pageNum);
+					Thread.sleep(200);
+					i++;
+					if("finish".equals(((Map<String,Object>)redisUtil.get(serialKey)).get("status"))) {
+						Map<String, List<Map<String, Object>>> map = (Map<String, List<Map<String, Object>>>) redisUtil
+								.get(serialKey);
+						return map.get("data");
+					}
+				}
+				throw new JLPException("获取分页数据超时,请稍后重试");
+				
+			} else if(redisUtil.get(serialKey) != null && "finish".equals(((Map<String,Object>)redisUtil.get(serialKey)).get("status"))){
 				log.info("[get data from redis success], pageNum:" + pageNum);
 				Map<String, List<Map<String, Object>>> map = (Map<String, List<Map<String, Object>>>) redisUtil
 						.get(serialKey);
@@ -186,6 +211,7 @@ public class JLPServiceImpl implements IJLpService {
 
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
+			throw new JLPException(e.getMessage());
 		}
 		return new ArrayList<Map<String, Object>>();
 	}
@@ -225,6 +251,8 @@ public class JLPServiceImpl implements IJLpService {
 			Map<String, Object> dataMap = new HashMap<String, Object>();
 			dataMap.put("lastActiveTime", new Date());
 			dataMap.put("status", "loading");
+			//加载中状态最多保存300s
+			redisUtil.expire(serialKeyPage, loadingSeconds);
 			redisUtil.set(serialKeyPage, dataMap);
 			executorService.execute(new Runnable() {
 				@Override
@@ -264,7 +292,7 @@ public class JLPServiceImpl implements IJLpService {
 							redisUtil.set(serialKeyPage, dataMap);
 							// 第一页和第二页存放30天，其他页存放1小时
 							if (pageNumPlus == 1 || pageNumPlus == 2) {
-								redisUtil.expire(serialKeyPage, pageDataAliveSeconds * 24 * 30);
+								redisUtil.expire(serialKeyPage, 3600 * 24 * 30);
 							} else {
 								redisUtil.expire(serialKeyPage, pageDataAliveSeconds);
 							}
@@ -376,12 +404,11 @@ public class JLPServiceImpl implements IJLpService {
 		return ret;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public int queryForCount(String sql) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		try {
-			String serialKey = Sha1Util.getEncrypteWord(sql);
+			String serialKey = "count_" + Sha1Util.getEncrypteWord(sql);
 			if (redisUtil.get(serialKey) != null) {
 				log.info("[GET sql for count SUCCESS]  ");
 				return ObjectUtil.objToInt(redisUtil.get(serialKey));
@@ -392,7 +419,16 @@ public class JLPServiceImpl implements IJLpService {
 				long end = System.currentTimeMillis();
 				log.info("sql for count--" + (end - start) + "ms");
 				if (countList != null && countList.size() > 0) {
-					return ObjectUtil.objToInt(countList.get(0).get("count"));
+					int count = ObjectUtil.objToInt(countList.get(0).get("count"));
+					try {
+						redisUtil.set(serialKey, count);
+						// 存放30天
+						redisUtil.expire(serialKey, 3600 * 24 * 30);
+					} catch (Exception e) {
+						log.error("操作redis失败", e);
+						redisUtil.del(serialKey);
+					}
+					return count;
 				} else {
 					return 0;
 				}

@@ -58,7 +58,7 @@ public class JLPDaoImpl implements IJLPDao {
 					dataList.add(hm);
 				} else {
 					index++;
-					if (index >= (pageNum - 1) * pageSize) {
+					if (index > (pageNum - 1) * pageSize) {
 						Map<String, Object> hm = new LinkedCaseInsensitiveMap<Object>();
 						for (int i = 1; i <= count; i++) {
 							String key = rsmd.getColumnLabel(i).toLowerCase();

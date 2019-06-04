@@ -11,6 +11,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.stereotype.Component;
@@ -30,13 +31,21 @@ public class JLPFilter implements Filter{
 			throws IOException, ServletException {
 		String reqSerialNo = UUID.randomUUID().toString().replaceAll("-", "");
 		HttpServletRequest req = (HttpServletRequest) request;
+		HttpServletResponse resp = (HttpServletResponse) response;
 		String url = req.getRequestURI();
 		if(url.contains("/api/")) {
-			String serviceName = url.substring(url.lastIndexOf("/")+1,url.length());
-			JLPLog log = JLPLog.getInstance(serviceName,reqSerialNo);
-			ThreadPoolConfig.setBaseContext(log);
+			String[] tmp = url.split("/api/");
+			String serviceName = null;
+			if(tmp.length > 0) {
+				serviceName = tmp[1].substring(0,tmp[1].indexOf("/") == -1 ? tmp[1].length() : tmp[1].indexOf("/") );
+			}
+//			String serviceName = url.substring(url.lastIndexOf("/")+1,url.length());
+			if(serviceName != null) {
+				JLPLog log = JLPLog.getInstance(serviceName,reqSerialNo);
+				ThreadPoolConfig.setBaseContext(log);
+			}
 		}
-		chain.doFilter(request, response);
+		chain.doFilter(req, resp);
 		ThreadPoolConfig.clearBaseContext();
 	}
 

@@ -67,6 +67,10 @@ public class NativeCacheLoader implements InitializingBean{
 					systemConfigService.getAll();
 					
 					filetypeSerice.getAll();
+					
+					
+					//TODO 程序启动，扫描数据状态处于loading状态的key，并清理掉它
+					
 				}
 			});
 			

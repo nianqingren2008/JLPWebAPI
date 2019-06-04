@@ -106,19 +106,25 @@ public class AdvancedQueryController {
 		if (advanceQueryRequest == null) {
 			response.getResponse().setCode("0000");
 			response.getResponse().setText("传入参数为空");
-			return response.toJsonString();
+			String json = response.toJsonString();
+			log.info("response --> " + json);
+			return json;
 		}
 		if (advanceQueryRequest.getViewId() == 0) {
 			response.getResponse().setCode("0000");
 			response.getResponse().setText("视图编号错误");
-			return response.toJsonString();
+			String json = response.toJsonString();
+			log.info("response --> " + json);
+			return json;
 		}
 
 		JShowView jShowView = jShowviewService.getOne(advanceQueryRequest.getViewId(), true);
 		if (jShowView == null) {
 			response.getResponse().setCode("0000");
 			response.getResponse().setText("视图编号错误");
-			return JSONObject.toJSONString(response);
+			String json = response.toJsonString();
+			log.info("response --> " + json);
+			return json;
 		}
 
 		JTableDict mainTable = null;
@@ -168,7 +174,9 @@ public class AdvancedQueryController {
 		if (jTableFieldDictList.size() == 0) {
 			response.getResponse().setCode("1001");
 			response.getResponse().setText("显示字段未配置");
-			return response.toJsonString();
+			String json = response.toJsonString();
+			log.info("response --> " + json);
+			return json;
 		}
 
 		List<ColunmsModel> columns = new ArrayList<ColunmsModel>();
@@ -402,10 +410,16 @@ public class AdvancedQueryController {
 //		
 //		retData = jlpService.queryForSQLStreaming(SqlPageData10,SqlPageData1000,SqlPageData100000,SqlAllData, pageNumInt, pageSizeInt);
 		
-		
-		retData = jlpService.queryForAdvanceQuery(tableNames,tempSql,patientTableWhere,tableWhere,finalSelectFields,tempSqlWhere, pageNumInt
-				, pageSizeInt);
-		
+		try {
+			retData = jlpService.queryForAdvanceQuery(tableNames,tempSql,patientTableWhere,tableWhere,finalSelectFields,tempSqlWhere, pageNumInt
+					, pageSizeInt);
+		}catch(Exception e) {
+			response.getResponse().setCode("0000");
+			response.getResponse().setText("获取数据错误，原因: " + e.getMessage() );
+			String json = response.toJsonString();
+			log.info("response --> " + json);
+			return json;
+		}
 		// 从前台header中获取token参数
 		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
 
@@ -431,11 +445,12 @@ public class AdvancedQueryController {
 		response.setColumns(columns);
 		response.setContent(retData);
 //		}
-		log.info("response --> " + response.toJsonString());
+		String json = response.toJsonString();
+		log.info("response --> " + json);
 		long end = System.currentTimeMillis();
 		log.info("serviceTime " + (end - start) + "ms");
 		//清理上下文
-		return response.toJsonString();
+		return json;
 	}
 
 	private List<Map<String, Object>> sensitiveWord(List<Map<String, Object>> retData,
