@@ -115,4 +115,27 @@ public class SerializeUtil {
 		return value;
 	}
     
+    public static String getValueByType(Object[] obj) {
+    	String value = "";
+    	for(Object argObj : obj) {
+    		if(argObj instanceof String) {
+    			value += argObj.toString();
+            } else if(argObj instanceof Integer || argObj instanceof Long || argObj instanceof Short) {
+            	value += argObj.toString();
+            } else if(argObj instanceof Boolean) {
+            	value += argObj.toString();
+            } else if(argObj instanceof Date) {
+            	value += argObj.toString();
+            } else if(argObj instanceof Double) {
+            	value += argObj.toString();
+            } else if(argObj instanceof Float) {
+            	value += argObj.toString();
+            }else{
+            	String objSerial = SerializeUtil.hessianSerialize(argObj);
+            	value += objSerial;
+            }
+    	}
+		return SerializeUtil.hessianSerialize(value);
+	}
+    
 }

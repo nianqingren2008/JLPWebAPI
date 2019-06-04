@@ -6,7 +6,16 @@ spring:
     name: jlp-service-provider
   main:
      allow-bean-definition-overriding: true
-
+  redis:
+     database: 0
+     host: 192.168.17.165
+     port: 6379
+     max-active: 200
+     max-wait: -1
+     max-idle: 10
+     min-idle: 0
+     timeout: 3600000
+     password: jlp321!@#
 
 spring.datasource.driver-class-name: oracle.jdbc.driver.OracleDriver
 spring.datasource.url: jdbc:oracle:thin:@192.168.17.165:1521:orcl
@@ -21,7 +30,6 @@ feign:
 mybatis:
   mapper-locations: classpath:mapping/*Mapper.xml
   type-aliases-package: com.callan.service.provider
-
 
 executorService.threedMax : 100
 
@@ -40,3 +48,8 @@ logging:
       callan:
          service:
            provider : debug
+
+
+
+
+           

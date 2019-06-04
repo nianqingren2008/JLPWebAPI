@@ -2,6 +2,7 @@ package com.callan.service.provider.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 
 public interface IJLpService {
 	
@@ -13,7 +14,7 @@ public interface IJLpService {
 	 * @param sqlData 
 	 * @return
 	 */
-	public List<Map<String, Object>> queryForSQLStreaming(String sqlPageData,String sqlAllData, int pageNum, int pageSize);
+	public List<Map<String, Object>> queryForSQLStreaming(String sql, int pageNum, int pageSize);
 	
 	public List<Map<String, Object>> queryForSQL(String sql,Object[] params);
 	
@@ -24,4 +25,10 @@ public interface IJLpService {
 	 * @throws Exception 
 	 */
 	public long getNextSeq(String seqName);
+
+	public List<Map<String, Object>> queryForAdvanceQuery(SortedSet<String> tableNames, String tempSql,
+			String patientTableWhere, Map<String, List<String>> tableWhere, String finalSelectFields,
+			String tempSqlWhere, int pageNumInt, int pageSizeInt);
+
+	public int queryForCount(String sqlCount);
 }

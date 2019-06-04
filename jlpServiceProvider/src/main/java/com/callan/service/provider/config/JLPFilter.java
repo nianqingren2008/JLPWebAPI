@@ -31,9 +31,11 @@ public class JLPFilter implements Filter{
 		String reqSerialNo = UUID.randomUUID().toString().replaceAll("-", "");
 		HttpServletRequest req = (HttpServletRequest) request;
 		String url = req.getRequestURI();
-		String serviceName = url.substring(url.lastIndexOf("/")+1,url.length());
-		JLPLog log = JLPLog.getInstance(serviceName,reqSerialNo);
-		ThreadPoolConfig.setBaseContext(log);
+		if(url.contains("/api/")) {
+			String serviceName = url.substring(url.lastIndexOf("/")+1,url.length());
+			JLPLog log = JLPLog.getInstance(serviceName,reqSerialNo);
+			ThreadPoolConfig.setBaseContext(log);
+		}
 		chain.doFilter(request, response);
 		ThreadPoolConfig.clearBaseContext();
 	}
