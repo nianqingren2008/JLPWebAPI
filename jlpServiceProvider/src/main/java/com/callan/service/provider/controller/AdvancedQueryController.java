@@ -816,6 +816,7 @@ public class AdvancedQueryController {
 	
 	private String toTableString(SortedSet<String> tableArray, String advancedQueryWhere,Map<String,List<String>> tableWhere) {
 		String ret = "";
+		tableArray.remove(JLPConts.PatientGlobalTable.toUpperCase());
 		if (tableArray != null) {
 			
 			String patientTable = JLPConts.PatientGlobalTable.toLowerCase();
