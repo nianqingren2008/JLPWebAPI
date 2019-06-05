@@ -1,6 +1,8 @@
 package com.callan.service.provider.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,17 +38,21 @@ public class CacheManagerController {
 			key = "*";
 		}
 		Set<String> keySet = redisTemplate.keys(key);
+		int i = 0;
 //		ValueOperations<String, Object> valueOper = redisTemplate.opsForValue();
 		for(String cacheKey : keySet) {
 			try {
 				//Map<String,Object> value = (Map<String, Object>) valueOper.get(cacheKey);
 				redisTemplate.delete(cacheKey);
+				i++;
 			}catch(Exception e) {
 				continue;
 			}
 		}
 		Map<String,Object> resultMap = new HashMap<String, Object>();
-		resultMap.put("response", new BaseResponse());
+		BaseResponse baseResponse = new BaseResponse();
+		baseResponse.setText("成功清理"+i+"条redis数据");
+		resultMap.put("response", baseResponse);
 		String json = JSONObject.toJSONString(resultMap);
 		log.info("response --> " + json);
 		return json;
@@ -58,12 +64,14 @@ public class CacheManagerController {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Set<String> keySet = redisTemplate.keys("*");
 		ValueOperations<String, Object> valueOper = redisTemplate.opsForValue();
+		List<String> list = new ArrayList<String>();
 		for(String key : keySet) {
 			try {
 				Map<String,Object> value = (Map<String, Object>) valueOper.get(key);
 				if("loading".equals(ObjectUtil.objToString(value.get("status")))){
 					log.info("key : " + key +",处于loading状态，执行删除");
 					redisTemplate.delete(key);
+					list.add(key);
 				}
 			}catch(Exception e) {
 				continue;
@@ -71,6 +79,7 @@ public class CacheManagerController {
 		}
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		resultMap.put("response", new BaseResponse());
+		resultMap.put("data", list);
 		String json = JSONObject.toJSONString(resultMap);
 		log.info("response --> " + json);
 		return json;
@@ -80,9 +89,12 @@ public class CacheManagerController {
 	@RequestMapping(value = "/api/cacheClear/local", method = { RequestMethod.GET })
 	public String clearLocalCache() {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
+		int count = LocalData.dataMap.size();
 		LocalData.dataMap.clear();;
 		Map<String,Object> resultMap = new HashMap<String, Object>();
-		resultMap.put("response", new BaseResponse());
+		BaseResponse baseResponse = new BaseResponse();
+		baseResponse.setText("成功清理"+count+"条本地缓存");
+		resultMap.put("response", baseResponse);
 		String json = JSONObject.toJSONString(resultMap);
 		log.info("response --> " + json);
 		return json;
