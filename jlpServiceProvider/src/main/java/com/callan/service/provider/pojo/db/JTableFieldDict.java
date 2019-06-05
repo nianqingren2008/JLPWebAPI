@@ -1,177 +1,133 @@
 package com.callan.service.provider.pojo.db;
 
-/**
- * 数据表与字段对照信息
- * @author callan
- *
- */
-public class JTableFieldDict {
-	/**
-	 * 流水号
-	 */
-	private Long id;
-	/**
-	 * 归属表编码
-	 */
-	private String tablecode;
-	/**
-	 * 字段编码
-	 */
-	private String code;
-	/**
-	 * 字段名
-	 */
-	private String name;
-	/**
-	 * 字段类型
-	 */
-	private String type;
-	/**
-	 * 字段描述
-	 */
-	private String description;
-	/**
-	 * 排序字段
-	 */
-	private Integer sortno;
-	/**
-	 * 显示控件类型
-	 */
-	private String controltypecode;
-	/**
-	 * 是否可空
-	 */
-	private String nullable;
-	/**
-	 * 字典表信息
-	 */
-	private String dictname;
-	/**
-	 * 搜索标志
-	 */
-	private String queryflag;
-	/**
-	 * 展示标志
-	 */
-	private String showflag;
-	/**
-	 * 排序标志
-	 */
-	private String sortflag;
+public class JTablefielddict {
+    private Long id;
 
-	private JShowDetailView jShowDetailView;
-	
-	
-	public JShowDetailView getjShowDetailView() {
-		return jShowDetailView;
-	}
+    private String tablecode;
 
-	public void setjShowDetailView(JShowDetailView jShowDetailView) {
-		this.jShowDetailView = jShowDetailView;
-	}
+    private String code;
 
-	public Long getId() {
-		return id;
-	}
+    private String name;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    private String type;
 
-	public String getTablecode() {
-		return tablecode;
-	}
+    private String description;
 
-	public void setTablecode(String tablecode) {
-		this.tablecode = tablecode;
-	}
+    private Integer sortno;
 
-	public String getCode() {
-		return code;
-	}
+    private String controltypecode;
 
-	public void setCode(String code) {
-		this.code = code;
-	}
+    private String nullable;
 
-	public String getName() {
-		return name;
-	}
+    private String dictname;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    private String queryflag;
 
-	public String getType() {
-		return type;
-	}
+    private String showflag;
 
-	public void setType(String type) {
-		this.type = type;
-	}
+    private String sortflag;
 
-	public String getDescription() {
-		return description;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public Integer getSortno() {
-		return sortno;
-	}
+    public String getTablecode() {
+        return tablecode;
+    }
 
-	public void setSortno(Integer sortno) {
-		this.sortno = sortno;
-	}
+    public void setTablecode(String tablecode) {
+        this.tablecode = tablecode == null ? null : tablecode.trim();
+    }
 
-	public String getControltypecode() {
-		return controltypecode;
-	}
+    public String getCode() {
+        return code;
+    }
 
-	public void setControltypecode(String controltypecode) {
-		this.controltypecode = controltypecode;
-	}
+    public void setCode(String code) {
+        this.code = code == null ? null : code.trim();
+    }
 
-	public String getNullable() {
-		return nullable;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setNullable(String nullable) {
-		this.nullable = nullable;
-	}
+    public void setName(String name) {
+        this.name = name == null ? null : name.trim();
+    }
 
-	public String getDictname() {
-		return dictname;
-	}
+    public String getType() {
+        return type;
+    }
 
-	public void setDictname(String dictname) {
-		this.dictname = dictname;
-	}
+    public void setType(String type) {
+        this.type = type == null ? null : type.trim();
+    }
 
-	public String getQueryflag() {
-		return queryflag;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setQueryflag(String queryflag) {
-		this.queryflag = queryflag;
-	}
+    public void setDescription(String description) {
+        this.description = description == null ? null : description.trim();
+    }
 
-	public String getShowflag() {
-		return showflag;
-	}
+    public Integer getSortno() {
+        return sortno;
+    }
 
-	public void setShowflag(String showflag) {
-		this.showflag = showflag;
-	}
+    public void setSortno(Integer sortno) {
+        this.sortno = sortno;
+    }
 
-	public String getSortflag() {
-		return sortflag;
-	}
+    public String getControltypecode() {
+        return controltypecode;
+    }
 
-	public void setSortflag(String sortflag) {
-		this.sortflag = sortflag;
-	}
+    public void setControltypecode(String controltypecode) {
+        this.controltypecode = controltypecode == null ? null : controltypecode.trim();
+    }
 
+    public String getNullable() {
+        return nullable;
+    }
+
+    public void setNullable(String nullable) {
+        this.nullable = nullable == null ? null : nullable.trim();
+    }
+
+    public String getDictname() {
+        return dictname;
+    }
+
+    public void setDictname(String dictname) {
+        this.dictname = dictname == null ? null : dictname.trim();
+    }
+
+    public String getQueryflag() {
+        return queryflag;
+    }
+
+    public void setQueryflag(String queryflag) {
+        this.queryflag = queryflag == null ? null : queryflag.trim();
+    }
+
+    public String getShowflag() {
+        return showflag;
+    }
+
+    public void setShowflag(String showflag) {
+        this.showflag = showflag == null ? null : showflag.trim();
+    }
+
+    public String getSortflag() {
+        return sortflag;
+    }
+
+    public void setSortflag(String sortflag) {
+        this.sortflag = sortflag == null ? null : sortflag.trim();
+    }
 }

@@ -1,83 +1,63 @@
 package com.callan.service.provider.pojo.db;
 
-/**
- * 数据表字典
- * 
- * @author callan
- *
- */
-public class JTableDict {
-	/**
-	 * 流水号
-	 */
-	private Long id;
-	/**
-	 * 编码
-	 */
-	private String code;
-	/**
-	 * 表名
-	 */
-	private String name;
-	/**
-	 * 描述
-	 */
-	private String description;
-	/**
-	 * 排序大小
-	 */
-	private Integer sortno;
-	/**
-	 * 启用标志
-	 */
-	private String activeflag;
+public class JTabledict {
+    private Long id;
 
-	public Long getId() {
-		return id;
-	}
+    private String code;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    private String name;
 
-	public String getCode() {
-		return code;
-	}
+    private String description;
 
-	public void setCode(String code) {
-		this.code = code;
-	}
+    private Integer sortno;
 
-	public String getName() {
-		return name;
-	}
+    private String activeflag;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public String getCode() {
+        return code;
+    }
 
-	public Integer getSortno() {
-		return sortno;
-	}
+    public void setCode(String code) {
+        this.code = code == null ? null : code.trim();
+    }
 
-	public void setSortno(Integer sortno) {
-		this.sortno = sortno;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getActiveflag() {
-		return activeflag;
-	}
+    public void setName(String name) {
+        this.name = name == null ? null : name.trim();
+    }
 
-	public void setActiveflag(String activeflag) {
-		this.activeflag = activeflag;
-	}
+    public String getDescription() {
+        return description;
+    }
 
+    public void setDescription(String description) {
+        this.description = description == null ? null : description.trim();
+    }
+
+    public Integer getSortno() {
+        return sortno;
+    }
+
+    public void setSortno(Integer sortno) {
+        this.sortno = sortno;
+    }
+
+    public String getActiveflag() {
+        return activeflag;
+    }
+
+    public void setActiveflag(String activeflag) {
+        this.activeflag = activeflag == null ? null : activeflag.trim();
+    }
 }

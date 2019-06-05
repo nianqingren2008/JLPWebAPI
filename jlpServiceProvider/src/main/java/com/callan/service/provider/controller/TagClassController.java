@@ -17,7 +17,6 @@ import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.tableclassdict.JTableclassdict;
-import com.callan.service.provider.pojo.task.JTask;
 import com.callan.service.provider.service.IJTableclassdictService;
 import com.callan.service.provider.service.IJUserService;
 
@@ -35,7 +34,7 @@ private IJUserService userService;
 private IJTableclassdictService tableclassdictService;
 
 @ApiOperation(value = "获取标签所属分类列表")
-@RequestMapping(value = "GET /api/TagClass", method = { RequestMethod.GET })
+@RequestMapping(value = "/api/TagClass", method = { RequestMethod.GET })
 public String  getTagList(HttpServletRequest request){
 	JLPLog log = ThreadPoolConfig.getBaseContext();
 	Map<String, Object> resultMap = new HashMap<String, Object>();
