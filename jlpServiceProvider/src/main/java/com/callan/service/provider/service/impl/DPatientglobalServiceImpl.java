@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.callan.service.provider.dao.mapper.DPatientglobalMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
-import com.callan.service.provider.pojo.cache.NativeCacheable;
+import com.callan.service.provider.pojo.cache.LocalCacheable;
 import com.callan.service.provider.pojo.db.DPatientglobal;
 import com.callan.service.provider.service.IDPatientglobalService;
 
@@ -23,7 +23,7 @@ public class DPatientglobalServiceImpl implements IDPatientglobalService{
 		return patientglobalMapper.selectByPrimaryKey(id);
 	}
 
-	@NativeCacheable
+	@LocalCacheable
 	@Override
 	public CacheResponse getAll4Id() {
 		List<DPatientglobal> list = patientglobalMapper.getAll();
@@ -37,7 +37,7 @@ public class DPatientglobalServiceImpl implements IDPatientglobalService{
 		return response;
 	}
 
-	@NativeCacheable
+	@LocalCacheable
 	@Override
 	public CacheResponse getAll() {
 		List<DPatientglobal> list = patientglobalMapper.getAll();

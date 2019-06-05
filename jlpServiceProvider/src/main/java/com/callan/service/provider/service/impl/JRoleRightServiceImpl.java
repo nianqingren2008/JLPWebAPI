@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.callan.service.provider.dao.mapper.JRoleRightMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
-import com.callan.service.provider.pojo.cache.NativeCacheable;
+import com.callan.service.provider.pojo.cache.LocalCacheable;
 import com.callan.service.provider.pojo.db.JRoleRight;
 import com.callan.service.provider.service.IJRoleRightService;
 
@@ -28,7 +28,7 @@ public class JRoleRightServiceImpl implements IJRoleRightService {
 		return roleRight;
 	}
 
-	@NativeCacheable
+	@LocalCacheable
 	@Override
 	public CacheResponse getAll4RoleId() {
 		List<JRoleRight> all = roleRightMapper.getAll();

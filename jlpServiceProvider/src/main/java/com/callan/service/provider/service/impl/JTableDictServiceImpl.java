@@ -17,7 +17,7 @@ import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.dao.mapper.JTableDictMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
-import com.callan.service.provider.pojo.cache.NativeCacheable;
+import com.callan.service.provider.pojo.cache.LocalCacheable;
 import com.callan.service.provider.pojo.db.JShowDetailView;
 import com.callan.service.provider.pojo.db.JTableDict;
 import com.callan.service.provider.service.IJShowDetailViewService;
@@ -52,7 +52,7 @@ public class JTableDictServiceImpl implements IJTableDictService {
 			return jTableDict;
 		}
 	}
-	@NativeCacheable
+	@LocalCacheable
 	@Override
 	public CacheResponse getAll4Id() {
 		Map<Long, JTableDict> map = new HashMap<>();
@@ -93,7 +93,7 @@ public class JTableDictServiceImpl implements IJTableDictService {
 			return entity;
 		}
 	}
-	@NativeCacheable
+	@LocalCacheable
 	@Override
 	public CacheResponse getAll4Name() {
 		Map<String, JTableDict> map = new HashMap<>();
@@ -141,7 +141,7 @@ public class JTableDictServiceImpl implements IJTableDictService {
 		}
 	}
 	
-	@NativeCacheable
+	@LocalCacheable
 	@Override
 	public CacheResponse getAll4Code() {
 		Map<String, JTableDict> map = new HashMap<>();

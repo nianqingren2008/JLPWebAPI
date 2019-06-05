@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.callan.service.provider.dao.mapper.JFiletypeMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
-import com.callan.service.provider.pojo.cache.NativeCacheable;
+import com.callan.service.provider.pojo.cache.LocalCacheable;
 import com.callan.service.provider.pojo.db.JFiletype;
 import com.callan.service.provider.service.IJFiletypeService;
 import com.callan.service.provider.service.IJSystemConfigService;
@@ -21,7 +21,7 @@ public class JFiletypeServiceImpl implements IJFiletypeService {
 	private JFiletypeMapper filetypeMapper;
 
 	@Override
-	@NativeCacheable
+	@LocalCacheable
 	public CacheResponse getAll() {
 		CacheResponse response = new CacheResponse();
 		response.setCode(0);
@@ -37,7 +37,7 @@ public class JFiletypeServiceImpl implements IJFiletypeService {
 		return entity;
 	}
 
-	@NativeCacheable
+	@LocalCacheable
 	@Override
 	public CacheResponse getAll4Id() {
 		List<JFiletype> all = filetypeMapper.getAll();

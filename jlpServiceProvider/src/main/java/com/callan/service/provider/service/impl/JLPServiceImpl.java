@@ -188,13 +188,13 @@ public class JLPServiceImpl implements IJLpService {
 				}
 //				end = System.currentTimeMillis();
 				return pageData;
-			} else if(redisUtil.get(serialKey) != null && "loading".equals(((Map<String,Object>)redisUtil.get(serialKey)).get("status"))){
+			} else if(redisUtil.get(serialKey) != null && "loading".equals(ObjectUtil.objToString(((Map<String,Object>)redisUtil.get(serialKey)).get("status")))){
 				int i = 0;
 				while(i < 50) {
 					log.info("[redis data is loading waiting 1s ], pageNum:" + pageNum);
 					Thread.sleep(200);
 					i++;
-					if("finish".equals(((Map<String,Object>)redisUtil.get(serialKey)).get("status"))) {
+					if("finish".equals(ObjectUtil.objToString(((Map<String,Object>)redisUtil.get(serialKey)).get("status")))) {
 						Map<String, List<Map<String, Object>>> map = (Map<String, List<Map<String, Object>>>) redisUtil
 								.get(serialKey);
 						return map.get("data");
@@ -202,7 +202,7 @@ public class JLPServiceImpl implements IJLpService {
 				}
 				throw new JLPException("获取分页数据超时,请稍后重试");
 				
-			} else if(redisUtil.get(serialKey) != null && "finish".equals(((Map<String,Object>)redisUtil.get(serialKey)).get("status"))){
+			} else if(redisUtil.get(serialKey) != null && "finish".equals(ObjectUtil.objToString(((Map<String,Object>)redisUtil.get(serialKey)).get("status")))){
 				log.info("[get data from redis success], pageNum:" + pageNum);
 				Map<String, List<Map<String, Object>>> map = (Map<String, List<Map<String, Object>>>) redisUtil
 						.get(serialKey);

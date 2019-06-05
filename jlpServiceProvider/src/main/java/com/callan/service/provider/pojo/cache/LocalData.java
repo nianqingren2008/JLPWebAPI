@@ -8,7 +8,7 @@ import java.util.Map;
  * @author callan
  *
  */
-public class NativeData {
+public class LocalData {
 	public static Map<String,Object> dataMap = new HashMap<String, Object>();
 
 	public static Object getData(String key) {

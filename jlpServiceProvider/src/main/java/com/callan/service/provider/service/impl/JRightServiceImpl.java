@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.dao.mapper.JRightMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
-import com.callan.service.provider.pojo.cache.NativeCacheable;
+import com.callan.service.provider.pojo.cache.LocalCacheable;
 import com.callan.service.provider.pojo.db.JRight;
 import com.callan.service.provider.service.IJRightService;
 import com.callan.service.provider.service.IJShowDetailViewService;
@@ -31,7 +31,7 @@ public class JRightServiceImpl implements IJRightService {
 		return jRight;
 	}
 	
-	@NativeCacheable
+	@LocalCacheable
 	@Override
 	public CacheResponse getAll4Id() {
 		List<JRight> list = jRightMapper.getAll();

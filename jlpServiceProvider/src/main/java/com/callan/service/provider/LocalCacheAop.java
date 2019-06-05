@@ -14,15 +14,15 @@ import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.CacheKey;
-import com.callan.service.provider.pojo.cache.NativeCacheable;
-import com.callan.service.provider.pojo.cache.NativeCacheable.KeyMode;
-import com.callan.service.provider.pojo.cache.NativeData;
+import com.callan.service.provider.pojo.cache.LocalCacheable;
+import com.callan.service.provider.pojo.cache.LocalCacheable.KeyMode;
+import com.callan.service.provider.pojo.cache.LocalData;
 
 @Aspect
 @Component
-public class NativeCacheAop {
+public class LocalCacheAop {
 
-	@Pointcut("@annotation(com.callan.service.provider.pojo.cache.NativeCacheable)")
+	@Pointcut("@annotation(com.callan.service.provider.pojo.cache.LocalCacheable)")
 	public void methodCachePointcut() {
 
 	}
@@ -39,7 +39,7 @@ public class NativeCacheAop {
 	public Object cached(ProceedingJoinPoint pjp) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Object value = null;
-		NativeCacheable cache = null;
+		LocalCacheable cache = null;
 		String targetName = pjp.getTarget().getClass().getName();
 		String methodName = pjp.getSignature().getName();
 		Object[] arguments = pjp.getArgs();
@@ -50,7 +50,7 @@ public class NativeCacheAop {
 				if (m.getName().equals(methodName)) {
 					Class[] tmpCs = m.getParameterTypes();
 					if (tmpCs.length == arguments.length) {
-						cache = m.getAnnotation(NativeCacheable.class);
+						cache = m.getAnnotation(LocalCacheable.class);
 						break;
 					}
 				}
@@ -92,7 +92,7 @@ public class NativeCacheAop {
 		String methonName = declaringTypeName + "." + pjp.getSignature().getName();
 
 //    	    logger.debug(methonName + ",from cache start ,  key:" + key);
-		value = NativeData.getData(key); // 从缓存获取数据
+		value = LocalData.getData(key); // 从缓存获取数据
 		if (value != null) {
 //    	    	logger.info(methonName + ",[GET SUCCESS],key:" + key);//+ "，value:" + value);
 			return value; // 如果有数据,则直接返回
@@ -105,12 +105,12 @@ public class NativeCacheAop {
 				CacheResponse vo = (CacheResponse) value;
 				if (vo.getCode() == 0) {
 					log.info(methonName + ",excuter success,will cache result");
-					NativeData.setData(key, value);
+					LocalData.setData(key, value);
 				} else {
 					log.info(methonName + ",excuter fail,will not do cache");
 				}
 			} else if (value != null) {
-				NativeData.setData(key, value);
+				LocalData.setData(key, value);
 			}
 
 		} catch (Throwable e) {

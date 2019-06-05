@@ -1,9 +1,14 @@
 package com.callan.service.provider.config;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import com.callan.service.provider.service.IJFiletypeService;
@@ -18,7 +23,7 @@ import com.callan.service.provider.service.IJTableFieldDictService;
 import com.callan.service.provider.service.IJUserService;
 
 @Service
-public class NativeCacheLoader implements InitializingBean{
+public class LocalCacheLoader implements InitializingBean{
 	
 	@Autowired IJRightService jRightService;
 	@Autowired IJSensitiveWordService jSensitiveWordService;
@@ -33,12 +38,15 @@ public class NativeCacheLoader implements InitializingBean{
 	
 	@Autowired IJFiletypeService filetypeSerice;
 	
+	@Autowired RedisTemplate<String, Object> redisTemplate;
+	
 	@Override
 	public void afterPropertiesSet() {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 //		log.info("-----开始初始化内存数据-----");
 		try {
 			executorService.execute(new Runnable() {
+				@SuppressWarnings("unchecked")
 				@Override
 				public void run() {
 					jRightService.getAll4Id();
@@ -69,8 +77,20 @@ public class NativeCacheLoader implements InitializingBean{
 					filetypeSerice.getAll();
 					
 					
-					//TODO 程序启动，扫描数据状态处于loading状态的key，并清理掉它
-					
+					//程序启动，扫描数据状态处于loading状态的key，并清理掉它
+					Set<String> keySet = redisTemplate.keys("*");
+					ValueOperations<String, Object> valueOper = redisTemplate.opsForValue();
+					for(String key : keySet) {
+						try {
+							Map<String,Object> value = (Map<String, Object>) valueOper.get(key);
+							if("loading".equals(ObjectUtil.objToString(value.get("status")))){
+								log.info("key : " + key +",处于loading状态，执行删除");
+								redisTemplate.delete(key);
+							}
+						}catch(Exception e) {
+							continue;
+						}
+					}
 				}
 			});
 			

@@ -4,7 +4,7 @@ spring:
 
 #总数数据存活时间(天数)
 sqlData.overTime.timeDay: 30
-#分页数据存货时间(秒)
+#分页数据存活时间(秒)
 pageDataAliveSeconds: 3600
 #向下向上查询的页数，推荐5
 pagePlusCount: 5

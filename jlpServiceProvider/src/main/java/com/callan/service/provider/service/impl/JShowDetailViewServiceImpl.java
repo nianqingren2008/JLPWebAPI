@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.dao.mapper.JShowDetailViewMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
-import com.callan.service.provider.pojo.cache.NativeCacheable;
+import com.callan.service.provider.pojo.cache.LocalCacheable;
 import com.callan.service.provider.pojo.db.JShowDetailView;
 import com.callan.service.provider.service.IJShowDetailViewService;
 
@@ -62,7 +62,7 @@ public class JShowDetailViewServiceImpl implements IJShowDetailViewService {
 		return map.get(viewId);
 	}
 	
-	@NativeCacheable
+	@LocalCacheable
 	@Override
 	public CacheResponse getAll4ViewId(boolean activeFlag) {
 		Map<Long,List<JShowDetailView>> map = new HashMap<>();
@@ -96,7 +96,7 @@ public class JShowDetailViewServiceImpl implements IJShowDetailViewService {
 		return response;
 	}
 	
-	@NativeCacheable
+	@LocalCacheable
 	@Override
 	public CacheResponse getAll4ViewId() {
 		Map<Long,List<JShowDetailView>> map = new HashMap<>();
@@ -118,7 +118,7 @@ public class JShowDetailViewServiceImpl implements IJShowDetailViewService {
 		return response;
 	}
 	
-	@NativeCacheable
+	@LocalCacheable
 	@Override
 	public CacheResponse getAll4Id() {
 		Map<Long,JShowDetailView> map = new HashMap<>();

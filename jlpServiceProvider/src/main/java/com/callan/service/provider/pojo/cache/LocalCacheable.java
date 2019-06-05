@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)  
 @Target({ElementType.METHOD,ElementType.TYPE,ElementType.FIELD,ElementType.LOCAL_VARIABLE})  
 @Documented
-public @interface NativeCacheable {
+public @interface LocalCacheable {
 	public enum KeyMode{
         DEFAULT,    //只有加了@CacheKey的参数,才加入key后缀中  
         BASIC,      //只有基本类型参数,才加入key后缀中,如:String,Integer,Long,Short,Boolean  
