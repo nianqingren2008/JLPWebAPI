@@ -83,9 +83,8 @@ public class AdvancedQueryController {
 	@Autowired
 	private IJRoleRightService roleRightService;
 
-//	@CrossOrigin(origins = "*",maxAge = 3600)  //跨域
 	@SuppressWarnings("unchecked")
-	@ApiOperation(value = "病例检索模糊查询")
+	@ApiOperation(value = "病例检索模糊查询(仅列表)")
 	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST })
 	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpServletRequest request) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
@@ -98,7 +97,7 @@ public class AdvancedQueryController {
 		} catch (Exception e) {
 			log.error(e);
 		}
-		boolean isTotals = false;
+//		boolean isTotals = false;
 		int pageNumInt = StringUtils.isBlank(pageNum) ? 1 : Integer.parseInt(pageNum);
 		int pageSizeInt = StringUtils.isBlank(pageSize) ? 20 : Integer.parseInt(pageSize);
 		AdvanceQueryResponse response = new AdvanceQueryResponse();
@@ -362,21 +361,21 @@ public class AdvancedQueryController {
 //		String sortStr = PatientGlobalTable + "__Id";
 //
 		String finalSelectFields = fieldNames.toString().substring(1, fieldNames.toString().length() - 1);
-		String finalTables4Count = toTableString(tableNames, tempSql,tableWhere);
+//		String finalTables4Count = toTableString(tableNames, tempSql,tableWhere);
 		
 		
 		
-		String tableKeys = toTableKeys(showTableNames);
+//		String tableKeys = toTableKeys(showTableNames);
 		
 		
 		
-		String sql = "select distinct " + tableKeys + " from " + finalTables4Count + " " + tempSqlWhere;
-		String sqlCount = " select count(1) count from (" + sql + ") countsql";
-//		log.info("sql : " + sql);
-		log.info("sqlCount : " + sqlCount);
-//		if (isTotals) {
-		int count = jlpService.queryForCount(sqlCount);
-		response.setTotals(count);
+//		String sql = "select distinct " + tableKeys + " from " + finalTables4Count + " " + tempSqlWhere;
+//		String sqlCount = " select count(1) count from (" + sql + ") countsql";
+////		log.info("sql : " + sql);
+//		log.info("sqlCount : " + sqlCount);
+////		if (isTotals) {
+//		int count = jlpService.queryForCount(sqlCount);
+//		response.setTotals(count);
 //		} else {
 //			String SqlKeys = getPageSql(sql,pageNumInt,pageSizeInt);
 //			log.info("SqlKeys : " + SqlKeys);
@@ -443,6 +442,7 @@ public class AdvancedQueryController {
 //			}
 		response.setColumns(columns);
 		response.setContent(retData);
+		response.setTotals(0);
 //		}
 		String json = response.toJsonString();
 		log.info("response --> " + json);
@@ -452,6 +452,223 @@ public class AdvancedQueryController {
 		return json;
 	}
 
+	
+	
+	@ApiOperation(value = "病例检索模糊查询(仅数量)")
+	@RequestMapping(value = "/api/AdvanceQuery/count", method = { RequestMethod.POST })
+	public String query4Count(@RequestBody String advanceQuery, String pageNum, String pageSize) {
+		JLPLog log = ThreadPoolConfig.getBaseContext();
+		long start = System.currentTimeMillis();
+		log.info("request --> " + advanceQuery);
+		AdvanceQueryRequest advanceQueryRequest = null;
+		try {
+			advanceQueryRequest = JSONObject.toJavaObject(JSONObject.parseObject(advanceQuery),
+					AdvanceQueryRequest.class);
+		} catch (Exception e) {
+			log.error(e);
+		}
+		AdvanceQueryResponse response = new AdvanceQueryResponse();
+		if (advanceQueryRequest == null) {
+			response.getResponse().setCode("0000");
+			response.getResponse().setText("传入参数为空");
+			String json = response.toJsonString();
+			response.setTotals(0);
+			log.info("response --> " + json);
+			return json;
+		}
+		if (advanceQueryRequest.getViewId() == 0) {
+			response.getResponse().setCode("0000");
+			response.getResponse().setText("视图编号错误");
+			String json = response.toJsonString();
+			response.setTotals(0);
+			log.info("response --> " + json);
+			return json;
+		}
+
+		JShowView jShowView = jShowviewService.getOne(advanceQueryRequest.getViewId(), true);
+		if (jShowView == null) {
+			response.getResponse().setCode("0000");
+			response.getResponse().setText("视图编号错误");
+			String json = response.toJsonString();
+			response.setTotals(0);
+			log.info("response --> " + json);
+			return json;
+		}
+
+		JTableDict mainTable = null;
+
+		// 获取显示视图信息
+		List<JShowDetailView> jShowDetailViewList = jShowDetailViewService.getByViewId(jShowView.getId(), true);
+//        
+		List<JTableFieldDict> jTableFieldDictList = new ArrayList<JTableFieldDict>();
+		for (JShowDetailView jShowDetailView : jShowDetailViewList) {
+			long fieldId = jShowDetailView.getFieldid();
+			JTableFieldDict jTableFieldDict = jTableFieldDictService.getOne(fieldId, true);
+			if (jTableFieldDict == null) {
+				log.warn("fieldId 为 " + fieldId + " 未找到j_tablefielddict 记录 ");
+				continue;
+			}
+			jTableFieldDictList.add(jTableFieldDict);
+			jTableFieldDict.setjShowDetailView(jShowDetailView);
+			jShowDetailView.setjTableFieldDict(jTableFieldDict);
+			JTableDict jTableDict = jTableDictService.getByCode(jTableFieldDict.getTablecode(), true);
+			jShowDetailView.setjTableDict(jTableDict);
+			if (mainTable == null) {
+				mainTable = jTableDict;
+			}
+		}
+
+		List<JShowDetailView> jShowDetailViewListShow = new ArrayList<>();
+		if (advanceQueryRequest.getQueryShowFields() != null) {
+			List<Long> tempFieldList = new ArrayList<Long>();
+			for (Long field : advanceQueryRequest.getQueryShowFields()) {
+				tempFieldList.add(field);
+			}
+			for (JShowDetailView jShowDetailView : jShowDetailViewList) {
+				if (tempFieldList.contains(jShowDetailView.getId().longValue())) {
+					if (!jShowDetailViewListShow.contains(jShowDetailView)) {
+						jShowDetailViewListShow.add(jShowDetailView);
+					}
+				}
+			}
+		}
+		Collections.sort(jShowDetailViewListShow, new Comparator<JShowDetailView>() {
+			@Override
+			public int compare(JShowDetailView o1, JShowDetailView o2) {
+				return o1.getSortno().compareTo(o2.getSortno());
+			}
+		});
+
+		if (jTableFieldDictList.size() == 0) {
+			response.getResponse().setCode("1001");
+			response.getResponse().setText("显示字段未配置");
+			response.setTotals(0);
+			String json = response.toJsonString();
+			log.info("response --> " + json);
+			return json;
+		}
+
+		// 获取查询所有表名
+		List<QueryConds> queryCondsList = advanceQueryRequest.getQueries().getQueryConds();
+		SortedSet<String> tableNameMainWheres = new TreeSet<String>();
+		SortedSet<String> tableNameWhereMainValues = new TreeSet<String>();
+		String sqlWhereMain = "";
+		Map<String,List<String> > tableWhere = new HashMap<String, List<String>>();
+		if (queryCondsList != null) {
+
+			for (QueryConds queryConds : queryCondsList) {
+				String tableName = queryConds.getCondition().split("\\.")[0].toUpperCase();
+				tableNameMainWheres.add(tableName);
+				String fieldName = queryConds.getCondition().split("\\.")[1].toUpperCase();
+				//
+				if (queryConds.getFieldType() == 1) {
+					tableNameWhereMainValues.add(queryConds.getCondValue().split("\\.")[0].toUpperCase());
+				}
+				String condition = queryConds.getCondition().toUpperCase();
+				JTableDict jTableDict = jTableDictService.getByName(tableName, true);
+				JTableFieldDict jTableFieldDict = jTableFieldDictService.getByTableCodeAndName(jTableDict.getCode(),
+						fieldName);
+				// whereFieldTypesMain.add(jTableFieldDict.getType());
+
+				String relation = queryConds.getRelation();
+				// 如果是is not null 则不拼装value
+				if (!relation.contains("null")) {
+					String condValue = queryConds.getCondValue() == null ? "" : queryConds.getCondValue();
+					if ("like".equalsIgnoreCase(relation)) {
+						condValue = "%" + condValue + "%";
+					}
+					if ("VARCHAR2".equalsIgnoreCase(jTableFieldDict.getType())
+							|| "CHAR".equalsIgnoreCase(jTableFieldDict.getType())) {
+						condValue = "'" + condValue + "'";
+					}
+					if ("DATE".equalsIgnoreCase(jTableFieldDict.getType())) {
+						condValue = "to_date('" + condValue + "','yyyy/mm/dd')";
+					}
+					sqlWhereMain += condition + " " + queryConds.getRelation() + " " + condValue + " and ";
+					List<String> list = tableWhere.get(tableName);
+					if(list == null) {
+						list = new ArrayList<String>();
+					}
+					list.add(" and " + condition + " " + queryConds.getRelation() + " " + condValue);
+				} else {
+					sqlWhereMain += condition + " " + queryConds.getRelation() + " " + " and ";
+				}
+
+			}
+		}
+		// 去掉最后的and
+		if (sqlWhereMain.length() > 4) {
+			sqlWhereMain = sqlWhereMain.substring(0, sqlWhereMain.length() - 4);
+		}
+		SortedSet<String> tableNames = new TreeSet<String>();
+		List<FieldName> fieldNames = new ArrayList<FieldName>();
+		// 增加隐藏主键
+		fieldNames.add(new FieldName(JLPConts.PatientGlobalTable + ".Id as hide_key"));
+		SortedSet<String> fieldShowNames = new TreeSet<String>();
+		SortedSet<String> showTableNames = new TreeSet<String>();
+		for (JShowDetailView JShowDetailView : jShowDetailViewListShow) {
+			tableNames.add(JShowDetailView.getjTableDict().getName());
+			showTableNames.add(JShowDetailView.getjTableDict().getName());
+			fieldNames.add(new FieldName(
+					(JShowDetailView.getjTableDict().getName() + "." + JShowDetailView.getjTableFieldDict().getName())
+							.toLowerCase()));
+			fieldShowNames.add(JShowDetailView.getjTableFieldDict().getName().toLowerCase());
+		}
+		tableNames.addAll(tableNameMainWheres);
+		List<Sorted> sortedList = advanceQueryRequest.getSorted();
+		// 排序字段
+		String sorts = "";
+		for (String showField : fieldShowNames) {
+			for (Sorted sorted : sortedList) {
+				if (showField.equalsIgnoreCase(sorted.getId())) {
+					sorts += showField + ",";
+				}
+			}
+		}
+		if (sorts.length() > 0) {
+			sorts = sorts.substring(0, sorts.length() - 1);
+		}
+
+		QueryIncludesEX queryIncludesEX = advanceQueryRequest.getQueries().getQueryIncludesEX();
+		String tempSql = queryEx(queryIncludesEX,tableWhere);
+
+		for (int i = 0; i < fieldNames.size(); i++) {
+			FieldName fieldName = fieldNames.get(i);
+			if (fieldName.getFieldName().toUpperCase().contains("BIRTHDAY")
+					&& !fieldName.getFieldName().contains("to_char")) {
+				fieldName.setFieldName("to_char(" + fieldName.getFieldName() + ",'yyyy/mm/dd') as birthday");
+			}
+		}
+		
+		String tempSqlWhere = " where 1=1 and " + JLPConts.PatientGlobalTable+".jlactiveflag='1' ";;
+		if (sqlWhereMain.length() > 0) {
+			tempSqlWhere += " and  " + sqlWhereMain;
+		}
+		tempSqlWhere += " and " + mainTable.getName() + ".Id is not null";
+		String finalTables4Count = toTableString(tableNames, tempSql,tableWhere);
+		
+		
+		
+		String tableKeys = toTableKeys(showTableNames);
+		
+		
+		
+		String sql = "select distinct " + tableKeys + " from " + finalTables4Count + " " + tempSqlWhere;
+		String sqlCount = " select count(1) count from (" + sql + ") countsql";
+		log.info("sqlCount : " + sqlCount);
+//		if (isTotals) {
+		int count = jlpService.queryForCount(sqlCount);
+		response.setTotals(count);
+		String json = response.toJsonString();
+		log.info("response --> " + json);
+		long end = System.currentTimeMillis();
+		log.info("serviceTime " + (end - start) + "ms");
+		//清理上下文
+		return json;
+	}
+	
+	
+	
 	private List<Map<String, Object>> sensitiveWord(List<Map<String, Object>> retData,
 			Map<String, JSensitiveWord> sensitiveWordMap) {
 		if (retData == null || retData.size() == 0) {
