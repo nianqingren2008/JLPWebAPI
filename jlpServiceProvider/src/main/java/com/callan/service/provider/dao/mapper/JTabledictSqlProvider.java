@@ -1,11 +1,11 @@
 package com.callan.service.provider.dao.mapper;
 
-import com.callan.service.provider.pojo.db.JTabledict;
+import com.callan.service.provider.pojo.db.JTableDict;
 import org.apache.ibatis.jdbc.SQL;
 
 public class JTabledictSqlProvider {
 
-    public String insertSelective(JTabledict record) {
+    public String insertSelective(JTableDict record) {
         SQL sql = new SQL();
         sql.INSERT_INTO("J_TABLEDICT");
         
@@ -36,7 +36,7 @@ public class JTabledictSqlProvider {
         return sql.toString();
     }
 
-    public String updateByPrimaryKeySelective(JTabledict record) {
+    public String updateByPrimaryKeySelective(JTableDict record) {
         SQL sql = new SQL();
         sql.UPDATE("J_TABLEDICT");
         

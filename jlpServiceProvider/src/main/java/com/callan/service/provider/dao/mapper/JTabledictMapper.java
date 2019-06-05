@@ -1,6 +1,6 @@
 package com.callan.service.provider.dao.mapper;
 
-import com.callan.service.provider.pojo.db.JTabledict;
+import com.callan.service.provider.pojo.db.JTableDict;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.InsertProvider;
@@ -26,10 +26,10 @@ public interface JTabledictMapper {
         "#{name,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, ",
         "#{sortno,jdbcType=DECIMAL}, #{activeflag,jdbcType=CHAR})"
     })
-    int insert(JTabledict record);
+    int insert(JTableDict record);
 
     @InsertProvider(type=JTabledictSqlProvider.class, method="insertSelective")
-    int insertSelective(JTabledict record);
+    int insertSelective(JTableDict record);
 
     @Select({
         "select",
@@ -45,10 +45,10 @@ public interface JTabledictMapper {
         @Result(column="SORTNO", property="sortno", jdbcType=JdbcType.DECIMAL),
         @Result(column="ACTIVEFLAG", property="activeflag", jdbcType=JdbcType.CHAR)
     })
-    JTabledict selectByPrimaryKey(Long id);
+    JTableDict selectByPrimaryKey(Long id);
 
     @UpdateProvider(type=JTabledictSqlProvider.class, method="updateByPrimaryKeySelective")
-    int updateByPrimaryKeySelective(JTabledict record);
+    int updateByPrimaryKeySelective(JTableDict record);
 
     @Update({
         "update J_TABLEDICT",
@@ -59,5 +59,5 @@ public interface JTabledictMapper {
           "ACTIVEFLAG = #{activeflag,jdbcType=CHAR}",
         "where ID = #{id,jdbcType=DECIMAL}"
     })
-    int updateByPrimaryKey(JTabledict record);
+    int updateByPrimaryKey(JTableDict record);
 }

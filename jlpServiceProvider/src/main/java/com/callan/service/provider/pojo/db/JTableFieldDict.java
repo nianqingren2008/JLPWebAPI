@@ -1,6 +1,6 @@
 package com.callan.service.provider.pojo.db;
 
-public class JTablefielddict {
+public class JTableFieldDict {
     private Long id;
 
     private String tablecode;
