@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.dao.mapper.JSensitiveWordMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
-import com.callan.service.provider.pojo.cache.NativeCacheable;
+import com.callan.service.provider.pojo.cache.LocalCacheable;
 import com.callan.service.provider.pojo.db.JSensitiveWord;
 import com.callan.service.provider.pojo.db.JShowDetailView;
 import com.callan.service.provider.service.IJRightService;
@@ -34,7 +34,7 @@ public class JSensitiveWordServiceImpl implements IJSensitiveWordService {
 		return map.get(id);
 	}
 
-	@NativeCacheable
+	@LocalCacheable
 	@Override
 	public CacheResponse getAll() {
 		List<JSensitiveWord> all = jSensitiveWordMapper.getAll();
@@ -50,7 +50,7 @@ public class JSensitiveWordServiceImpl implements IJSensitiveWordService {
 		return response;
 	}
 
-	@NativeCacheable
+	@LocalCacheable
 	@Override
 	public CacheResponse getAll4Name() {
 		List<JSensitiveWord> all = jSensitiveWordMapper.getAll();

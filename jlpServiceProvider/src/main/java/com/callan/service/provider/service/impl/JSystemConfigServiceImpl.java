@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.callan.service.provider.dao.mapper.JDownloadFileMapper;
 import com.callan.service.provider.dao.mapper.JSystemConfigMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
-import com.callan.service.provider.pojo.cache.NativeCacheable;
+import com.callan.service.provider.pojo.cache.LocalCacheable;
 import com.callan.service.provider.pojo.db.JDownloadfile;
 import com.callan.service.provider.pojo.db.JRoleRight;
 import com.callan.service.provider.pojo.db.JSystemconfig;
@@ -34,7 +34,7 @@ public class JSystemConfigServiceImpl implements IJSystemConfigService {
 
 	}
 
-	@NativeCacheable
+	@LocalCacheable
 	@Override
 	public CacheResponse getByClassTypeAndKeyName(String classType, String keyName) {
 		CacheResponse response = new CacheResponse();
@@ -43,7 +43,7 @@ public class JSystemConfigServiceImpl implements IJSystemConfigService {
 		return response;
 	}
 
-	@NativeCacheable
+	@LocalCacheable
 	@Override
 	public CacheResponse getAll4Id() {
 		List<JSystemconfig> all = systemConfigMapper.getAll();

@@ -1,5 +1,7 @@
 package com.callan.service.provider.controller;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +16,9 @@ import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.db.DPatientglobal;
-import com.callan.service.provider.pojo.db.JFiletype;
+import com.callan.service.provider.pojo.db.DPatientvisit;
 import com.callan.service.provider.service.IDPatientglobalService;
+import com.callan.service.provider.service.IDPatientvisitService;
 import com.callan.service.provider.service.IJFiletypeService;
 
 import io.swagger.annotations.Api;
@@ -27,7 +30,11 @@ public class PanoramaController {
 	@Autowired
 	private IJFiletypeService filetypeService;
 	@Autowired
-	private IDPatientglobalService dPatientglobalService;
+	private IDPatientglobalService patientglobalService;
+	
+	@Autowired
+	private IDPatientvisitService patientvisitService;
+	
 	
 	@ApiOperation(value = "获取全景视图患者住院列表")
 	@RequestMapping(value = "/api/Panorama/{PanoramaType}/{Id}", method = { RequestMethod.GET })
@@ -41,7 +48,7 @@ public class PanoramaController {
             hasPage = false;
         }
 
-        DPatientglobal patientglobal = dPatientglobalService.getOne(id);
+        DPatientglobal patientglobal = patientglobalService.getOne(id);
         if (patientglobal == null)
         {
         	BaseResponse baseResponse = new BaseResponse();
@@ -49,10 +56,16 @@ public class PanoramaController {
 			baseResponse.setText("未找到该患者信息！");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
-			
         }
-//        var patientVisitQuery = orclJlpContext.DPatientvisits.Where(x => x.Jlactiveflag == "1" && x.Patientglobalid == patientglobal.Id).OrderBy(x => x.Rydatetime).AsQueryable();
-//        int patientVisitCount = patientVisitQuery.Count();
+        List<DPatientvisit> vistList = patientvisitService.getByPatientGlobalId(patientglobal.getId());
+        Collections.sort(vistList, new Comparator<DPatientvisit>() {
+
+			@Override
+			public int compare(DPatientvisit o1, DPatientvisit o2) {
+				return o1.getRydatetime().compareTo(o2.getRydatetime());
+			}
+		});
+        int patientVisitCount = vistList.size();
 //        if (hasPage)
 //        {
 //            patientVisitQuery = patientVisitQuery.Skip((urlParameter.pageNum - 1) * urlParameter.pageSize).Take(urlParameter.pageSize);

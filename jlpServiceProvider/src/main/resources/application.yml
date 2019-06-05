@@ -2,5 +2,12 @@ spring:
   profiles:
     active: prod
 
-#分页数据存活时间(天数)
-sqlData.overTime.timeDay: 10
+#总数数据存活时间(天数)
+sqlData.overTime.timeDay: 30
+#分页数据存活时间(秒)
+pageDataAliveSeconds: 3600
+#向下向上查询的页数，推荐5
+pagePlusCount: 5
+#加载中状态保存时长，防止意外中断导致key一直处于加载中状态，推荐300s
+loadingSeconds: 300
+
