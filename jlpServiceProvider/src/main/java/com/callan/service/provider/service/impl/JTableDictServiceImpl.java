@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ThreadPoolConfig;
-import com.callan.service.provider.dao.mapper.JTableDictMapper;
+import com.callan.service.provider.dao.mapper.JTabledictMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.LocalCacheable;
 import com.callan.service.provider.pojo.db.JShowDetailView;
@@ -28,7 +28,7 @@ import com.callan.service.provider.service.IJTableDictService;
 public class JTableDictServiceImpl implements IJTableDictService {
 	
 	@Autowired
-	private JTableDictMapper jTableDictMapper;
+	private JTabledictMapper jTableDictMapper;
 
 	@Override
 	public JTableDict getOne(Long id) {

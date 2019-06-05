@@ -1,6 +1,9 @@
 package com.callan.service.provider.dao.mapper;
 
 import com.callan.service.provider.pojo.db.JTableDict;
+
+import java.util.List;
+
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.InsertProvider;
@@ -60,4 +63,29 @@ public interface JTabledictMapper {
         "where ID = #{id,jdbcType=DECIMAL}"
     })
     int updateByPrimaryKey(JTableDict record);
+    
+    
+    /**
+	 * 
+	 * @return
+	 */
+	@Select("SELECT * FROM J_TABLEDICT")
+    public List<JTableDict> getAll();
+	
+	
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
+    @Select("SELECT * FROM J_TABLEDICT WHERE id = #{id}")
+    JTableDict getOne(Long id);
+    
+
+    /**
+     * 
+     * @param id
+     */
+    @Delete("DELETE FROM J_TABLEDICT WHERE id =#{id}")
+    void delete(Long id);
 }

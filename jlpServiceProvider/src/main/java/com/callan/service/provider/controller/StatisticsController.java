@@ -14,7 +14,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.base.BaseResponse;
-import com.callan.service.provider.pojo.db.JTabledict;
 import com.callan.service.provider.service.IJUserService;
 
 import io.swagger.annotations.Api;
