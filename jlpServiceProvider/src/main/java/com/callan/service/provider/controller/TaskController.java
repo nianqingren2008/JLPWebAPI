@@ -168,12 +168,12 @@ public class TaskController {
 	public String  getTaskList(String pageNum, String pageSize, HttpServletRequest request){
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
+		BaseResponse baseResponse = new BaseResponse();
 		// 从前台header中获取token参数
 		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
 				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null || userId == 0) {
-			BaseResponse baseResponse = new BaseResponse();
 			baseResponse.setCode("0000");
 			baseResponse.setText("用户信息获取失败，请检查请求头");
 			resultMap.put("response", baseResponse);
@@ -215,7 +215,9 @@ public class TaskController {
 			map.put("fileUrl", task.getFileurl());
 			resultList.add(map);
 		}
-		resultMap.put("response", new BaseResponse());
+		baseResponse.setCode("1000");
+		baseResponse.setText("处理成功");
+		resultMap.put("response", baseResponse);
 		resultMap.put("tasks", resultList);
 		String json = JSONObject.toJSONString(resultMap);
 		log.info("response : " + json);
@@ -227,13 +229,13 @@ public class TaskController {
 	public String  queryTask(Long id, HttpServletRequest request){
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
+		BaseResponse baseResponse = new BaseResponse();
 		Map<String, Object> map = new HashMap<String, Object>();
 		// 从前台header中获取token参数
 		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
 				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null || userId == 0) {
-			BaseResponse baseResponse = new BaseResponse();
 			baseResponse.setCode("0000");
 			baseResponse.setText("用户信息获取失败，请检查请求头");
 			resultMap.put("response", baseResponse);
@@ -258,13 +260,13 @@ public class TaskController {
 			}
 		}
 		else {
-			BaseResponse baseResponse = new BaseResponse();
 			baseResponse.setCode("0000");
 			baseResponse.setText("获取任务詳情失败，请检查请求头");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
-		
+		baseResponse.setCode("1000");
+		baseResponse.setText("获取任务詳情成功");
 		resultMap.put("response", new BaseResponse());
 		resultMap.put("task", map);
 		String json = JSONObject.toJSONString(resultMap);
