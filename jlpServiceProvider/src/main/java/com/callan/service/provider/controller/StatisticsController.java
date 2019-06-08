@@ -1,6 +1,7 @@
 package com.callan.service.provider.controller;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +15,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.base.BaseResponse;
+import com.callan.service.provider.pojo.db.JStatisconf;
+import com.callan.service.provider.pojo.db.JStatisconfdetail;
+import com.callan.service.provider.service.IJLpService;
 import com.callan.service.provider.service.IJUserService;
 
 import io.swagger.annotations.Api;
@@ -24,6 +28,8 @@ import io.swagger.annotations.ApiOperation;
 public class StatisticsController {
 	@Autowired
 	private IJUserService userService;
+	@Autowired
+	private IJLpService jlpService;
 	
 	@ApiOperation(value = "获取统计项列表")
 	@RequestMapping(value = "/api/Statistics/pageCode", method = { RequestMethod.GET })
@@ -42,7 +48,63 @@ public class StatisticsController {
 			return JSONObject.toJSONString(resultMap);
 		}
 		log.info("userId : " + userId);
-		 
+		String sql = " select distinct k1.code,k1.title,k1.id  from ( "
+				+ " select n1.id, "+
+				"    n1.code,  "+
+				"    n1.title,   "+
+				"    n1.createdate, "+
+				"       n1.pagecode, "+
+				"       n1.pagetitle from (  "+
+				" select w1.id,  "+
+				"       w1.code,  "+
+				"       w1.title, "+
+				"       w1.createdate, "+
+				"       w1.pagecode, "+
+				"       w1.pagetitle, "+
+				"       w1.fieldid, "+ 
+				"       w2.name,    "+
+				"       w2.description "+
+				"  from (select t.id, "+
+				"               t.code, "+
+				"               t.title, "+
+				"               t.createdate, "+
+				"               t.pagecode, "+
+				"               t.pagetitle, "+
+				"               m.fieldid "+
+				"          from j_statisconf t "+
+				"          left join j_statisconfdetail m "+
+				"            on t.id = m.statisconfid "+
+				"         where t.activeflag = '1' and t.pagecode = '"+pageCode+"') w1 "+
+				"  left join j_tablefielddict w2 "+
+				"    on w1.fieldid = w2.id) n1  group  by   n1.id, "+
+				"       n1.code, "+
+				"       n1.title, "+
+				"       n1.createdate, "+
+				"       n1.pagecode, "+
+				"       n1.pagetitle "
+				+ " ) k1  order by k1.id ";
+		log.info("geStatistics-->>sql : " + sql);
+		int pageNum = 1, pageSize =20;
+		List<Map<String, Object>> resultList = jlpService.queryForSQLStreaming(sql,  pageNum,  pageSize);
+		List<JStatisconf> jStatisconfList = null;
+		List<JStatisconfdetail> jStatisconfdetails=null;
+		if(resultList!=null&&resultList.size()>0) {
+			for ( Map<String, Object>  map : resultList) {
+				JStatisconf jStatisconf = new  JStatisconf();
+				jStatisconf.setId((Long) map.get("id"));
+				jStatisconf.setCode(map.get("code")+"");
+				jStatisconf.setTitle(map.get("title")+"");
+				jStatisconfList.add(jStatisconf);
+			}
+		}
+		else {
+			BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("0000");
+			baseResponse.setText("错误的页面编号");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
+		}
+		
 		
 		return null;
 	}
