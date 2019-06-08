@@ -215,8 +215,7 @@ public class TaskController {
 			map.put("fileUrl", task.getFileurl());
 			resultList.add(map);
 		}
-		baseResponse.setCode("1000");
-		baseResponse.setText("处理成功");
+		 
 		resultMap.put("response", baseResponse);
 		resultMap.put("tasks", resultList);
 		String json = JSONObject.toJSONString(resultMap);
@@ -265,8 +264,7 @@ public class TaskController {
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
-		baseResponse.setCode("1000");
-		baseResponse.setText("获取任务詳情成功");
+		 
 		resultMap.put("response", new BaseResponse());
 		resultMap.put("task", map);
 		String json = JSONObject.toJSONString(resultMap);

@@ -1,5 +1,7 @@
 package com.callan.service.provider.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,4 +19,10 @@ public class JRoleServiceImpl implements IJRoleService {
 		return roleMapper.getOne(id);
 	}
 
+	@Override
+	public List<JRole> getAll() {
+		return roleMapper.getAll();
+	}
+	
+	 
 }
