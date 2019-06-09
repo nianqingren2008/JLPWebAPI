@@ -5,26 +5,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.callan.service.provider.config.JLPConts;
-import com.callan.service.provider.dao.mapper.JSensitiveWordMapper;
+import com.callan.service.provider.dao.mapper.JSensitivewordMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.LocalCacheable;
 import com.callan.service.provider.pojo.db.JSensitiveWord;
-import com.callan.service.provider.pojo.db.JShowDetailView;
-import com.callan.service.provider.service.IJRightService;
 import com.callan.service.provider.service.IJSensitiveWordService;
-import com.callan.service.provider.service.IJShowDetailViewService;
 
 @Service
 public class JSensitiveWordServiceImpl implements IJSensitiveWordService {
 	@Autowired
-	private JSensitiveWordMapper  jSensitiveWordMapper;
+	private JSensitivewordMapper  jSensitiveWordMapper;
 	
 	@Override
 	public JSensitiveWord getOne(Long id) {
