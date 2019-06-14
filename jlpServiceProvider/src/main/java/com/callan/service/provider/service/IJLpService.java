@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
+import com.callan.service.provider.pojo.db.JStatisconfdetail;
+
 public interface IJLpService {
 	
 	/**

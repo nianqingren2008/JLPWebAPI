@@ -17,6 +17,8 @@ import com.callan.service.provider.service.IJRoleRightService;
 import com.callan.service.provider.service.IJSensitiveWordService;
 import com.callan.service.provider.service.IJShowDetailViewService;
 import com.callan.service.provider.service.IJShowViewService;
+import com.callan.service.provider.service.IJStatisconfService;
+import com.callan.service.provider.service.IJStatisconfdetailService;
 import com.callan.service.provider.service.IJSystemConfigService;
 import com.callan.service.provider.service.IJTableDictService;
 import com.callan.service.provider.service.IJTableFieldDictService;
@@ -37,6 +39,8 @@ public class LocalCacheLoader implements InitializingBean{
 	@Autowired IJSystemConfigService systemConfigService;
 	
 	@Autowired IJFiletypeService filetypeSerice;
+	@Autowired  IJStatisconfService jStatisconfService;
+	@Autowired  IJStatisconfdetailService jStatisconfdetailService;
 	
 	@Autowired RedisTemplate<String, Object> redisTemplate;
 	
@@ -76,6 +80,10 @@ public class LocalCacheLoader implements InitializingBean{
 					
 					filetypeSerice.getAll();
 					
+					jStatisconfService.getAll();
+					jStatisconfService.getAll4Id();
+					jStatisconfdetailService.getAll();
+					jStatisconfdetailService.getAll4Id();
 					
 					//程序启动，扫描数据状态处于loading状态的key，并清理掉它
 					Set<String> keySet = redisTemplate.keys("*");
