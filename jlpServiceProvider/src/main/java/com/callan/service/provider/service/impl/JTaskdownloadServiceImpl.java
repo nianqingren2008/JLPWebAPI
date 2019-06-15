@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.callan.service.provider.dao.mapper.JStatisconfMapper;
 import com.callan.service.provider.dao.mapper.JTaskdownloadMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
+import com.callan.service.provider.pojo.cache.LocalCacheable;
 import com.callan.service.provider.pojo.task.JTask;
 import com.callan.service.provider.pojo.task.JTaskdownload;
 import com.callan.service.provider.service.IJTaskdownloadService;
@@ -19,9 +20,14 @@ public class JTaskdownloadServiceImpl implements IJTaskdownloadService{
 
 	@Autowired
 	private JTaskdownloadMapper taskdowenloadMapper;
+	
+	@LocalCacheable
 	@Override
 	public CacheResponse getAll() {
-		 return taskdowenloadMapper.getAll();
+		CacheResponse response = new CacheResponse();
+		response.setCode(0);
+		response.setData(taskdowenloadMapper.getAll());
+		return response;
 	}
 
 	@Override
