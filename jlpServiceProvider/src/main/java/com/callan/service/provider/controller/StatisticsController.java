@@ -1,5 +1,6 @@
 package com.callan.service.provider.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,9 +80,9 @@ public class StatisticsController {
 		log.info("geStatistics-->>sql : " + sql);
 		int pageNum = 1, pageSize =20;
 		List<Map<String, Object>> resultList = jlpService.queryForSQLStreaming(sql,  pageNum,  pageSize);
-		List<JStatisconf> jStatisconfList = null;
+		List<JStatisconf> jStatisconfList = new ArrayList<JStatisconf>();
 		List<JStatisconfdetail> jStatisconfdetails=null;
-		Map<String,List<JStatisconfdetail>> detailsMap = null;
+		Map<String,List<JStatisconfdetail>> detailsMap = new HashMap<String, List<JStatisconfdetail>>();
 		if(resultList!=null&&resultList.size()>0) {
 			for ( Map<String, Object>  map : resultList) {
 				JStatisconf jStatisconf = new  JStatisconf();

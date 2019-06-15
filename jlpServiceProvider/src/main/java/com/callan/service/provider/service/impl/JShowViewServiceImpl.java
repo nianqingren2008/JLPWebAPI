@@ -59,5 +59,27 @@ public class JShowViewServiceImpl implements IJShowViewService {
 		}
 		return jShowView;
 	}
+
+	@Override
+	public JShowView getByCode(String code) {
+		IJShowViewService base = (IJShowViewService) AopContext.currentProxy();
+		Map<Long, JShowView> data = (Map<Long, JShowView>) base.getAll4Code().getData();
+		JShowView jShowView = data.get(code);
+		return jShowView;
+	}
+	
+	@LocalCacheable
+	@Override
+	public CacheResponse getAll4Code() {
+		List<JShowView> list = jshowviewMapper.getAll();
+		Map<String, JShowView> map = new HashMap<String, JShowView>();
+		for (JShowView jShowView : list) {
+			map.put(jShowView.getCode(), jShowView);
+		}
+		CacheResponse response = new CacheResponse();
+		response.setCode(0);
+		response.setData(map);
+		return response;
+	}
 	
 }

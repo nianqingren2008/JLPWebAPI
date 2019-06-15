@@ -13,4 +13,8 @@ public interface IJShowViewService {
 
 	JShowView getOne(Long id, boolean activityFlag);
 
+	JShowView getByCode(String code);
+
+	CacheResponse getAll4Code();
+
 }

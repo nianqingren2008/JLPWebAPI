@@ -265,6 +265,7 @@ public class AdvancedQueryController {
 		List<FieldName> fieldNames = new ArrayList<FieldName>();
 		// 增加隐藏主键
 		fieldNames.add(new FieldName(JLPConts.PatientGlobalTable + ".Id as hide_key"));
+		fieldNames.add(new FieldName(JLPConts.PatientGlobalTable + ".Id as _key"));
 		SortedSet<String> fieldShowNames = new TreeSet<String>();
 		SortedSet<String> showTableNames = new TreeSet<String>();
 		for (JShowDetailView JShowDetailView : jShowDetailViewListShow) {

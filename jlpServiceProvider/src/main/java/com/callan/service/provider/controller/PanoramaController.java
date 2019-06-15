@@ -6,9 +6,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -19,22 +22,40 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
+import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ObjectUtil;
 import com.callan.service.provider.config.ThreadPoolConfig;
+import com.callan.service.provider.pojo.advanceQueryBase.ColunmsModel;
 import com.callan.service.provider.pojo.base.BaseResponse;
+import com.callan.service.provider.pojo.db.DDischargesummary;
+import com.callan.service.provider.pojo.db.DLabmasterinfo;
+import com.callan.service.provider.pojo.db.DMedicalrecords;
 import com.callan.service.provider.pojo.db.DPatientglobal;
 import com.callan.service.provider.pojo.db.DPatientvisit;
+import com.callan.service.provider.pojo.db.JPageviewdetail;
 import com.callan.service.provider.pojo.db.JRight;
 import com.callan.service.provider.pojo.db.JRoleRight;
 import com.callan.service.provider.pojo.db.JSensitiveWord;
+import com.callan.service.provider.pojo.db.JShowDetailView;
+import com.callan.service.provider.pojo.db.JShowView;
+import com.callan.service.provider.pojo.db.JTableFieldDict;
 import com.callan.service.provider.pojo.panorama.BasePatientInfoModel;
 import com.callan.service.provider.pojo.panorama.RecordPatients;
+import com.callan.service.provider.service.IDDischargesummaryService;
+import com.callan.service.provider.service.IDLabmasterinfoService;
+import com.callan.service.provider.service.IDMedicalrecordsService;
 import com.callan.service.provider.service.IDPatientglobalService;
 import com.callan.service.provider.service.IDPatientvisitService;
 import com.callan.service.provider.service.IJFiletypeService;
+import com.callan.service.provider.service.IJLpService;
+import com.callan.service.provider.service.IJPageViewDetailService;
+import com.callan.service.provider.service.IJPageViewService;
 import com.callan.service.provider.service.IJRoleRightService;
 import com.callan.service.provider.service.IJSensitiveWordService;
+import com.callan.service.provider.service.IJShowDetailViewService;
+import com.callan.service.provider.service.IJShowViewService;
+import com.callan.service.provider.service.IJTableFieldDictService;
 import com.callan.service.provider.service.IJUserService;
 
 import io.swagger.annotations.Api;
@@ -60,8 +81,35 @@ public class PanoramaController {
 	@Autowired
 	private IJSensitiveWordService jSensitiveWordService;
 
+	@Autowired
+	private IJPageViewService pageViewService;
+
+	@Autowired
+	private IJPageViewDetailService pageViewDetailService;
+
+	@Autowired
+	private IJShowViewService showViewService;
+
+	@Autowired
+	private IJShowDetailViewService showDetailViewService;
+
+	@Autowired
+	private IJTableFieldDictService tableFieldDictService;
+
+	@Autowired
+	private IJLpService JLpService;
+
+	@Autowired
+	private IDMedicalrecordsService medicalrecordsService;
+
+	@Autowired
+	private IDDischargesummaryService dischargesummaryService;
+
+	@Autowired
+	private IDLabmasterinfoService labmasterinfoService;
+
 	@ApiOperation(value = "获取全景视图患者住院列表")
-	@RequestMapping(value = "/api/Panorama/{PanoramaType}/{Id}", method = { RequestMethod.GET })
+	@RequestMapping(value = "/api/Panorama/{Id}", method = { RequestMethod.GET })
 	public String getPanoramaDetail(long id, int pageSize, int pageNum, HttpServletRequest request) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -228,316 +276,333 @@ public class PanoramaController {
 		}
 		return new String(charr);
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-//	
-//	
-//	
-//	 #region 全景视图信息
-//     /// <summary>
-//     /// 全景视图信息
-//     /// </summary>
-//     /// <param name="PanoramaType">全景中数据类别</param>
-//     /// <param name="Id">患者住院记录ID</param>
-//     /// <param name="urlParameter"></param>
-//     /// <returns></returns>
-//     [Route("{panoramaType:length(1,20)}/{id:long:min(1)}")]
-//     public IHttpActionResult Get(string PanoramaType, long Id, [FromUri]UrlPageParameterModel urlParameter)
-//     {
-//         var views = (from pageview in orclJlpContext.JPageviews
-//                      join pageviewdetail in orclJlpContext.JPageviewdetails on pageview.Code equals pageviewdetail.Pagecode into pageviewdetails
-//                      from pageviewdetail in pageviewdetails
-//                      join showview in orclJlpContext.JShowviews on pageviewdetail.Viewcode equals showview.Code into showviews
-//                      from showview in showviews
-//                      where pageview.Activeflag == "1" && pageviewdetail.Activeflag == "1" && showview.Activeflag == "1" && pageview.Code == "1002"
-//                      select showview).ToList();
-//         JShowview panoramashowview = null;
-//         if (views.Count() == 0 || (panoramashowview = views.FirstOrDefault(x => x.Accesscode.ToLower() == PanoramaType.ToLower())) is null)
-//         {
-//             return BadRequest("请求资源错误");
-//         }
+
+	@ApiOperation(value = "全景视图信息")
+	@RequestMapping(value = "/api/Panorama/{PanoramaType}/{Id}", method = { RequestMethod.GET })
+	public String panoramaTypeId(String PanoramaType, long Id, int pageSize, int pageNum, HttpServletRequest request) {
+
+		JLPLog log = ThreadPoolConfig.getBaseContext();
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		List<JPageviewdetail> detailList = pageViewDetailService.getByPageCode("1002");
+		JShowView panoramashowview = null;
+		if (detailList != null && detailList.size() > 0) {
+			panoramashowview = showViewService.getByCode(detailList.get(0).getViewcode());
+		}
+
+		if (detailList.size() == 0 || (panoramashowview == null)) {
+			BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("0000");
+			baseResponse.setText("请求资源错误");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
+		}
+
+		boolean hasPage = true;
+		if (pageNum == 0 || pageSize == 0) {
+			hasPage = false;
+		}
+		DPatientvisit dPatientvisit = patientvisitService.getOne(Id);
+		if (dPatientvisit == null) {
+			BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("0000");
+			baseResponse.setText("未找到住院信息");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
+		}
+		if (StringUtils.isBlank(dPatientvisit.getPatientid()) || StringUtils.isBlank(dPatientvisit.getVisitid())) {
+			BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("0000");
+			baseResponse.setText("该患者住院信息错误");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
+		}
+
+		Long panoramashowviewId = panoramashowview.getId();
+		JShowView showView = showViewService.getOne(panoramashowviewId);
+		List<JShowDetailView> detailViewList = showDetailViewService.getByViewId(showView.getId(), true);
+		Set<String> tableCodeSet = new HashSet<String>();
+
+		TreeSet<JTableFieldDict> fieldDictSet = new TreeSet<JTableFieldDict>(new Comparator<JTableFieldDict>() {
+			@Override
+			public int compare(JTableFieldDict o1, JTableFieldDict o2) {
+				return o1.getSortno().compareTo(o2.getSortno());
+			}
+		});
+
+		for (JShowDetailView showDetailView : detailViewList) {
+			JTableFieldDict tableFieldDict = tableFieldDictService.getOne(showDetailView.getFieldid());
+			tableCodeSet.add(tableFieldDict.getTablecode());
+			fieldDictSet.add(tableFieldDict);
+		}
+		if (fieldDictSet.size() == 0) {
+			BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("0000");
+			baseResponse.setText("未配置全景信息视图" + PanoramaType + "，请联系技术人员！");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
+		}
+
+		if (tableCodeSet.size() > 1) {
+			BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("0000");
+			baseResponse.setText("全景信息视图" + PanoramaType + "}暂时不支持多表联合查看，请联系技术人员！");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
+		}
+
+		List<ColunmsModel> columns = new ArrayList<ColunmsModel>();
+		Set<String> fieldSet = new HashSet<String>();
+		for (JTableFieldDict jTableFieldDict : fieldDictSet) {
+			ColunmsModel colunmsModel = new ColunmsModel();
+			colunmsModel.setDataIndex(jTableFieldDict.getName().toLowerCase());
+			colunmsModel.setKey(jTableFieldDict.getName().toLowerCase());
+			colunmsModel.setTitle(jTableFieldDict.getjShowDetailView().getFieldtitle());
+			colunmsModel.setIsLongStr("clob".equals(jTableFieldDict.getType()));
+			colunmsModel.setIsSearched(JLPConts.ActiveFlag.equals(jTableFieldDict.getQueryflag()));
+			columns.add(colunmsModel);
+			fieldSet.add(jTableFieldDict.getName());
+		}
+
+		String patientId = dPatientvisit.getPatientid();
+		String visitId = dPatientvisit.getVisitid();
+
+		fieldSet.add("Id as hide_key");
+		String fieldStrs = fieldSet.toString().substring(1, fieldSet.toString().length() - 1);
+		String tableName = tableCodeSet.iterator().next();
+		int totals = 0;
+
+		String Sql = "select distinct" + fieldStrs + " from " + tableName + " where ";
+		if (PanoramaType == "basepatient") {
+			Sql += " Id=  '" + dPatientvisit.getPatientid() + "'";
+		} else {
+			Sql += " patientId='" + patientId + "' and visitId='" + visitId + "'";
+		}
+		if (hasPage) {
+			String sqlCount = " select count(1) count from (" + Sql + ") countsql";
+			totals = JLpService.queryForCount(sqlCount);
+			Sql = "SELECT *" + "  FROM (SELECT tt.*, ROWNUM AS rowno" + "          FROM (  " + Sql + ") tt"
+					+ "         WHERE ROWNUM <= " + pageNum * pageSize + ") table_alias" + " WHERE table_alias.rowno > "
+					+ (pageNum - 1) * pageSize;
+		}
+		List<Map<String, Object>> contentData = JLpService.queryForSQL(Sql, new Object[] {});
+		if (totals == 0) {
+			totals = contentData.size();
+		}
+
+		// 从前台header中获取token参数
+		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+
+		Long userRole = jUserService.getUserRoleByToken(authorization);
+		if (userRole != null && userRole != 0L) {
+			List<JRoleRight> roleRightList = roleRightService.getByRoleId(userRole);
+			if (roleRightList != null && roleRightList.size() > 0) {
+				JRight jRight = roleRightList.get(0).getjRight();
+				if (jRight == null || jRight.getId() != 4L) {
+					// 获取敏感字段配置
+					Map<String, JSensitiveWord> sensitiveWordMap = (Map<String, JSensitiveWord>) jSensitiveWordService
+							.getAll4Name().getData();
+					if (!sensitiveWordMap.isEmpty()) {
+						// 将敏感字段设置为 ***
+						contentData = sensitiveWord(contentData, sensitiveWordMap);
+					}
+				}
+			}
+		}
+
+		BaseResponse baseResponse = new BaseResponse();
+		resultMap.put("response", baseResponse);
+		resultMap.put("totals", totals);
+		resultMap.put("columns", columns);
+		resultMap.put("content", contentData);
+		String json = JSONObject.toJSONString(resultMap);
+		log.info("response--> " + json);
+		return json;
+	}
+
+	private List<Map<String, Object>> sensitiveWord(List<Map<String, Object>> retData,
+			Map<String, JSensitiveWord> sensitiveWordMap) {
+		if (retData == null || retData.size() == 0) {
+			return retData;
+		}
+		if (sensitiveWordMap == null || sensitiveWordMap.isEmpty()) {
+			return retData;
+		}
+
+		for (Map<String, Object> data : retData) {
+			Set<String> keySet = data.keySet();
+			for (String key : keySet) {
+				if (sensitiveWordMap.containsKey(key)) {
+					String value = data.get(key) + "";
+					data.put(key, toSensitivewordEx(value));
+				}
+			}
+		}
+		return retData;
+	}
+
 //
-//         bool hasPage = true;
-//         int pageNum = 0;
-//         int pageSize = 0;
-//         if (urlParameter == null || urlParameter.pageNum == 0)
-//         {
-//             hasPage = false;
-//         }
-//         else
-//         {
-//             pageNum = urlParameter.pageNum;
-//             pageSize = urlParameter.pageSize;
-//         }
-//         DPatientvisit dPatientvisit = orclJlpContext.DPatientvisits.FirstOrDefault(x => x.Id == Id && x.Jlactiveflag == "1");
-//         if (dPatientvisit is null)
-//         {
-//             return Content(HttpStatusCode.BadRequest, ResponseModel.Error(Text: "未找到该住院信息！").ToDictionaryObj());
-//         }
-//         if (string.IsNullOrEmpty(dPatientvisit.Patientid)
-//             || string.IsNullOrEmpty(dPatientvisit.Visitid))
-//         {
-//             return Content(HttpStatusCode.BadRequest, ResponseModel.Error(Text: "该患者住院信息错误！").ToDictionaryObj());
-//         }
-//
-//         var showFields = (from showview in orclJlpContext.JShowviews
-//                           join showviewdetail in orclJlpContext.JShowdetailviews on showview.Id equals showviewdetail.Viewid into showviewDetails
-//                           from showviewdetail in showviewDetails
-//                           join field in orclJlpContext.JTablefielddicts on showviewdetail.Fieldid equals field.Id into fieldInfos
-//                           from field in fieldInfos
-//                           join fieldTable in orclJlpContext.JTabledicts on field.Tablecode equals fieldTable.Code into fieldtables
-//                           from fieldtable in fieldtables
-//                           where showview.Activeflag == "1" && showview.Id == panoramashowview.Id && showviewdetail.Activeflag == "1" && field.Showflag == "1" && fieldtable.Activeflag == "1"
-//                           select new { showField = showviewdetail, field, fieldtable }).Distinct().ToList();
-//         if (showFields.Count() == 0)
-//         {
-//             return Content(HttpStatusCode.BadRequest, ResponseModel.Error(Text: $"未配置全景信息视图{PanoramaType}，请联系技术人员！").ToDictionaryObj());
-//         }
-//
-//         if (showFields.Select(x => x.fieldtable).Distinct().Count() > 1)
-//         {
-//             return Content(HttpStatusCode.BadRequest, ResponseModel.Error(Text: $"全景信息视图{PanoramaType}暂时不支持多表联合查看，请联系技术人员！").ToDictionaryObj());
-//         }
-//         showFields = showFields.OrderBy(x => x.showField.Sortno).ToList();
-//         DictionaryObj ret = new DictionaryObj();
-//         var columns = showFields.Select(x => new ColunmsModel
-//         {
-//             key = x.field.Name.ToLower(),
-//             dataIndex = x.field.Name.ToLower(),
-//             title = string.IsNullOrEmpty(x.showField.Fieldtitle) ? x.field.Description : x.showField.Fieldtitle,
-//             isLongStr = x.field.Type == "CLOB",
-//             isSearched = x.field.Queryflag == "1"
-//         });
-//
-//         string patientId = dPatientvisit.Patientid;
-//         string visitId = dPatientvisit.Visitid;
-//
-//         var fieldStrs = showFields.Select(x => x.field.Name).Distinct().ToList();
-//         var tableName = showFields.FirstOrDefault().fieldtable.Name;
-//         int totals = 0;
-//
-//         fieldStrs.Add("Id as hide_key");
-//
-//         string Sql = $"select distinct {fieldStrs.ToArray().ToStringEx()} from {tableName} where ";
-//         if (PanoramaType == "basepatient")
-//         {
-//             Sql += $" Id={dPatientvisit.Patientglobalid} ";
-//         }
-//         else
-//         {
-//             Sql += $" patientId='{patientId}' and visitId='{visitId}'";
-//         }
-//         if (hasPage)
-//         {
-//             string sqlCount = DBHelperBase.getCountSql(BarryCommon.DataBaseType.Oracle, Sql);
-//             totals = (int)orclJlpContext.Database.DynamicSqlQueryMethod(sqlCount, new object[] { }).ToListAsync().Result.FirstOrDefault();
-//             Sql = DBHelperBase.getPageSql(BarryCommon.DataBaseType.Oracle, Sql, pageNum, pageNum);
-//         }
-//         var contentData = orclJlpContext.Database.DynamicSqlQueryMethod(Sql, new object[] { }).ToListAsync().Result.ToArray();
-//         if (totals == 0)
-//         {
-//             totals = contentData.Length;
-//         }
-//
-//         if (contentData.Length > 0)
-//         {
-//             var rights = ActionContext.GetUserRight();
-//             if (rights is null || !rights.Any(x => x.Id == 4))
-//             {
-//                 var sensitivewords = orclJlpContext.JSensitivewords.Where(x => x.Activeflag == JLPStaticProperties.ActiveFlag).Select(x => x.Name).ToArray().Select(x => x.ToLower()).ToArray();
-//                 if (sensitivewords.Count() > 0)
-//                 {
-//                     contentData = contentData.Sensitiveword(sensitivewords);
-//                 }
-//             }
-//         }
-//
-//         ResponseModel response = ResponseModel.Ok();
-//
-//         ret.Add("response", response);
-//         ret.Add("totals", totals);
-//         ret.Add("columns", columns);
-//         ret.Add("content", contentData);
-//         return Ok(ret);
-//     }
-//     #endregion
-//
-//     #region 检验结果信息获取
-//     /// <summary>
-//     /// 检验信息获取
-//     /// </summary>
-//     /// <param name="Id">检验主表ID</param>
-//     /// <param name="urlParameter"></param>
-//     /// <returns></returns>
-//     [HttpGet]
-//     [Route("LabResult/{id:long:min(1)}")]
-//     public IHttpActionResult LabResult(long Id, [FromUri]UrlPageParameterModel urlParameter)
-//     {
-//         var views = (from pageview in orclJlpContext.JPageviews
-//                      join pageviewdetail in orclJlpContext.JPageviewdetails on pageview.Code equals pageviewdetail.Pagecode into pageviewdetails
-//                      from pageviewdetail in pageviewdetails
-//                      join showview in orclJlpContext.JShowviews on pageviewdetail.Viewcode equals showview.Code into showviews
-//                      from showview in showviews
-//                      where pageview.Activeflag == "1" && pageviewdetail.Activeflag == "1" && showview.Activeflag == "1" && pageview.Code == "1002"
-//                      select showview).ToList();
-//         JShowview panoramashowview = null;
-//         if (views.Count() == 0 || (panoramashowview = views.FirstOrDefault(x => x.Accesscode.ToLower() == "labresult")) is null)
-//         {
-//             return BadRequest("请求资源错误");
-//         }
-//
-//         bool hasPage = true;
-//         int pageNum = 0;
-//         int pageSize = 0;
-//         if (urlParameter == null || urlParameter.pageNum == 0)
-//         {
-//             hasPage = false;
-//         }
-//         else
-//         {
-//             pageNum = urlParameter.pageNum;
-//             pageSize = urlParameter.pageSize;
-//         }
-//         DLabmasterinfo labmasterinfo = orclJlpContext.DLabmasterinfos.FirstOrDefault(x => x.Id == Id && x.Jlactiveflag == "1");
-//         if (labmasterinfo is null)
-//         {
-//             return Content(HttpStatusCode.BadRequest, ResponseModel.Error(Text: "未找到该检验信息！").ToDictionaryObj());
-//         }
-//         if (string.IsNullOrEmpty(labmasterinfo.Applyno))
-//         {
-//             return Content(HttpStatusCode.BadRequest, ResponseModel.Error(Text: "该检验信息数据缺失！").ToDictionaryObj());
-//         }
-//
-//         var showFields = (from showview in orclJlpContext.JShowviews
-//                           join showviewdetail in orclJlpContext.JShowdetailviews on showview.Id equals showviewdetail.Viewid into showviewDetails
-//                           from showviewdetail in showviewDetails
-//                           join field in orclJlpContext.JTablefielddicts on showviewdetail.Fieldid equals field.Id into fieldInfos
-//                           from field in fieldInfos
-//                           join fieldTable in orclJlpContext.JTabledicts on field.Tablecode equals fieldTable.Code into fieldtables
-//                           from fieldtable in fieldtables
-//                           where showview.Activeflag == "1" && showview.Id == panoramashowview.Id && showviewdetail.Activeflag == "1" && field.Showflag == "1" && fieldtable.Activeflag == "1"
-//                           select new { showField = showviewdetail, field, fieldtable }).Distinct().ToList();
-//         if (showFields.Count() == 0)
-//         {
-//             return Content(HttpStatusCode.BadRequest, ResponseModel.Error(Text: $"未配置全景信息视图labresult，请联系技术人员！").ToDictionaryObj());
-//         }
-//
-//         if (showFields.Select(x => x.fieldtable).Distinct().Count() > 1)
-//         {
-//             return Content(HttpStatusCode.BadRequest, ResponseModel.Error(Text: $"全景信息视图labresult暂时不支持多表联合查看，请联系技术人员！").ToDictionaryObj());
-//         }
-//         showFields = showFields.OrderBy(x => x.showField.Sortno).ToList();
-//         DictionaryObj ret = new DictionaryObj();
-//         var columns = showFields.Select(x => new ColunmsModel
-//         {
-//             key = x.field.Name.ToLower(),
-//             dataIndex = x.field.Name.ToLower(),
-//             title = string.IsNullOrEmpty(x.showField.Fieldtitle) ? x.field.Description : x.showField.Fieldtitle,
-//             isLongStr = x.field.Type == "CLOB",
-//             isSearched = x.field.Queryflag == "1"
-//         });
-//
-//         var fieldStrs = showFields.Select(x => x.field.Name).Distinct().ToList();
-//         var tableName = showFields.FirstOrDefault().fieldtable.Name;
-//         int totals = 0;
-//
-//         fieldStrs.Add("Id as hide_key");
-//
-//         string Sql = $"select distinct {fieldStrs.ToArray().ToStringEx()} from {tableName} where applyNo='{labmasterinfo.Applyno}'";
-//         if (hasPage)
-//         {
-//             string sqlCount = DBHelperBase.getCountSql(BarryCommon.DataBaseType.Oracle, Sql);
-//             totals = (int)orclJlpContext.Database.DynamicSqlQueryMethod(sqlCount, new object[] { }).ToListAsync().Result.FirstOrDefault();
-//             Sql = DBHelperBase.getPageSql(BarryCommon.DataBaseType.Oracle, Sql, pageNum, pageNum);
-//         }
-//         var contentData = orclJlpContext.Database.DynamicSqlQueryMethod(Sql, new object[] { }).ToListAsync().Result;
-//         if (totals == 0)
-//         {
-//             totals = contentData.Count;
-//         }
-//         ResponseModel response = ResponseModel.Ok();
-//         ret.Add("response", response);
-//         ret.Add("totals", totals);
-//         ret.Add("columns", columns);
-//         ret.Add("content", contentData);
-//         return Ok(ret);
-//     }
-//     #endregion
-//
-//     #region 患者住院信息
-//     /// <summary>
-//     /// 患者住院信息
-//     /// </summary>
-//     /// <param name="Id">患者住院ID</param>
-//     /// <returns></returns>
-//     [Route("Inpat/{id:long:min(1)}")]
-//     [HttpGet]
-//     public IHttpActionResult Inpat(long Id)
-//     {
-//         DPatientvisit dPatientvisit = orclJlpContext.DPatientvisits.FirstOrDefault(x => x.Id == Id && x.Jlactiveflag == "1");
-//         if (dPatientvisit is null)
-//         {
-//             return Content(HttpStatusCode.BadRequest, ResponseModel.Error(Text: "未找到该住院信息！").ToDictionaryObj());
-//         }
-//         if (string.IsNullOrEmpty(dPatientvisit.Patientid)
-//             || string.IsNullOrEmpty(dPatientvisit.Visitid))
-//         {
-//             return Content(HttpStatusCode.BadRequest, ResponseModel.Error(Text: "该患者住院信息错误！").ToDictionaryObj());
-//         }
-//
-//         DictionaryObj ret = new DictionaryObj();
-//         DMedicalrecords medicalrecords = orclJlpContext.DMedicalrecords.FirstOrDefault(x => x.Patientid == dPatientvisit.Patientid && x.Visitid == dPatientvisit.Visitid);
-//         DDischargesummary dDischargesummary = orclJlpContext.DDischargesummaries.FirstOrDefault(x => x.Patientid == dPatientvisit.Patientid && x.Visitid == dPatientvisit.Visitid);
-//
-//         ResponseModel response = ResponseModel.Ok();
-//         ret.Add("response", response);
-//
-//         if (medicalrecords != null && medicalrecords.Medicalrecords.Length != 0)
-//         {
-//             ret.Add("caseHistory", JLPStaticProperties.MedicalRecordsHandle(medicalrecords.Medicalrecords));
-//         }
-//         if (dDischargesummary != null)
-//         {
-//             DictionaryObj tempObj = new DictionaryObj();
-//             tempObj.Add("出院时间", dDischargesummary.Cydate?.ToString("yyyy年MM月dd日 HH时mm分ss秒"));
-//             tempObj.Add("出院小结", dDischargesummary.Lscontent);
-//             ret.Add("outDept", tempObj);
-//         }
-//         return Ok(ret);
-//     }
-//     #endregion
-// }
-	
-	
+	@ApiOperation(value = "检验结果信息获取")
+	@RequestMapping(value = "/api/Panorama/LabResult/{Id}", method = { RequestMethod.GET })
+	public String LabResult(long Id, int pageSize, int pageNum) {
+
+		JLPLog log = ThreadPoolConfig.getBaseContext();
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		List<JPageviewdetail> detailList = pageViewDetailService.getByPageCode("1002");
+		JShowView panoramashowview = null;
+		if (detailList != null && detailList.size() > 0) {
+			panoramashowview = showViewService.getByCode(detailList.get(0).getViewcode());
+		}
+
+		if (detailList.size() == 0 || (panoramashowview == null)
+				|| !"labresult".equals(panoramashowview.getAccesscode())) {
+			BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("0000");
+			baseResponse.setText("请求资源错误");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
+		}
+
+		boolean hasPage = true;
+		if (pageNum == 0 || pageSize == 0) {
+			hasPage = false;
+		}
+
+		DLabmasterinfo labmasterinfo = labmasterinfoService.getOne(Id);
+		if (labmasterinfo == null) {
+			BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("0000");
+			baseResponse.setText("未找到该检验信息！");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
+		}
+		if (StringUtils.isBlank(labmasterinfo.getApplyno())) {
+			BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("0000");
+			baseResponse.setText("该检验信息数据缺失！");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
+		}
+
+		Long panoramashowviewId = panoramashowview.getId();
+		JShowView showView = showViewService.getOne(panoramashowviewId);
+		List<JShowDetailView> detailViewList = showDetailViewService.getByViewId(showView.getId(), true);
+		Set<String> tableCodeSet = new HashSet<String>();
+
+		TreeSet<JTableFieldDict> fieldDictSet = new TreeSet<JTableFieldDict>(new Comparator<JTableFieldDict>() {
+			@Override
+			public int compare(JTableFieldDict o1, JTableFieldDict o2) {
+				return o1.getSortno().compareTo(o2.getSortno());
+			}
+		});
+
+		for (JShowDetailView showDetailView : detailViewList) {
+			JTableFieldDict tableFieldDict = tableFieldDictService.getOne(showDetailView.getFieldid());
+			tableCodeSet.add(tableFieldDict.getTablecode());
+			fieldDictSet.add(tableFieldDict);
+		}
+		if (fieldDictSet.size() == 0) {
+			BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("0000");
+			baseResponse.setText("未配置全景信息视图labresult，请联系技术人员！");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
+		}
+
+		if (tableCodeSet.size() > 1) {
+			BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("0000");
+			baseResponse.setText("全景信息视图labresult暂时不支持多表联合查看，请联系技术人员！");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
+		}
+
+		List<ColunmsModel> columns = new ArrayList<ColunmsModel>();
+		Set<String> fieldSet = new HashSet<String>();
+		for (JTableFieldDict jTableFieldDict : fieldDictSet) {
+			ColunmsModel colunmsModel = new ColunmsModel();
+			colunmsModel.setDataIndex(jTableFieldDict.getName().toLowerCase());
+			colunmsModel.setKey(jTableFieldDict.getName().toLowerCase());
+			colunmsModel.setTitle(jTableFieldDict.getjShowDetailView().getFieldtitle());
+			colunmsModel.setIsLongStr("clob".equals(jTableFieldDict.getType()));
+			colunmsModel.setIsSearched(JLPConts.ActiveFlag.equals(jTableFieldDict.getQueryflag()));
+			columns.add(colunmsModel);
+			fieldSet.add(jTableFieldDict.getName());
+		}
+
+		fieldSet.add("Id as hide_key");
+		String fieldStrs = fieldSet.toString().substring(1, fieldSet.toString().length() - 1);
+		String tableName = tableCodeSet.iterator().next();
+		int totals = 0;
+		String Sql = "select distinct " + fieldStrs + " from " + tableName + " where applyNo='"
+				+ labmasterinfo.getApplyno() + "'";
+		if (hasPage) {
+			String sqlCount = " select count(1) count from (" + Sql + ") countsql";
+			totals = JLpService.queryForCount(sqlCount);
+			Sql = "SELECT *" + "  FROM (SELECT tt.*, ROWNUM AS rowno" + "          FROM (  " + Sql + ") tt"
+					+ "         WHERE ROWNUM <= " + pageNum * pageSize + ") table_alias" + " WHERE table_alias.rowno > "
+					+ (pageNum - 1) * pageSize;
+		}
+		List<Map<String, Object>> contentData = JLpService.queryForSQL(Sql, new Object[] {});
+		if (totals == 0) {
+			totals = contentData.size();
+		}
+		BaseResponse baseResponse = new BaseResponse();
+		resultMap.put("response", baseResponse);
+		resultMap.put("totals", totals);
+		resultMap.put("columns", columns);
+		resultMap.put("content", contentData);
+		String json = JSONObject.toJSONString(resultMap);
+		log.info("response--> " + json);
+		return json;
+	}
+
+	@ApiOperation(value = "患者住院信息")
+	@RequestMapping(value = "/api/Panorama/Inpat/{Id}", method = { RequestMethod.GET })
+	public String Inpat(long Id) {
+
+		JLPLog log = ThreadPoolConfig.getBaseContext();
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		DPatientvisit dPatientvisit = patientvisitService.getOne(Id);
+		if (dPatientvisit == null) {
+			BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("0000");
+			baseResponse.setText("未找到该住院信息！");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
+		}
+		if (StringUtils.isBlank(dPatientvisit.getPatientid()) || StringUtils.isBlank(dPatientvisit.getVisitid())) {
+			BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("0000");
+			baseResponse.setText("该患者住院信息错误！");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
+		}
+
+		List<DMedicalrecords> recordList = medicalrecordsService.getByPatientId(dPatientvisit.getPatientid(),
+				dPatientvisit.getVisitid());
+
+		List<DDischargesummary> summaryList = dischargesummaryService.getByPatientId(dPatientvisit.getPatientid(),
+				dPatientvisit.getVisitid());
+
+		BaseResponse baseResponse = new BaseResponse();
+		resultMap.put("response", baseResponse);
+
+		if (recordList != null && recordList.size() > 0) {
+			resultMap.put("caseHistory", recordList.get(0).getMedicalrecords());
+		}
+		if (summaryList != null) {
+			Map tempObj = new HashMap();
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日 HH时mm分ss秒");
+			tempObj.put("出院时间", sdf.format(summaryList.get(0).getCydate()));
+			tempObj.put("出院小结", sdf.format(summaryList.get(0).getLscontent()));
+			resultMap.put("outDept", tempObj);
+		}
+		String json = JSONObject.toJSONString(resultMap);
+		log.info("response--> " + json);
+		return json;
+	}
+
 }

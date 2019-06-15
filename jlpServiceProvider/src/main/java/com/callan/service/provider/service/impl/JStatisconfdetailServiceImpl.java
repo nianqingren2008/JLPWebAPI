@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.callan.service.provider.dao.mapper.JStatisconfdetailMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
@@ -12,6 +13,7 @@ import com.callan.service.provider.pojo.cache.LocalCacheable;
 import com.callan.service.provider.pojo.db.JStatisconfdetail;
 import com.callan.service.provider.service.IJStatisconfdetailService;
 
+@Service
 public class JStatisconfdetailServiceImpl implements IJStatisconfdetailService {
 
 	@Autowired
