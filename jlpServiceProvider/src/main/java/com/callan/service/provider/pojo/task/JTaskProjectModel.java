@@ -25,7 +25,7 @@ public class JTaskProjectModel {
     private String[] queryShowFields ;
     
     // 导出文件类型
-    private byte fileTypeId ;
+    private short fileTypeId ;
     
     // 数据导出策略ID
     private int dataExportClass ;
@@ -93,11 +93,13 @@ public class JTaskProjectModel {
 		this.queryShowFields = queryShowFields;
 	}
 
-	public byte getFileTypeId() {
+	 
+
+	public short getFileTypeId() {
 		return fileTypeId;
 	}
 
-	public void setFileTypeId(byte fileTypeId) {
+	public void setFileTypeId(short fileTypeId) {
 		this.fileTypeId = fileTypeId;
 	}
 

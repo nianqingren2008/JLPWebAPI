@@ -82,6 +82,12 @@ public interface JTaskMapper {
 		@Select("SELECT * FROM J_TASK WHERE  ID = #{id}  AND USERID = #{userId}  AND ACTIVEFLAG='"+JLPConts.ActiveFlag+"'")
 		public JTask getByIdAndUserId(Long id, Long userId);
 
+		/*
+		 * 
+		 */
+		@Select("SELECT * FROM J_TASK WHERE   ACTIVEFLAG='"+JLPConts.ActiveFlag+"'")
+		public List<JTask>  getAll();
+
  
 
 	

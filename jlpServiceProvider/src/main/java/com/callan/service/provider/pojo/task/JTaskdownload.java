@@ -3,196 +3,175 @@ package com.callan.service.provider.pojo.task;
 import java.util.Date;
 
 public class JTaskdownload {
-	
-    // 流水号
-    private long Id ;
+    private Long id;
+
+    private Long taskid;
+
+    private Long projectid;
+
+    private Long queryid;
+
+    private Short dataexportclass;
+
+    private String exportfields;
+
+    private String projectstatuses;
+
+    private String tagdata;
+
+    private String tagtranspose;
+
+    private Short filetypeid;
+
+    private Short imageexportclass;
+
+    private String imageclass;
+
+    private Long fileid;
+
+    private Long imagefileid;
+
+    private Date createdate;
+
+    private String activeflag;
     
-    // 任务ID
-    private long Taskid ;
-    
-    // 课题ID
-    private long Projectid ;
-    
-    // 查询ID
-    private long Queryid ;
-    
-    // 数据导出策略
-    private short Dataexportclass ;
-    
-    // 导出字段(多个，以逗号隔开)
-    private String Exportfields ;
-    
-    // 课题导出状态(多个，以逗号隔开)
-    private String Projectstatuses ;
-    
-    // 标签数据ID
-    private String Tagdata ;
-    
-    // 标签转置ID
-    private String Tagtranspose ;
-    
-    // 文件类别
-    private byte Filetypeid ;
-    
-    // 图像导出策略
-    private short Imageexportclass ;
-    
-    // 图像分类(CT/MR/US等等)
-    private String Imageclass ;
-    
-    // 文件ID
-    private long Fileid ;
-    
-    // 图像ID
-    private long Imagefileid ;
-    
-    // 创建时间
-    private Date Createdate ;
-    
-    // 启用标志
-    private String Activeflag ;
-    
-    //url
-    private String Url;
+    private String url;
     
     
 
-	public String getUrl() {
-		return Url;
+    public String getUrl() {
+		return url;
 	}
 
 	public void setUrl(String url) {
-		Url = url;
+		this.url = url;
 	}
 
-	public long getId() {
-		return Id;
-	}
+	public Long getId() {
+        return id;
+    }
 
-	public void setId(long id) {
-		Id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public long getTaskid() {
-		return Taskid;
-	}
+    public Long getTaskid() {
+        return taskid;
+    }
 
-	public void setTaskid(long taskid) {
-		Taskid = taskid;
-	}
+    public void setTaskid(Long taskid) {
+        this.taskid = taskid;
+    }
 
-	public long getProjectid() {
-		return Projectid;
-	}
+    public Long getProjectid() {
+        return projectid;
+    }
 
-	public void setProjectid(long projectid) {
-		Projectid = projectid;
-	}
+    public void setProjectid(Long projectid) {
+        this.projectid = projectid;
+    }
 
-	public long getQueryid() {
-		return Queryid;
-	}
+    public Long getQueryid() {
+        return queryid;
+    }
 
-	public void setQueryid(long queryid) {
-		Queryid = queryid;
-	}
+    public void setQueryid(Long queryid) {
+        this.queryid = queryid;
+    }
 
-	public short getDataexportclass() {
-		return Dataexportclass;
-	}
+    public Short getDataexportclass() {
+        return dataexportclass;
+    }
 
-	public void setDataexportclass(short dataexportclass) {
-		Dataexportclass = dataexportclass;
-	}
+    public void setDataexportclass(Short dataexportclass) {
+        this.dataexportclass = dataexportclass;
+    }
 
-	public String getExportfields() {
-		return Exportfields;
-	}
+    public String getExportfields() {
+        return exportfields;
+    }
 
-	public void setExportfields(String exportfields) {
-		Exportfields = exportfields;
-	}
+    public void setExportfields(String exportfields) {
+        this.exportfields = exportfields == null ? null : exportfields.trim();
+    }
 
-	public String getProjectstatuses() {
-		return Projectstatuses;
-	}
+    public String getProjectstatuses() {
+        return projectstatuses;
+    }
 
-	public void setProjectstatuses(String projectstatuses) {
-		Projectstatuses = projectstatuses;
-	}
+    public void setProjectstatuses(String projectstatuses) {
+        this.projectstatuses = projectstatuses == null ? null : projectstatuses.trim();
+    }
 
-	public String getTagdata() {
-		return Tagdata;
-	}
+    public String getTagdata() {
+        return tagdata;
+    }
 
-	public void setTagdata(String tagdata) {
-		Tagdata = tagdata;
-	}
+    public void setTagdata(String tagdata) {
+        this.tagdata = tagdata == null ? null : tagdata.trim();
+    }
 
-	public String getTagtranspose() {
-		return Tagtranspose;
-	}
+    public String getTagtranspose() {
+        return tagtranspose;
+    }
 
-	public void setTagtranspose(String tagtranspose) {
-		Tagtranspose = tagtranspose;
-	}
+    public void setTagtranspose(String tagtranspose) {
+        this.tagtranspose = tagtranspose == null ? null : tagtranspose.trim();
+    }
 
-	public byte getFiletypeid() {
-		return Filetypeid;
-	}
+    public Short getFiletypeid() {
+        return filetypeid;
+    }
 
-	public void setFiletypeid(byte filetypeid) {
-		Filetypeid = filetypeid;
-	}
+    public void setFiletypeid(Short filetypeid) {
+        this.filetypeid = filetypeid;
+    }
 
-	public short getImageexportclass() {
-		return Imageexportclass;
-	}
+    public Short getImageexportclass() {
+        return imageexportclass;
+    }
 
-	public void setImageexportclass(short imageexportclass) {
-		Imageexportclass = imageexportclass;
-	}
+    public void setImageexportclass(Short imageexportclass) {
+        this.imageexportclass = imageexportclass;
+    }
 
-	public String getImageclass() {
-		return Imageclass;
-	}
+    public String getImageclass() {
+        return imageclass;
+    }
 
-	public void setImageclass(String imageclass) {
-		Imageclass = imageclass;
-	}
+    public void setImageclass(String imageclass) {
+        this.imageclass = imageclass == null ? null : imageclass.trim();
+    }
 
-	public long getFileid() {
-		return Fileid;
-	}
+    public Long getFileid() {
+        return fileid;
+    }
 
-	public void setFileid(long fileid) {
-		Fileid = fileid;
-	}
+    public void setFileid(Long fileid) {
+        this.fileid = fileid;
+    }
 
-	public long getImagefileid() {
-		return Imagefileid;
-	}
+    public Long getImagefileid() {
+        return imagefileid;
+    }
 
-	public void setImagefileid(long imagefileid) {
-		Imagefileid = imagefileid;
-	}
+    public void setImagefileid(Long imagefileid) {
+        this.imagefileid = imagefileid;
+    }
 
-	public Date getCreatedate() {
-		return Createdate;
-	}
+    public Date getCreatedate() {
+        return createdate;
+    }
 
-	public void setCreatedate(Date createdate) {
-		Createdate = createdate;
-	}
+    public void setCreatedate(Date createdate) {
+        this.createdate = createdate;
+    }
 
-	public String getActiveflag() {
-		return Activeflag;
-	}
+    public String getActiveflag() {
+        return activeflag;
+    }
 
-	public void setActiveflag(String activeflag) {
-		Activeflag = activeflag;
-	}
-
-    
-    
+    public void setActiveflag(String activeflag) {
+        this.activeflag = activeflag == null ? null : activeflag.trim();
+    }
 }

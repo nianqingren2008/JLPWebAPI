@@ -4,14 +4,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.callan.service.provider.dao.mapper.JStatisconfdetailMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.LocalCacheable;
 import com.callan.service.provider.pojo.db.JStatisconfdetail;
+import com.callan.service.provider.pojo.db.JTableFieldDict;
+import com.callan.service.provider.pojo.db.JUser;
 import com.callan.service.provider.service.IJStatisconfdetailService;
-
+import com.callan.service.provider.service.IJTableFieldDictService;
+import com.callan.service.provider.service.IJUserService;
+@Service
 public class JStatisconfdetailServiceImpl implements IJStatisconfdetailService {
 
 	@Autowired
@@ -37,6 +43,11 @@ public class JStatisconfdetailServiceImpl implements IJStatisconfdetailService {
 		response.setCode(0);
 		response.setData(map);
 		return response;
+	}
+	
+	@Override
+	public List<JStatisconfdetail> getAllByConfId(Long confId) {
+		return statisconfdetailMapper.getAllByConfId(confId);
 	}
 
 }
