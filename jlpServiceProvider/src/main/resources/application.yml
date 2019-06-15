@@ -2,6 +2,15 @@ spring:
   profiles:
     active: prod
 
+hikari.readOnly: false
+hikari.connectionTimeout: 60000
+hikari.idleTimeout: 60000
+hikari.validationTimeout: 3000
+hikari.maxLifetime: 60000
+hikari.loginTimeout: 5
+hikari.maximumPoolSize: 200
+hikari.minimumIdle: 1
+
 #总数数据存活时间(天数)
 sqlData.overTime.timeDay: 30
 #分页数据存活时间(秒)
@@ -10,4 +19,9 @@ pageDataAliveSeconds: 3600
 pagePlusCount: 5
 #加载中状态保存时长，防止意外中断导致key一直处于加载中状态，推荐300s
 loadingSeconds: 300
+
+#如果遇到loading状态的查询，连续执行的次数
+queryLoadingCount: 500
+#如果遇到loading状态的查询，连续执行的间隔
+queryLoadingInterval: 200
 

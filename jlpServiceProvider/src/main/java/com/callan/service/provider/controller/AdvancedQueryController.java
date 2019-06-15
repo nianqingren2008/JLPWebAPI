@@ -85,7 +85,7 @@ public class AdvancedQueryController {
 
 	@SuppressWarnings("unchecked")
 	@ApiOperation(value = "病例检索模糊查询(仅列表)")
-	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST })
+	@RequestMapping(value = "/api/AdvancedQuery", method = { RequestMethod.POST })
 	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpServletRequest request) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		long start = System.currentTimeMillis();
