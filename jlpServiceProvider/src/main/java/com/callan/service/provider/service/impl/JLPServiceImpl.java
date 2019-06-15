@@ -22,6 +22,7 @@ import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.dao.IJLPDao;
 import com.callan.service.provider.pojo.cache.SerializeUtil;
 import com.callan.service.provider.pojo.cache.Sha1Util;
+import com.callan.service.provider.pojo.db.JStatisconfdetail;
 import com.callan.service.provider.service.IJLpService;
 
 @Service
@@ -447,4 +448,7 @@ public class JLPServiceImpl implements IJLpService {
 		}
 		return 0;
 	}
+ 
+	 
+	 
 }

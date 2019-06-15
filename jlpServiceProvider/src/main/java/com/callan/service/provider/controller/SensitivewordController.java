@@ -20,7 +20,9 @@ import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.db.JSensitiveWord;
+import com.callan.service.provider.pojo.db.JTableFieldDict;
 import com.callan.service.provider.service.IJSensitiveWordService;
+import com.callan.service.provider.service.IJTableFieldDictService;
 import com.callan.service.provider.service.IJUserService;
 
 import io.swagger.annotations.Api;
@@ -89,7 +91,8 @@ public class SensitivewordController {
 		}
 		log.info("userId : " + userId);
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-		
+		IJTableFieldDictService base = (IJTableFieldDictService) AopContext.currentProxy();
+		Map<String, JTableFieldDict>   Data = (Map<String,JTableFieldDict>) base.getAll4TableCode().getData();
 		
 		
 		resultMap.put("response", new BaseResponse());

@@ -1,6 +1,10 @@
 package com.callan.service.provider.dao.mapper;
 
+import com.callan.service.provider.pojo.db.JStatisconf;
 import com.callan.service.provider.pojo.db.JStatisconfdetail;
+
+import java.util.List;
+
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.InsertProvider;
@@ -71,4 +75,11 @@ public interface JStatisconfdetailMapper {
         "where ID = #{id,jdbcType=DECIMAL}"
     })
     int updateByPrimaryKey(JStatisconfdetail record);
+
+    /**
+	 * 
+	 * @return
+	 */
+	@Select("SELECT * FROM J_STATISCONFDETAIL")
+    public List<JStatisconfdetail> getAll();
 }
