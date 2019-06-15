@@ -83,6 +83,12 @@ public class AdvancedQueryController {
 	@Autowired
 	private IJRoleRightService roleRightService;
 
+	@ApiOperation(value = "病例检索模糊查询(仅列表)")
+	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST })
+	public String query1(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpServletRequest request) {
+		return query(advanceQuery,pageNum,pageSize,request);
+	}
+	
 	@SuppressWarnings("unchecked")
 	@ApiOperation(value = "病例检索模糊查询(仅列表)")
 	@RequestMapping(value = "/api/AdvancedQuery", method = { RequestMethod.POST })

@@ -1,6 +1,5 @@
 package com.callan.service.provider.dao.mapper;
 
-import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.pojo.db.DLabmasterinfo;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
@@ -50,8 +49,7 @@ public interface DLabmasterinfoMapper {
         "PATIENTSOURCE, APPLYNO, REQDATETIME, TESTCAUSE, SPECIMEN, SPCMRECDATETIME, REPORTTIME, ",
         "TESTTYPE, JLCREATEDATE, JLACTIVEFLAG",
         "from D_LABMASTERINFO",
-        "where ID = #{id,jdbcType=DECIMAL}",
-        " and JLACTIVEFLAG='"+JLPConts.ActiveFlag+"'"
+        "where ID = #{id,jdbcType=DECIMAL}"
     })
     @Results({
         @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
