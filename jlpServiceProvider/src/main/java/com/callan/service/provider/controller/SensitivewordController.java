@@ -53,16 +53,17 @@ public class SensitivewordController {
 			return JSONObject.toJSONString(resultMap);
 		}
 		log.info("userId : " + userId);
-		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
+		List<Map<String, String>> resultList = new ArrayList<Map<String, String>>();
 		IJSensitiveWordService base = (IJSensitiveWordService) AopContext.currentProxy();
-		Map<Long, JSensitiveWord> allData = (Map<Long, JSensitiveWord>) base.getAll().getData();
-		Iterator<Entry<Long, JSensitiveWord>> entries = allData.entrySet().iterator(); 
-		while (entries.hasNext()) { 
-			Map<String, Object> map = new HashMap<String, Object>();
-			Entry<Long, JSensitiveWord> entry = entries.next(); 
-			map.put("id", entry.getValue().getId());
-			map.put("name", entry.getValue().getName());
-			resultList.add(map);
+		List<JSensitiveWord> sensitivewordList = new ArrayList<JSensitiveWord>();
+		sensitivewordList = (List<JSensitiveWord>) base.getAll().getData(); 
+		if(sensitivewordList!=null&&sensitivewordList.size()>0) {
+			for(JSensitiveWord sensitiveword:sensitivewordList) {
+				Map<String,String> map = new HashMap<String,String>();
+				map.put("id", sensitiveword.getId().toString());
+				map.put("name", sensitiveword.getName());
+				resultList.add(map);
+			}
 		}
 		
 		resultMap.put("response", new BaseResponse());
