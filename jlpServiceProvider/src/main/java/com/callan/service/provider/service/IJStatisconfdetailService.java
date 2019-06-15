@@ -11,6 +11,6 @@ public interface IJStatisconfdetailService {
 
 	CacheResponse getAll4Id();
 
-	List<JStatisconfdetail> getAllByConfId(Long confId);
+//	List<JStatisconfdetail> getAllByConfId(Long confId);
 
 }
