@@ -85,7 +85,7 @@ public class AdvancedQueryController {
 
 	@SuppressWarnings("unchecked")
 	@ApiOperation(value = "病例检索模糊查询(仅列表)")
-	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST })
+	@RequestMapping(value = "/api/AdvancedQuery", method = { RequestMethod.POST })
 	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpServletRequest request) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		long start = System.currentTimeMillis();
@@ -265,6 +265,7 @@ public class AdvancedQueryController {
 		List<FieldName> fieldNames = new ArrayList<FieldName>();
 		// 增加隐藏主键
 		fieldNames.add(new FieldName(JLPConts.PatientGlobalTable + ".Id as hide_key"));
+		fieldNames.add(new FieldName(JLPConts.PatientGlobalTable + ".Id as _key"));
 		SortedSet<String> fieldShowNames = new TreeSet<String>();
 		SortedSet<String> showTableNames = new TreeSet<String>();
 		for (JShowDetailView JShowDetailView : jShowDetailViewListShow) {

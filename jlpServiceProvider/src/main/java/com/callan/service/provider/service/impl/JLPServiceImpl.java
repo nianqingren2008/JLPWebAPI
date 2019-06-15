@@ -55,7 +55,16 @@ public class JLPServiceImpl implements IJLpService {
 	@Value("${loadingSeconds}")
 	private int loadingSeconds;
 	
-	
+	/*
+	 * 如果遇到loading状态的查询，连续执行的间隔
+	 */
+	@Value("${queryLoadingInterval}")
+	private int queryLoadingInterval;
+	/*
+	 * 如果遇到loading状态的查询，连续执行的次数
+	 */
+	@Value("${queryLoadingCount}")
+	private int queryLoadingCount;
 	
 	@Override
 	public List<Map<String, Object>> queryForSQLStreaming(String sql, int pageNum, int pageSize) {
@@ -191,9 +200,9 @@ public class JLPServiceImpl implements IJLpService {
 				return pageData;
 			} else if(redisUtil.get(serialKey) != null && "loading".equals(ObjectUtil.objToString(((Map<String,Object>)redisUtil.get(serialKey)).get("status")))){
 				int i = 0;
-				while(i < 50) {
+				while(i < queryLoadingCount) {
 					log.info("[redis data is loading waiting 1s ], pageNum:" + pageNum);
-					Thread.sleep(200);
+					Thread.sleep(queryLoadingInterval);
 					i++;
 					if("finish".equals(ObjectUtil.objToString(((Map<String,Object>)redisUtil.get(serialKey)).get("status")))) {
 						Map<String, List<Map<String, Object>>> map = (Map<String, List<Map<String, Object>>>) redisUtil

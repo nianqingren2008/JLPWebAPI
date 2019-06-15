@@ -1,5 +1,6 @@
 package com.callan.service.provider.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public class JStatisconfServiceImpl implements IJStatisconfService{
 	@Override
 	public List<JStatisconfdetail> queryDetailListById(Long statisconfigId) {
 		// TODO Auto-generated method stub
-		return null;
+		return new ArrayList<JStatisconfdetail>();
 	}
 	
 	@LocalCacheable

@@ -29,7 +29,7 @@ public class UserController {
 	private IJUserService jUserService;
 	
 	@ApiOperation(value = "用户登录")
-	@RequestMapping(value = "/api/user", method = { RequestMethod.POST })
+	@RequestMapping(value = "/api/User", method = { RequestMethod.POST })
 	public String login(JUser user) {
 		JUser loginUser = jUserService.login(user.getLogincode(),user.getLoginpwd());
 		if(loginUser == null || loginUser.getId() == 0) {

@@ -8,7 +8,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -20,13 +19,8 @@ import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.db.JStatisconf;
 import com.callan.service.provider.pojo.db.JStatisconfdetail;
-import com.callan.service.provider.pojo.db.JTableFieldDict;
-import com.callan.service.provider.pojo.db.JUser;
-import com.callan.service.provider.pojo.statistic.StatisticModel;
 import com.callan.service.provider.service.IJLpService;
 import com.callan.service.provider.service.IJStatisconfService;
-import com.callan.service.provider.service.IJStatisconfdetailService;
-import com.callan.service.provider.service.IJTableFieldDictService;
 import com.callan.service.provider.service.IJUserService;
 
 import io.swagger.annotations.Api;
@@ -41,17 +35,13 @@ public class StatisticsController {
 	private IJLpService jlpService;
 	@Autowired
 	private IJStatisconfService jStatisconfService;
-	@Autowired
-	private IJStatisconfdetailService jStatisconfdetailService;
-	@Autowired 
-	private IJTableFieldDictService jTableFieldDictService;
 	
 	@ApiOperation(value = "获取统计项列表")
 	@RequestMapping(value = "/api/Statistics/pageCode", method = { RequestMethod.GET })
 	public String  geStatistics(String pageCode,HttpServletRequest request){
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		pageCode = StringUtils.isBlank(pageCode)?"":pageCode;
+		pageCode = StringUtils.isBlank(pageCode)?"main":pageCode;
 		String sql = " select distinct k1.code,k1.title,k1.id  from ( "
 				+ " select n1.id, "+
 				"    n1.code,  "+
@@ -91,9 +81,8 @@ public class StatisticsController {
 		int pageNum = 1, pageSize =20;
 		List<Map<String, Object>> resultList = jlpService.queryForSQLStreaming(sql,  pageNum,  pageSize);
 		List<JStatisconf> jStatisconfList = new ArrayList<JStatisconf>();
-		
-		Map<String,Object> detailsMap = new HashMap<String,Object>();
-		List<Map<String,String>> jStatisconfdetailListMap = new ArrayList<Map<String,String>>();
+		List<JStatisconfdetail> jStatisconfdetails=null;
+		Map<String,List<JStatisconfdetail>> detailsMap = new HashMap<String, List<JStatisconfdetail>>();
 		if(resultList!=null&&resultList.size()>0) {
 			for ( Map<String, Object>  map : resultList) {
 				JStatisconf jStatisconf = new  JStatisconf();
@@ -102,9 +91,11 @@ public class StatisticsController {
 				jStatisconf.setTitle(map.get("title")+"");
 				jStatisconfList.add(jStatisconf);
 				
-				jStatisconfdetailListMap = (List<Map<String, String>>) buildStaticsconfdetail(Long.valueOf(map.get("id")+""));
-				detailsMap.put(map.get("code")+"", jStatisconfdetailListMap);
+				jStatisconfdetails = jStatisconfService.queryDetailListById(Long.valueOf(map.get("id")+""));
+				detailsMap.put(map.get("code")+"", jStatisconfdetails);
 			}
+			
+		
 			
 		}
 		else {
@@ -123,26 +114,6 @@ public class StatisticsController {
 		return json;
  	}
 	
-	private List<Map<String, String>> buildStaticsconfdetail(Long confId) {
-		List<Map<String, String>> jStatisconfdetailMapList = new ArrayList<Map<String, String>>();
-		
-		List<JStatisconfdetail> jStatisconfdetails= new ArrayList<JStatisconfdetail>();
-		jStatisconfdetails = jStatisconfdetailService.getAllByConfId(confId);
-		if(jStatisconfdetails!=null&&jStatisconfdetails.size()>0) {	
-			for(JStatisconfdetail statisconfdetail:jStatisconfdetails) {
-				Map<String,String> statisconfdetailMap  = new HashMap<String, String>();
-				IJTableFieldDictService base = (IJTableFieldDictService) AopContext.currentProxy();
-				Map<Long, JTableFieldDict> data = (Map<Long, JTableFieldDict>) base.getAll4Id().getData();
-				JTableFieldDict tablefiledict = data.get(statisconfdetail.getFieldid()+"");
-				statisconfdetailMap.put("dataIndex", tablefiledict.getName().toLowerCase());
-				statisconfdetailMap.put("key",tablefiledict.getName().toLowerCase());
-				statisconfdetailMap.put("title", tablefiledict.getDescription());
-				jStatisconfdetailMapList.add(statisconfdetailMap);
-			}
-		}
-		return jStatisconfdetailMapList;
-	}
-
 	@ApiOperation(value = "课题中各分类数据统计")
 	@RequestMapping(value = "/api/Statistics/Project/Id", method = { RequestMethod.POST})
 	public String  getProject(long id,HttpServletRequest request){
@@ -168,34 +139,22 @@ public class StatisticsController {
 	
 	@ApiOperation(value = "获取统计项详细数据")
 	@RequestMapping(value = "/api/Statistics", method = { RequestMethod.POST})
-	public String  getProjectDetail(StatisticModel statisticModel,HttpServletRequest request){
+	public String  getProjectDetail(long id,HttpServletRequest request){
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		IJStatisconfService base = (IJStatisconfService) AopContext.currentProxy();
-		Map<Long,JStatisconf> data = (Map<Long,JStatisconf>) base.getAll4Id().getData();
-		JStatisconf  statisconf = data.get(statisticModel.getId()+"");
-		List<JStatisconfdetail> jStatisconfdetails= jStatisconfdetailService.getAllByConfId(statisconf.getId());
-	    List<Long> fieldIds = new ArrayList<Long>();
-		if(jStatisconfdetails!=null&&jStatisconfdetails.size()>0) {
-			for(JStatisconfdetail statisconfdetail:jStatisconfdetails) {
-				fieldIds.add(statisconfdetail.getFieldid());
-				
-				
-			}
-				
-	    	
-	    	
-	    	
-	    	
-	    	
-	    }
-	    else{
-	    	BaseResponse baseResponse = new BaseResponse();
+		// 从前台header中获取token参数
+		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+				: request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
+		if (userId == null || userId == 0) {
+			BaseResponse baseResponse = new BaseResponse();
 			baseResponse.setCode("0000");
-			baseResponse.setText("统计ID错误");
+			baseResponse.setText("用户信息获取失败，请检查请求头");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
-	    }
+		}
+		log.info("userId : " + userId);
+		
 		
 		
 		return null;
