@@ -82,4 +82,10 @@ public interface JStatisconfdetailMapper {
 	 */
 	@Select("SELECT * FROM J_STATISCONFDETAIL")
     public List<JStatisconfdetail> getAll();
+
+	/*
+	 * @confId  statisconfiid
+	 */
+	@Select("SELECT * FROM J_STATISCONFDETAIL WHERE STATISCONFID= #{confId} AND DEFAULVALUE = '1' ")
+	List<JStatisconfdetail> getAllByConfId(Long confId);
 }

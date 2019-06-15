@@ -9,8 +9,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,13 +24,16 @@ import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.db.JDownloadfile;
 import com.callan.service.provider.pojo.db.JQueryrecord;
 import com.callan.service.provider.pojo.db.JQueryrecordDetails;
+import com.callan.service.provider.pojo.db.JTableFieldDict;
 import com.callan.service.provider.pojo.db.JUser;
 import com.callan.service.provider.pojo.task.JTask;
 import com.callan.service.provider.pojo.task.JTaskProjectModel;
 import com.callan.service.provider.pojo.task.JTaskdownload;
 import com.callan.service.provider.pojo.task.TaskModel;
 import com.callan.service.provider.service.IJQueryrecordDetailService;
+import com.callan.service.provider.service.IJTableFieldDictService;
 import com.callan.service.provider.service.IJTaskService;
+import com.callan.service.provider.service.IJTaskdownloadService;
 import com.callan.service.provider.service.IJUserService;
 
 import io.swagger.annotations.Api;
@@ -44,6 +46,8 @@ public class TaskController {
 //	Log log = LogFactory.getLog(TaskController.class);
 	@Autowired
 	private IJTaskService jTaskService;
+	@Autowired 
+	private IJTaskdownloadService jTaskdownloadService;
 	@Autowired
 	private IJQueryrecordDetailService queryrecordDetailService;
 	@Autowired
@@ -151,13 +155,24 @@ public class TaskController {
 	@ApiOperation(value = "删除任务")
 	@RequestMapping(value = "/api/Task/", method = { RequestMethod.DELETE })
 	public String  deleteTask(Long id){
+		JLPLog log = ThreadPoolConfig.getBaseContext();
 		ControllerBaseResponse response = new ControllerBaseResponse();
-		try {
-			jTaskService.delete(id);
-		}catch(Exception e) {
-//			log.error("添加下载任务失败",e);
+		IJTaskService base = (IJTaskService) AopContext.currentProxy();
+		Map<Long,JTask> data = (Map<Long,JTask>) base.getAll4Id().getData();
+		JTask jtask = data.get(id);
+		if(jtask!=null) {
+			try {
+				jTaskService.delete(id);
+			}catch(Exception e) {
+//				log.error("添加下载任务失败",e);
+				response.getResponse().setCode("400");
+				response.getResponse().setText(e.getMessage());
+				return response.toJsonString();
+			}
+		}
+		else{
 			response.getResponse().setCode("400");
-			response.getResponse().setText(e.getMessage());
+			response.getResponse().setText("未找到id="+id+"的任务!");
 			return response.toJsonString();
 		}
 		return response.toJsonString();
@@ -240,12 +255,22 @@ public class TaskController {
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
-		log.info("userId : " + userId);
+		log.info("  id :"+ id+  "   userId : " + userId);
 		JTask task = jTaskService.getByIdAndUserId(id,userId);
 		if(task!=null) {
 			
 			if("3".equals(task.getStatus())) {
-				//TODO 
+				IJTaskdownloadService base = (IJTaskdownloadService) AopContext.currentProxy();
+				List<JTaskdownload> jtaskdownloadtempList = new ArrayList<JTaskdownload>();
+				List<JTaskdownload> jtaskdownloadList = (List<JTaskdownload>)base.getAll().getData();
+				 for(JTaskdownload jtaskdownlaod:jtaskdownloadList) {
+					 if(jtaskdownlaod.getTaskid().equals(task.getId())) {
+						 jtaskdownloadtempList.add(jtaskdownlaod);
+						 
+					 }
+				 }
+				 
+				 map.put("fileUrl", jtaskdownloadtempList.get(0).getFileid().toString());
 			}
 			else {
 				map.put("id", task.getId());

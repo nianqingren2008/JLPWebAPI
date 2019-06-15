@@ -1,5 +1,6 @@
 package com.callan.service.provider.dao.mapper;
 
+import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.pojo.db.JFiletype;
 import com.callan.service.provider.pojo.db.JStatisconf;
 
@@ -74,6 +75,6 @@ public interface JStatisconfMapper {
 	 * 
 	 * @return
 	 */
-	@Select("SELECT * FROM J_STATISCONF")
+	@Select("SELECT * FROM J_STATISCONF WHERE ACTIVEFLAG='"+JLPConts.ActiveFlag+"' ")
     public List<JStatisconf> getAll();
 }
