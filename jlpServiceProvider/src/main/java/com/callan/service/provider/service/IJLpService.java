@@ -30,7 +30,7 @@ public interface IJLpService {
 
 	public List<Map<String, Object>> queryForAdvanceQuery(SortedSet<String> tableNames, String tempSql,
 			String patientTableWhere, Map<String, List<String>> tableWhere, String finalSelectFields,
-			String tempSqlWhere, int pageNumInt, int pageSizeInt);
+			String tempSqlWhere, int pageNumInt, int pageSizeInt, String sqlCount);
 
 	public int queryForCount(String sqlCount);
 }

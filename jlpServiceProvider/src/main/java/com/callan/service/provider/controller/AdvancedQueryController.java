@@ -271,7 +271,7 @@ public class AdvancedQueryController {
 		List<FieldName> fieldNames = new ArrayList<FieldName>();
 		// 增加隐藏主键
 		fieldNames.add(new FieldName(JLPConts.PatientGlobalTable + ".Id as hide_key"));
-		fieldNames.add(new FieldName(JLPConts.PatientGlobalTable + ".Id as _key"));
+		fieldNames.add(new FieldName(JLPConts.PatientGlobalTable + ".Id as \"_key\""));
 		SortedSet<String> fieldShowNames = new TreeSet<String>();
 		SortedSet<String> showTableNames = new TreeSet<String>();
 		for (JShowDetailView JShowDetailView : jShowDetailViewListShow) {
@@ -368,17 +368,13 @@ public class AdvancedQueryController {
 //		String sortStr = PatientGlobalTable + "__Id";
 //
 		String finalSelectFields = fieldNames.toString().substring(1, fieldNames.toString().length() - 1);
-//		String finalTables4Count = toTableString(tableNames, tempSql,tableWhere);
+		String finalTables4Count = toTableString(tableNames, tempSql,tableWhere);
 		
+		String tableKeys = toTableKeys(showTableNames);
 		
-		
-//		String tableKeys = toTableKeys(showTableNames);
-		
-		
-		
-//		String sql = "select distinct " + tableKeys + " from " + finalTables4Count + " " + tempSqlWhere;
-//		String sqlCount = " select count(1) count from (" + sql + ") countsql";
-////		log.info("sql : " + sql);
+		String sql = "select distinct " + tableKeys + " from " + finalTables4Count + " " + tempSqlWhere;
+		String sqlCount = " select count(1) count from (" + sql + ") countsql";
+//		log.info("sql : " + sql);
 //		log.info("sqlCount : " + sqlCount);
 ////		if (isTotals) {
 //		int count = jlpService.queryForCount(sqlCount);
@@ -417,7 +413,7 @@ public class AdvancedQueryController {
 		
 		try {
 			retData = jlpService.queryForAdvanceQuery(tableNames,tempSql,patientTableWhere,tableWhere,finalSelectFields,tempSqlWhere, pageNumInt
-					, pageSizeInt);
+					, pageSizeInt,sqlCount);
 		}catch(Exception e) {
 			response.getResponse().setCode("0000");
 			response.getResponse().setText("获取数据错误，原因: " + e.getMessage() );

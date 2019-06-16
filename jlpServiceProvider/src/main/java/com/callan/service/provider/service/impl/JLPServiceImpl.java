@@ -6,7 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +58,7 @@ public class JLPServiceImpl implements IJLpService {
 	 */
 	@Value("${loadingSeconds}")
 	private int loadingSeconds;
-	
+
 	/*
 	 * 如果遇到loading状态的查询，连续执行的间隔
 	 */
@@ -65,14 +69,14 @@ public class JLPServiceImpl implements IJLpService {
 	 */
 	@Value("${queryLoadingCount}")
 	private int queryLoadingCount;
-	
+
 	@Override
 	public List<Map<String, Object>> queryForSQLStreaming(String sql, int pageNum, int pageSize) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		try {
 			log.debug("queryForSQLStreaming -- > sql : " + sql);
 			long start = System.currentTimeMillis();
-			List<Map<String, Object>> pageData = dao.queryForSQLStreaming(sql, pageNum,pageSize);
+			List<Map<String, Object>> pageData = dao.queryForSQLStreaming(sql, pageNum, pageSize);
 			long end = System.currentTimeMillis();
 			log.info("queryForSQLStreaming--" + (end - start) + "ms");
 			return pageData;
@@ -122,7 +126,7 @@ public class JLPServiceImpl implements IJLpService {
 	@Override
 	public List<Map<String, Object>> queryForAdvanceQuery(SortedSet<String> tableNames, String tempSql,
 			String patientTableWhere, Map<String, List<String>> tableWhere, String finalSelectFields,
-			String tempSqlWhere, int pageNum, int pageSize) {
+			String tempSqlWhere, int pageNum, int pageSize, String sqlCount) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 
 		try {
@@ -149,31 +153,59 @@ public class JLPServiceImpl implements IJLpService {
 			}
 
 			if (serialKey != null && redisUtil.get(serialKey) == null) {
+				CountTask countTask = new CountTask();
+				countTask.setSqlCount(sqlCount);
+				Future<Integer> result = executorService.submit(countTask);
+				
 				Map<String, Object> dataMap = new HashMap<String, Object>();
 				dataMap.put("lastActiveTime", new Date());
 				dataMap.put("status", "loading");
-				//加载中状态最多保存300s
+				// 加载中状态最多保存300s
 				redisUtil.expire(serialKey, loadingSeconds);
 				redisUtil.set(serialKey, dataMap);
 				Map<String, String> sqlMap = getSqlMap(tableNames, tempSql, patientTableWhere, tableWhere,
 						finalSelectFields, tempSqlWhere, pageNum, pageSize);
 				long start = System.currentTimeMillis();
 				String sql = sqlMap.get("sqlPageData10");
-				List<Map<String, Object>> pageData = dao.queryForSQLStreaming(sql, pageNum, pageSize);
-				if (pageData.size() != pageSize) {
-					sql = sqlMap.get("sqlPageData1000");
+				List<Map<String, Object>> pageData = new ArrayList<Map<String, Object>>();
+				try {
 					pageData = dao.queryForSQLStreaming(sql, pageNum, pageSize);
+					Integer count = null;
+					if (result.isDone()) {
+						count = result.get();
+					}
 					if (pageData.size() != pageSize) {
-						sql = sqlMap.get("sqlPageData100000");
-						pageData = dao.queryForSQLStreaming(sql, pageNum, pageSize);
-						if (pageData.size() != pageSize) {
-							String finalTables4Count = toTableString(tableNames, tempSql, tableWhere);
-							String sqlAllData = "select distinct " + finalSelectFields + " from " + finalTables4Count
-									+ " " + tempSqlWhere + " order by " + JLPConts.PatientGlobalTable + ".Id";
-							sql = sqlAllData;
+						if (count == null || (count != null && pageData.size() != count.intValue())) {
+							sql = sqlMap.get("sqlPageData1000");
 							pageData = dao.queryForSQLStreaming(sql, pageNum, pageSize);
+
+							if (result.isDone()) {
+								count = result.get();
+							}
+							if (pageData.size() != pageSize) {
+								if (count == null || (count != null && pageData.size() != count.intValue())) {
+									sql = sqlMap.get("sqlPageData100000");
+									pageData = dao.queryForSQLStreaming(sql, pageNum, pageSize);
+									if (result.isDone()) {
+										count = result.get();
+									}
+									if (pageData.size() != pageSize) {
+										if (count == null || (count != null && pageData.size() != count.intValue())) {
+											String finalTables4Count = toTableString(tableNames, tempSql, tableWhere);
+											String sqlAllData = "select distinct " + finalSelectFields + " from "
+													+ finalTables4Count + " " + tempSqlWhere + " order by "
+													+ JLPConts.PatientGlobalTable + ".Id";
+											sql = sqlAllData;
+											pageData = dao.queryForSQLStreaming(sql, pageNum, pageSize);
+										}
+									}
+								}
+							}
 						}
 					}
+				} catch (Exception e) {
+					log.error(e);
+					redisUtil.del(serialKey);
 				}
 				log.info("queryForSQLStreaming-----sql : " + sql);
 
@@ -198,21 +230,24 @@ public class JLPServiceImpl implements IJLpService {
 				}
 //				end = System.currentTimeMillis();
 				return pageData;
-			} else if(redisUtil.get(serialKey) != null && "loading".equals(ObjectUtil.objToString(((Map<String,Object>)redisUtil.get(serialKey)).get("status")))){
+			} else if (redisUtil.get(serialKey) != null && "loading"
+					.equals(ObjectUtil.objToString(((Map<String, Object>) redisUtil.get(serialKey)).get("status")))) {
 				int i = 0;
-				while(i < queryLoadingCount) {
+				while (i < queryLoadingCount) {
 					log.info("[redis data is loading waiting 1s ], pageNum:" + pageNum);
 					Thread.sleep(queryLoadingInterval);
 					i++;
-					if("finish".equals(ObjectUtil.objToString(((Map<String,Object>)redisUtil.get(serialKey)).get("status")))) {
+					if ("finish".equals(
+							ObjectUtil.objToString(((Map<String, Object>) redisUtil.get(serialKey)).get("status")))) {
 						Map<String, List<Map<String, Object>>> map = (Map<String, List<Map<String, Object>>>) redisUtil
 								.get(serialKey);
 						return map.get("data");
 					}
 				}
 				throw new JLPException("获取分页数据超时,请稍后重试");
-				
-			} else if(redisUtil.get(serialKey) != null && "finish".equals(ObjectUtil.objToString(((Map<String,Object>)redisUtil.get(serialKey)).get("status")))){
+
+			} else if (redisUtil.get(serialKey) != null && "finish"
+					.equals(ObjectUtil.objToString(((Map<String, Object>) redisUtil.get(serialKey)).get("status")))) {
 				log.info("[get data from redis success], pageNum:" + pageNum);
 				Map<String, List<Map<String, Object>>> map = (Map<String, List<Map<String, Object>>>) redisUtil
 						.get(serialKey);
@@ -224,6 +259,24 @@ public class JLPServiceImpl implements IJLpService {
 			throw new JLPException(e.getMessage());
 		}
 		return new ArrayList<Map<String, Object>>();
+	}
+
+	class CountTask implements Callable<Integer> {
+		private String sqlCount;
+		
+		public String getSqlCount() {
+			return sqlCount;
+		}
+
+		public void setSqlCount(String sqlCount) {
+			this.sqlCount = sqlCount;
+		}
+
+		@Override
+		public Integer call() throws Exception {
+			int count = queryForCount(sqlCount);
+			return count;
+		}
 	}
 
 	private Map<String, String> getSqlMap(SortedSet<String> tableNames, String tempSql, String patientTableWhere,
@@ -257,19 +310,20 @@ public class JLPServiceImpl implements IJLpService {
 			Map<String, String> sqlMap = getSqlMap(tableNames, tempSql, patientTableWhere, tableWhere,
 					finalSelectFields, tempSqlWhere, pageNumPlus, pageSize);
 
-			log.info("-------------------开始加载第" + pageNumPlus + "页数据--------------");
-			Map<String, Object> dataMap = new HashMap<String, Object>();
-			dataMap.put("lastActiveTime", new Date());
-			dataMap.put("status", "loading");
-			//加载中状态最多保存300s
-			redisUtil.expire(serialKeyPage, loadingSeconds);
-			redisUtil.set(serialKeyPage, dataMap);
 			executorService.execute(new Runnable() {
 				@Override
 				public void run() {
 					try {
 						log.info("-------------------start load sqlDataPlus data------------pageNumPlus: "
 								+ pageNumPlus);
+
+						log.info("-------------------开始加载第" + pageNumPlus + "页数据--------------");
+						Map<String, Object> dataMap = new HashMap<String, Object>();
+						dataMap.put("lastActiveTime", new Date());
+						dataMap.put("status", "loading");
+						// 加载中状态最多保存300s
+						redisUtil.expire(serialKeyPage, loadingSeconds);
+						redisUtil.set(serialKeyPage, dataMap);
 
 						long start = System.currentTimeMillis();
 						String sql = sqlMap.get("sqlPageData10");
@@ -315,6 +369,7 @@ public class JLPServiceImpl implements IJLpService {
 //								+ pageNumPlus + (end - start) + "ms");
 					} catch (Exception e) {
 						e.printStackTrace();
+						redisUtil.del(serialKeyPage);
 					}
 				}
 			});
@@ -448,7 +503,5 @@ public class JLPServiceImpl implements IJLpService {
 		}
 		return 0;
 	}
- 
-	 
-	 
+
 }
