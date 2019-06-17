@@ -41,4 +41,5 @@ public class JStatisconfdetailServiceImpl implements IJStatisconfdetailService {
 		return response;
 	}
 
+
 }

@@ -61,4 +61,20 @@ public class JSensitiveWordServiceImpl implements IJSensitiveWordService {
 		response.setData(map);
 		return response;
 	}
+	
+	@Override
+	public int deleteByPrimaryKey(Long id) {
+	  return jSensitiveWordMapper.deleteByPrimaryKey(id);
+	}
+	
+	@Override
+	public int insertSelective(JSensitiveWord jSensitiveWord) {
+		return jSensitiveWordMapper.insertSelective(jSensitiveWord);
+	}
+	
+	@Override 
+	public int  updateByPrimaryKeySelective(JSensitiveWord jSensitiveWord) {
+		return jSensitiveWordMapper.updateByPrimaryKeySelective(jSensitiveWord);
+	}
 }
+

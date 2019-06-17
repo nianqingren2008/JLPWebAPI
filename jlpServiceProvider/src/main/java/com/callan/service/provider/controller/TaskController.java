@@ -157,9 +157,8 @@ public class TaskController {
 	public String  deleteTask(Long id){
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		ControllerBaseResponse response = new ControllerBaseResponse();
-		IJTaskService base = (IJTaskService) AopContext.currentProxy();
-		Map<Long,JTask> data = (Map<Long,JTask>) base.getAll4Id().getData();
-		JTask jtask = data.get(id);
+		Map<Long,JTask> taskMap = (Map<Long,JTask>) jTaskService.getAll4Id().getData();
+		JTask jtask = taskMap.get(id);
 		if(jtask!=null) {
 			try {
 				jTaskService.delete(id);
@@ -260,9 +259,8 @@ public class TaskController {
 		if(task!=null) {
 			
 			if("3".equals(task.getStatus())) {
-				IJTaskdownloadService base = (IJTaskdownloadService) AopContext.currentProxy();
 				List<JTaskdownload> jtaskdownloadtempList = new ArrayList<JTaskdownload>();
-				List<JTaskdownload> jtaskdownloadList = (List<JTaskdownload>)base.getAll().getData();
+				List<JTaskdownload> jtaskdownloadList = (List<JTaskdownload>)jTaskdownloadService.getAll().getData();
 				 for(JTaskdownload jtaskdownlaod:jtaskdownloadList) {
 					 if(jtaskdownlaod.getTaskid().equals(task.getId())) {
 						 jtaskdownloadtempList.add(jtaskdownlaod);

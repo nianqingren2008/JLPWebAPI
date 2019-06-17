@@ -160,4 +160,26 @@ public class JTableFieldDictServiceImpl implements IJTableFieldDictService {
 		return null;
 	}
 	
+	@LocalCacheable
+	@Override
+	public CacheResponse getAll(boolean showFlag) {
+		List<JTableFieldDict> tablefieldList = new ArrayList<JTableFieldDict>();
+		List<JTableFieldDict> list = jTableFiledDictMapper.getAll();
+		for (JTableFieldDict entity : list) {
+			if(showFlag)
+			{
+					if(JLPConts.ActiveFlag.equals(entity.getShowflag())) {
+						tablefieldList.add(entity);
+					}
+			}
+			else {
+				tablefieldList.add(entity);
+			}
+		}
+		CacheResponse response = new CacheResponse();
+		response.setCode(0);
+		response.setData(tablefieldList);
+		return response;
+	}
+	
 }

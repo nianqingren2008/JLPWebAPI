@@ -2,14 +2,11 @@ package com.callan.service.provider.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
 import com.callan.service.provider.config.JLPLog;
+import com.callan.service.provider.config.JLPMapUtil;
 import com.callan.service.provider.config.ThreadPoolConfig;
+import com.callan.service.provider.pojo.ControllerBaseResponse;
 import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.db.JSensitiveWord;
 import com.callan.service.provider.pojo.db.JTableFieldDict;
@@ -35,6 +34,8 @@ public class SensitivewordController {
 	private IJUserService userService;
 	@Autowired
 	private IJSensitiveWordService jSensitiveWordService;
+	@Autowired
+	private IJTableFieldDictService jTablefielddictService;
 	
 	@ApiOperation(value = "获取敏感词列表")
 	@RequestMapping(value = "/api/Sensitiveword", method = { RequestMethod.GET })
@@ -42,7 +43,7 @@ public class SensitivewordController {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		BaseResponse baseResponse = new BaseResponse();
-		// 从前台header中获取token参数
+		/*// 从前台header中获取token参数
 		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
 				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
@@ -52,11 +53,11 @@ public class SensitivewordController {
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
-		log.info("userId : " + userId);
+		log.info("userId : " + userId);*/
+		
 		List<Map<String, String>> resultList = new ArrayList<Map<String, String>>();
-		IJSensitiveWordService base = (IJSensitiveWordService) AopContext.currentProxy();
 		List<JSensitiveWord> sensitivewordList = new ArrayList<JSensitiveWord>();
-		sensitivewordList = (List<JSensitiveWord>) base.getAll().getData(); 
+		sensitivewordList = (List<JSensitiveWord>)jSensitiveWordService.getAll().getData();
 		if(sensitivewordList!=null&&sensitivewordList.size()>0) {
 			for(JSensitiveWord sensitiveword:sensitivewordList) {
 				Map<String,String> map = new HashMap<String,String>();
@@ -80,7 +81,7 @@ public class SensitivewordController {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		BaseResponse baseResponse = new BaseResponse();
-		// 从前台header中获取token参数
+		/*// 从前台header中获取token参数
 		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
 				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
@@ -90,11 +91,21 @@ public class SensitivewordController {
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
-		log.info("userId : " + userId);
-		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-		IJTableFieldDictService base = (IJTableFieldDictService) AopContext.currentProxy();
-		Map<String, JTableFieldDict>   Data = (Map<String,JTableFieldDict>) base.getAll4TableCode().getData();
-		
+		log.info("userId : " + userId);*/
+		List<Map<String, String>> resultList = new ArrayList<Map<String, String>>();
+		Map<String,String> fildsmap = new HashMap<>();
+		List<JTableFieldDict> tablefieldList = (List<JTableFieldDict>)jTablefielddictService.getAll(true).getData();
+		if(tablefieldList!=null&&tablefieldList.size()>0) {
+			for(JTableFieldDict tablefile:tablefieldList) {
+				if(!tablefile.getName().startsWith("JL")) {
+					fildsmap.put("Name", tablefile.getName());
+					fildsmap.put("title", tablefile.getDictname());
+					fildsmap = JLPMapUtil.deleteDuplicate1(fildsmap); 	//去重 
+					resultList.add(fildsmap);
+				}
+			}
+			
+		}
 		
 		resultMap.put("response", new BaseResponse());
 		resultMap.put("allFields", resultList);
@@ -102,5 +113,48 @@ public class SensitivewordController {
 		log.info("response : " + json);
 		return json;
 	}
+	
+	
+	@ApiOperation(value = "新增或者修改敏感词")
+	@RequestMapping(value = "/api/Sensitiveword", method = { RequestMethod.POST })
+	public String updateSensitiveword(Long id,String word,HttpServletRequest request) {
+		JLPLog log = ThreadPoolConfig.getBaseContext();
+		JSensitiveWord sensitiveword = jSensitiveWordService.getOne(id);
+		if(sensitiveword!=null) {
+			log.info("修改已经存在的 id : " + id);
+			int updateRet = jSensitiveWordService.updateByPrimaryKeySelective(sensitiveword);
+			
+		}
+		else {
+			log.info("增加 id : " + id);
+			int addRet = jSensitiveWordService.insertSelective(sensitiveword);
+		}
+		
+		return null;
+		
+	}
+	
+	@ApiOperation(value = "移除敏感词")
+	@RequestMapping(value = "/api/Sensitiveword/delete", method = { RequestMethod.DELETE })
+	public String deleteSensitiveword(Long id,String word,HttpServletRequest request) {
+		JLPLog log = ThreadPoolConfig.getBaseContext();
+		
+		JSensitiveWord sensitiveword = jSensitiveWordService.getOne(id);
+		if(sensitiveword!=null) {
+			int deleteRet = jSensitiveWordService.deleteByPrimaryKey(id);
+		}
+		else {
+			ControllerBaseResponse response = new ControllerBaseResponse();
+			response.getResponse().setCode("400");
+			response.getResponse().setText("用户名或密码错误");
+			return response.toJsonString();
+		}
+		 
+		return null;
+		
+	}
+	   
+	
+	
 	
 }

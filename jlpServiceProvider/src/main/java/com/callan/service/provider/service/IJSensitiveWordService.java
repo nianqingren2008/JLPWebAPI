@@ -11,4 +11,10 @@ public interface IJSensitiveWordService {
 	
 	CacheResponse getAll4Name();
 
+	int deleteByPrimaryKey(Long id);
+
+	int insertSelective(JSensitiveWord jSensitiveWord);
+
+	int updateByPrimaryKeySelective(JSensitiveWord jSensitiveWord);
+
 }
