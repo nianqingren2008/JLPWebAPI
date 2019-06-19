@@ -119,18 +119,29 @@ public class SensitivewordController {
 	@RequestMapping(value = "/api/Sensitiveword", method = { RequestMethod.POST })
 	public String updateSensitiveword(Long id,String word,HttpServletRequest request) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
+		ControllerBaseResponse response = new ControllerBaseResponse();
 		JSensitiveWord sensitiveword = jSensitiveWordService.getOne(id);
 		if(sensitiveword!=null) {
 			log.info("修改已经存在的 id : " + id);
-			int updateRet = jSensitiveWordService.updateByPrimaryKeySelective(sensitiveword);
+			try {
+				int updateRet = jSensitiveWordService.updateByPrimaryKeySelective(sensitiveword);
+			}
+			catch (Exception e) {
+				response.getResponse().setCode("400");
+				response.getResponse().setText("系统异常，修改id:"+id+"的敏感词信息失败");
+			}
 			
 		}
 		else {
 			log.info("增加 id : " + id);
+			try {
 			int addRet = jSensitiveWordService.insertSelective(sensitiveword);
+			}catch (Exception e) {
+				response.getResponse().setCode("400");
+				response.getResponse().setText("系统异常，增加id:"+id+"的敏感词信息失败");
+			}
 		}
-		
-		return null;
+		return response.toJsonString();
 		
 	}
 	
@@ -138,20 +149,24 @@ public class SensitivewordController {
 	@RequestMapping(value = "/api/Sensitiveword/delete", method = { RequestMethod.DELETE })
 	public String deleteSensitiveword(Long id,String word,HttpServletRequest request) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
-		
+		ControllerBaseResponse response = new ControllerBaseResponse();
 		JSensitiveWord sensitiveword = jSensitiveWordService.getOne(id);
 		if(sensitiveword!=null) {
+			try {
 			int deleteRet = jSensitiveWordService.deleteByPrimaryKey(id);
+			
+			}
+			catch (Exception e) {
+				response.getResponse().setCode("400");
+				response.getResponse().setText("系统异常，移除id:"+id+"的敏感词信息失败");
+			}
 		}
 		else {
-			ControllerBaseResponse response = new ControllerBaseResponse();
+			 
 			response.getResponse().setCode("400");
-			response.getResponse().setText("用户名或密码错误");
-			return response.toJsonString();
+			response.getResponse().setText("找不到id:"+id+"的敏感词信息");
 		}
-		 
-		return null;
-		
+		return response.toJsonString();
 	}
 	   
 	
