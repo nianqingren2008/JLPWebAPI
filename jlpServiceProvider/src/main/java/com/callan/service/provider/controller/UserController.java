@@ -1,5 +1,7 @@
 package com.callan.service.provider.controller;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
@@ -24,21 +26,22 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @Api(description = "用户管理")
 public class UserController {
-	
+
 	@Autowired
 	private IJUserService jUserService;
-	
+
 	@ApiOperation(value = "用户登录")
 	@RequestMapping(value = "/api/User", method = { RequestMethod.POST })
-	public String login(JUser user) {
-		JUser loginUser = jUserService.login(user.getLogincode(),user.getLoginpwd());
-		if(loginUser == null || loginUser.getId() == 0) {
+	public String login(JUser user,HttpServletResponse resq) {
+		JUser loginUser = jUserService.login(user.getLogincode(), user.getLoginpwd());
+		if (loginUser == null || loginUser.getId() == 0) {
 			ControllerBaseResponse response = new ControllerBaseResponse();
+			resq.setStatus(400);
 			response.getResponse().setCode("400");
 			response.getResponse().setText("用户名或密码错误");
 			return response.toJsonString();
 		}
-		
+
 //        JSystemconfig systemconfig = orclJlpContext.JSystemconfigs.FirstOrDefault(x => x.Activeflag == "1" && x.Classtype == "system" && x.Keyname == "LoginActiveHours");
 //        int activeHours = 24;
 //        if (systemconfig != null && int.TryParse(systemconfig.Keyvalue, out int tempInt))
@@ -80,15 +83,25 @@ public class UserController {
 //        return Ok(ret);
 		return null;
 	}
-	
-	
+
 	@ApiOperation(value = "更改用户密码")
 	@RequestMapping(value = "/api/changepwd", method = { RequestMethod.POST })
-    public String ChangePwd(UserChangePwd userChangePwd, HttpSession session) {
+	public String ChangePwd(UserChangePwd userChangePwd, HttpServletRequest request,HttpServletResponse resq) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
-		JUser user = (JUser) session.getAttribute("user");
 		ControllerBaseResponse response = new ControllerBaseResponse();
-		if(user.getLoginpwd() != userChangePwd.getUserPwd()) {
+		// 从前台header中获取token参数
+		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+
+		JUser user = jUserService.getUserByToken(authorization);
+		if (user == null) {
+			resq.setStatus(400);
+			response.getResponse().setCode("400");
+			response.getResponse().setText("登录过期，请先登录");
+			return response.toJsonString();
+		}
+
+		if (user.getLoginpwd() != userChangePwd.getUserPwd()) {
+			resq.setStatus(400);
 			response.getResponse().setCode("400");
 			response.getResponse().setText("用户名或密码错误");
 			return response.toJsonString();
@@ -96,18 +109,19 @@ public class UserController {
 		user.setLoginpwd(userChangePwd.getUserNewPwd());
 		try {
 			jUserService.updatePwd(user);
-		}catch(Exception e) {
-			log.error("修改密码失败",e);
+		} catch (Exception e) {
+			log.error("修改密码失败", e);
+			resq.setStatus(400);
 			response.getResponse().setCode("400");
 			response.getResponse().setText(e.getMessage());
 			return response.toJsonString();
 		}
 		return response.toJsonString();
-    }
+	}
 
 	@ApiOperation(value = "获取角色")
 	@RequestMapping(value = "/api/Role", method = { RequestMethod.POST })
-    public String Post(UserRole userRole) {
+	public String Post(UserRole userRole) {
 //        JUsers users = orclJlpContext.JUsers.FirstOrDefault(x => x.Activeflag == JLPStaticProperties.ActiveFlag && x.Id == userRole.userId);
 //        if (users is null) { return NotFound(); }
 //        JRole jRole = orclJlpContext.JRoles.FirstOrDefault(x => x.Activeflag == JLPStaticProperties.ActiveFlag && x.Id == userRole.roleId);
@@ -122,7 +136,6 @@ public class UserController {
 //
 //        return Ok(ResponseModel.Ok().ToDictionaryObj());
 		return null;
-    }
-    
-    
+	}
+
 }

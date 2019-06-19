@@ -25,3 +25,8 @@ queryLoadingCount: 500
 #如果遇到loading状态的查询，连续执行的间隔
 queryLoadingInterval: 200
 
+pathdb_driver: com.microsoft.sqlserver.jdbc.SQLServerDriver
+pathdb_url: jdbc:sqlserver://pathdb.tjh.com:1433;DatabaseName=pathnet
+pathdb_user: pacs_path_view
+pathdb_pwd: pacs_path_view
+

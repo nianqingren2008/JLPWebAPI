@@ -21,7 +21,7 @@ public interface JSystemConfigMapper {
 	
 	
 	@Select("SELECT * FROM j_systemconfig WHERE classType = #{classType} and keyName = #{keyName} and activeflag='"+JLPConts.ActiveFlag+"'")
-    public JSystemconfig getByIdAndFileCode(String classType,String keyName);
+    public JSystemconfig getByClassTypeAndKeyName(String classType,String keyName);
 	
 	/**
 	 * 

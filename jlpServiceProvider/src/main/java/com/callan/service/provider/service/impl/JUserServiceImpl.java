@@ -74,4 +74,9 @@ public class JUserServiceImpl implements IJUserService {
 		}
 		return null;
 	}
+
+	@Override
+	public JUser getUserByToken(String authorization) {
+		return jUserMapper.getUserByToken(authorization);
+	}
 }

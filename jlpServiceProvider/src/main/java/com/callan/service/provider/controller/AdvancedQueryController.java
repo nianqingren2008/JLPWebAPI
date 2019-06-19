@@ -1,8 +1,10 @@
 package com.callan.service.provider.controller;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +25,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSONObject;
 import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.config.JLPLog;
+import com.callan.service.provider.config.ObjectUtil;
 import com.callan.service.provider.config.ThreadPoolConfig;
+import com.callan.service.provider.dao.IPathologyDao;
 import com.callan.service.provider.pojo.AdvanceQueryRequest;
 import com.callan.service.provider.pojo.AdvanceQueryResponse;
 import com.callan.service.provider.pojo.advanceQueryBase.ColunmsModel;
@@ -37,6 +41,7 @@ import com.callan.service.provider.pojo.db.JRoleRight;
 import com.callan.service.provider.pojo.db.JSensitiveWord;
 import com.callan.service.provider.pojo.db.JShowDetailView;
 import com.callan.service.provider.pojo.db.JShowView;
+import com.callan.service.provider.pojo.db.JSystemconfig;
 import com.callan.service.provider.pojo.db.JTableDict;
 import com.callan.service.provider.pojo.db.JTableFieldDict;
 import com.callan.service.provider.service.IJLpService;
@@ -44,6 +49,7 @@ import com.callan.service.provider.service.IJRoleRightService;
 import com.callan.service.provider.service.IJSensitiveWordService;
 import com.callan.service.provider.service.IJShowDetailViewService;
 import com.callan.service.provider.service.IJShowViewService;
+import com.callan.service.provider.service.IJSystemConfigService;
 import com.callan.service.provider.service.IJTableDictService;
 import com.callan.service.provider.service.IJTableFieldDictService;
 import com.callan.service.provider.service.IJUserService;
@@ -54,7 +60,6 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @Api(description = "病例检索查询")
 public class AdvancedQueryController {
-	
 
 	@Autowired
 	private IJShowViewService jShowviewService;
@@ -83,12 +88,19 @@ public class AdvancedQueryController {
 	@Autowired
 	private IJRoleRightService roleRightService;
 
+	@Autowired
+	private IJSystemConfigService systemConfigService;
+
+	@Autowired
+	private IPathologyDao pathologyDao;
+
 	@ApiOperation(value = "病例检索模糊查询(仅列表)")
 	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST })
-	public String query1(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpServletRequest request) {
-		return query(advanceQuery,pageNum,pageSize,request);
+	public String query1(@RequestBody String advanceQuery, String pageNum, String pageSize,
+			HttpServletRequest request) {
+		return query(advanceQuery, pageNum, pageSize, request);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@ApiOperation(value = "病例检索模糊查询(仅列表)")
 	@RequestMapping(value = "/api/AdvancedQuery", method = { RequestMethod.POST })
@@ -202,7 +214,7 @@ public class AdvancedQueryController {
 		// List<String> whereFieldTypesMain = new ArrayList<String>();
 		String patientTableWhere = " where 1=1 ";
 		String sqlWhereMain = "";
-		Map<String,List<String> > tableWhere = new HashMap<String, List<String>>();
+		Map<String, List<String>> tableWhere = new HashMap<String, List<String>>();
 		if (queryCondsList != null) {
 
 			for (QueryConds queryConds : queryCondsList) {
@@ -235,12 +247,12 @@ public class AdvancedQueryController {
 					}
 					sqlWhereMain += condition + " " + queryConds.getRelation() + " " + condValue + " and ";
 					List<String> list = tableWhere.get(tableName);
-					if(list == null) {
+					if (list == null) {
 						list = new ArrayList<String>();
 					}
 					list.add(" and " + condition + " " + queryConds.getRelation() + " " + condValue);
-					if(condition.contains(JLPConts.PatientGlobalTable)){
-						patientTableWhere += " and " + condition + " " + queryConds.getRelation() + " " + condValue ;
+					if (condition.contains(JLPConts.PatientGlobalTable)) {
+						patientTableWhere += " and " + condition + " " + queryConds.getRelation() + " " + condValue;
 					}
 				} else {
 					sqlWhereMain += condition + " " + queryConds.getRelation() + " " + " and ";
@@ -283,6 +295,55 @@ public class AdvancedQueryController {
 			fieldShowNames.add(JShowDetailView.getjTableFieldDict().getName().toLowerCase());
 		}
 		tableNames.addAll(tableNameMainWheres);
+
+		boolean IsImageUrl = false;
+		boolean IsPathImageUrl = false;
+		JSystemconfig systemconfig = (JSystemconfig) systemConfigService.getByClassTypeAndKeyName("image", "Html")
+				.getData();
+		String imageUrl = null;
+		if (systemconfig != null) {
+			imageUrl = systemconfig.getKeyvalue();
+		}
+		String imageKey = null;
+		systemconfig = (JSystemconfig) systemConfigService.getByClassTypeAndKeyName("image", "fieldName").getData();
+		if (systemconfig != null) {
+			imageKey = systemconfig.getKeyvalue();
+		}
+		String imageField = "_examImage";
+		String pathImageUrl = null;
+		systemconfig = (JSystemconfig) systemConfigService.getByClassTypeAndKeyName("image", "pathHtml").getData();
+		if (systemconfig != null) {
+			pathImageUrl = systemconfig.getKeyvalue();
+		}
+
+		String pathImageKey = null;
+		systemconfig = (JSystemconfig) systemConfigService.getByClassTypeAndKeyName("image", "pathFieldName").getData();
+		if (systemconfig != null) {
+			pathImageKey = systemconfig.getKeyvalue();
+		}
+
+		String pathImageField = "_pathImage";
+		for (String str : tableNames) {
+			if (imageKey.contains(str)) {
+				IsImageUrl = true;
+			}
+			if (pathImageKey.contains(str)) {
+				IsPathImageUrl = true;
+			}
+		}
+
+		if (IsImageUrl) {
+			fieldNames.add(new FieldName(imageKey + "  as \"_examImage\""));
+		} else {
+			fieldNames.add(new FieldName("'' as \"_examImage\""));
+		}
+
+		if (IsPathImageUrl) {
+			fieldNames.add(new FieldName(pathImageKey + " as \"_pathImage\"" ));
+		} else {
+			fieldNames.add(new FieldName("'' as \"_pathImage\"" ));
+		}
+
 //		for(String tableName : tableNames) {
 //			if(PatientGlobalTable.equals(tableName.toUpperCase())) {
 //				tableNames.remove(tableName);
@@ -322,7 +383,7 @@ public class AdvancedQueryController {
 //		}
 		// 处理纳入
 //		for (QueryIncludesEXCondition queryIncludesEXCondition : includes) {
-		String tempSql = queryEx(queryIncludesEX,tableWhere);
+		String tempSql = queryEx(queryIncludesEX, tableWhere);
 //		}
 		// 处理排除
 
@@ -350,28 +411,29 @@ public class AdvancedQueryController {
 				fieldName.setFieldName("to_char(" + fieldName.getFieldName() + ",'yyyy/mm/dd') as birthday");
 			}
 		}
-		
 
-		
-		patientTableWhere += " and "+JLPConts.PatientGlobalTable+".jlactiveflag='1'";
-		if (advanceQueryRequest.getPatientGlobalId() != null
-				&& advanceQueryRequest.getPatientGlobalId().longValue() > 0) {
-			patientTableWhere += " and "+JLPConts.PatientGlobalTable+".Id = "
-				+ advanceQueryRequest.getPatientGlobalId();
-		}
-		String tempSqlWhere = " where 1=1 and " + JLPConts.PatientGlobalTable+".jlactiveflag='1' ";;
+		patientTableWhere += " and " + JLPConts.PatientGlobalTable + ".jlactiveflag='1'";
+
+		String tempSqlWhere = " where 1=1 and " + JLPConts.PatientGlobalTable + ".jlactiveflag='1' ";
+		;
 		if (sqlWhereMain.length() > 0) {
 			tempSqlWhere += " and  " + sqlWhereMain;
 		}
 		tempSqlWhere += " and " + mainTable.getName() + ".Id is not null";
+
+		if (advanceQueryRequest.getPatientGlobalId() != null
+				&& advanceQueryRequest.getPatientGlobalId().longValue() > 0) {
+			tempSqlWhere += " and " + JLPConts.PatientGlobalTable + ".Id = " + advanceQueryRequest.getPatientGlobalId();
+		}
+
 //        #region 组装返回值
 //		String sortStr = PatientGlobalTable + "__Id";
 //
 		String finalSelectFields = fieldNames.toString().substring(1, fieldNames.toString().length() - 1);
-		String finalTables4Count = toTableString(tableNames, tempSql,tableWhere);
-		
+		String finalTables4Count = toTableString(tableNames, tempSql, tableWhere);
+
 		String tableKeys = toTableKeys(showTableNames);
-		
+
 		String sql = "select distinct " + tableKeys + " from " + finalTables4Count + " " + tempSqlWhere;
 		String sqlCount = " select count(1) count from (" + sql + ") countsql";
 //		log.info("sql : " + sql);
@@ -393,11 +455,11 @@ public class AdvancedQueryController {
 
 //		String SqlAllData = "select distinct " + finalSelectFields + " from " + finalTables4Count + " " + tempSqlWhere
 //				+ " order by " + JLPConts.PatientGlobalTable + ".Id";
-		
+
 //		if(StringUtils.isBlank(sqlWhereMain)) {
 //			
 //		}
-		
+
 //		String finalTables4PageData10 = toTableString(tableNames, tempSql,pageNumInt,pageSizeInt,patientTableWhere,tableWhere,10);
 //		String finalTables4PageData1000 = toTableString(tableNames, tempSql,pageNumInt,pageSizeInt,patientTableWhere,tableWhere,1000);
 //		String finalTables4PageData100000 = toTableString(tableNames, tempSql,pageNumInt,pageSizeInt,patientTableWhere,tableWhere,100000);
@@ -410,19 +472,20 @@ public class AdvancedQueryController {
 //				+ " order by " + JLPConts.PatientGlobalTable + ".Id";
 //		
 //		retData = jlpService.queryForSQLStreaming(SqlPageData10,SqlPageData1000,SqlPageData100000,SqlAllData, pageNumInt, pageSizeInt);
-		
+
 		try {
-			retData = jlpService.queryForAdvanceQuery(tableNames,tempSql,patientTableWhere,tableWhere,finalSelectFields,tempSqlWhere, pageNumInt
-					, pageSizeInt,sqlCount);
-		}catch(Exception e) {
+			retData = jlpService.queryForAdvanceQuery(tableNames, tempSql, patientTableWhere, tableWhere,
+					finalSelectFields, tempSqlWhere, pageNumInt, pageSizeInt, sqlCount);
+		} catch (Exception e) {
 			response.getResponse().setCode("0000");
-			response.getResponse().setText("获取数据错误，原因: " + e.getMessage() );
+			response.getResponse().setText("获取数据错误，原因: " + e.getMessage());
 			String json = response.toJsonString();
 			log.info("response --> " + json);
 			return json;
 		}
 		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+		String authorization = request.getHeader("Authorization") == null ? "5996590f4d137887e12651c3aaad4105"
+				: request.getHeader("Authorization");
 
 		Long userRole = jUserService.getUserRoleByToken(authorization);
 		if (userRole != null && userRole != 0L) {
@@ -435,28 +498,85 @@ public class AdvancedQueryController {
 							.getAll4Name().getData();
 					if (!sensitiveWordMap.isEmpty()) {
 						// 将敏感字段设置为 ***
-						retData = sensitiveWord(retData, sensitiveWordMap);
+						retData = sensitiveWord(retData, sensitiveWordMap, log);
 					}
 				}
 			}
 
 		}
 
+		StringBuffer preUrl = request.getRequestURL();
+		String preUrlStr = preUrl.toString().substring(0, preUrl.toString().indexOf("/api/"));
+		if (IsImageUrl) {
+			retData = SetImageUrl(retData, imageUrl, imageField, "", false, log);
+		}
+		if (IsPathImageUrl) {
+			retData = SetImageUrl(retData, pathImageUrl, pathImageField, preUrlStr, IsPathImageUrl, log);
+		}
+
 //			}
 		response.setColumns(columns);
 		response.setContent(retData);
-		response.setTotals(0);
+		response.setTotals(retData.size());
 //		}
 		String json = response.toJsonString();
 		log.info("response --> " + json);
 		long end = System.currentTimeMillis();
 		log.info("serviceTime " + (end - start) + "ms");
-		//清理上下文
+		// 清理上下文
 		return json;
 	}
 
-	
-	
+	public List<Map<String, Object>> SetImageUrl(List<Map<String, Object>> ts, String Url, String fieldName,
+			String preUrl, boolean IsPath, JLPLog log) {
+		if (ts == null || ts.size() < 1) {
+			return ts;
+		}
+		if (StringUtils.isBlank(fieldName)) {
+			return ts;
+		}
+
+		String pathSql = "select t.F_BLH,t.F_TXURL from V_PACS_FCK_ZLK_TX t where t.F_BLH in (?)";
+
+		for (Map<String, Object> map : ts) {
+			if (map.containsKey(fieldName)) {
+				List<Map<String, Object>> resultList;
+				try {
+					resultList = pathologyDao.queryForSQL(pathSql, new Object[] { map.get(fieldName) });
+
+					if (resultList != null && resultList.size() > 0) {
+						Url = Url.replace("{0}", "");
+						Url = Url.replace("{1}", "");
+						String value = "";
+						for (Map<String, Object> valueMap : resultList) {
+							value += preUrl + Url;
+							String tempValue  = ObjectUtil.objToString(valueMap.get("F_TXURL"));
+							if (IsPath) {
+								tempValue = tempValue.replace("ftp://", "").replace("FTP://", "");
+								if (tempValue.indexOf("/") == 0) {
+									tempValue += "";
+								} else {
+
+									tempValue = tempValue.substring(tempValue.indexOf("/") + 1);
+								}
+							} 
+							value += tempValue + ",";
+						}
+						if(value.length() > 0 && value.endsWith(",")) {
+							value = value.substring(0,value.length()-1);
+						}
+						map.put(fieldName, value);
+					}
+				} catch (Exception e) {
+					log.error(e);
+				}
+			}
+
+		}
+
+		return ts;
+	}
+
 	@ApiOperation(value = "病例检索模糊查询(仅数量)")
 	@RequestMapping(value = "/api/AdvanceQuery/count", method = { RequestMethod.POST })
 	public String query4Count(@RequestBody String advanceQuery, String pageNum, String pageSize) {
@@ -556,7 +676,7 @@ public class AdvancedQueryController {
 		SortedSet<String> tableNameMainWheres = new TreeSet<String>();
 		SortedSet<String> tableNameWhereMainValues = new TreeSet<String>();
 		String sqlWhereMain = "";
-		Map<String,List<String> > tableWhere = new HashMap<String, List<String>>();
+		Map<String, List<String>> tableWhere = new HashMap<String, List<String>>();
 		if (queryCondsList != null) {
 
 			for (QueryConds queryConds : queryCondsList) {
@@ -589,7 +709,7 @@ public class AdvancedQueryController {
 					}
 					sqlWhereMain += condition + " " + queryConds.getRelation() + " " + condValue + " and ";
 					List<String> list = tableWhere.get(tableName);
-					if(list == null) {
+					if (list == null) {
 						list = new ArrayList<String>();
 					}
 					list.add(" and " + condition + " " + queryConds.getRelation() + " " + condValue);
@@ -633,7 +753,7 @@ public class AdvancedQueryController {
 		}
 
 		QueryIncludesEX queryIncludesEX = advanceQueryRequest.getQueries().getQueryIncludesEX();
-		String tempSql = queryEx(queryIncludesEX,tableWhere);
+		String tempSql = queryEx(queryIncludesEX, tableWhere);
 
 		for (int i = 0; i < fieldNames.size(); i++) {
 			FieldName fieldName = fieldNames.get(i);
@@ -642,20 +762,17 @@ public class AdvancedQueryController {
 				fieldName.setFieldName("to_char(" + fieldName.getFieldName() + ",'yyyy/mm/dd') as birthday");
 			}
 		}
-		
-		String tempSqlWhere = " where 1=1 and " + JLPConts.PatientGlobalTable+".jlactiveflag='1' ";;
+
+		String tempSqlWhere = " where 1=1 and " + JLPConts.PatientGlobalTable + ".jlactiveflag='1' ";
+		;
 		if (sqlWhereMain.length() > 0) {
 			tempSqlWhere += " and  " + sqlWhereMain;
 		}
 		tempSqlWhere += " and " + mainTable.getName() + ".Id is not null";
-		String finalTables4Count = toTableString(tableNames, tempSql,tableWhere);
-		
-		
-		
+		String finalTables4Count = toTableString(tableNames, tempSql, tableWhere);
+
 		String tableKeys = toTableKeys(showTableNames);
-		
-		
-		
+
 		String sql = "select distinct " + tableKeys + " from " + finalTables4Count + " " + tempSqlWhere;
 		String sqlCount = " select count(1) count from (" + sql + ") countsql";
 		log.info("sqlCount : " + sqlCount);
@@ -666,14 +783,14 @@ public class AdvancedQueryController {
 		log.info("response --> " + json);
 		long end = System.currentTimeMillis();
 		log.info("serviceTime " + (end - start) + "ms");
-		//清理上下文
+		// 清理上下文
 		return json;
 	}
-	
-	
-	
+
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
 	private List<Map<String, Object>> sensitiveWord(List<Map<String, Object>> retData,
-			Map<String, JSensitiveWord> sensitiveWordMap) {
+			Map<String, JSensitiveWord> sensitiveWordMap, JLPLog log) {
 		if (retData == null || retData.size() == 0) {
 			return retData;
 		}
@@ -684,6 +801,13 @@ public class AdvancedQueryController {
 		for (Map<String, Object> data : retData) {
 			Set<String> keySet = data.keySet();
 			for (String key : keySet) {
+				if (data.get(key) instanceof Date) {
+					try {
+						data.put(key, sdf.format(data.get(key)));
+					} catch (Exception e) {
+						log.error(e);
+					}
+				}
 				if (sensitiveWordMap.containsKey(key)) {
 					String value = data.get(key) + "";
 					data.put(key, toSensitivewordEx(value));
@@ -761,7 +885,7 @@ public class AdvancedQueryController {
 //		}
 //		return ret;
 //	}
-	
+
 //	/**
 //	 * 
 //	 * @param tableArray
@@ -816,12 +940,13 @@ public class AdvancedQueryController {
 //		}
 //		return ret;
 //	}
-	
-	private String toTableString(SortedSet<String> tableArray, String advancedQueryWhere,Map<String,List<String>> tableWhere) {
+
+	private String toTableString(SortedSet<String> tableArray, String advancedQueryWhere,
+			Map<String, List<String>> tableWhere) {
 		String ret = "";
 		tableArray.remove(JLPConts.PatientGlobalTable.toUpperCase());
 		if (tableArray != null) {
-			
+
 			String patientTable = JLPConts.PatientGlobalTable.toLowerCase();
 			ret = patientTable;
 
@@ -868,13 +993,13 @@ public class AdvancedQueryController {
 	 * @param queryIncludesEX
 	 * @return
 	 */
-	private String queryEx(QueryIncludesEX queryIncludesEX,Map<String,List<String>> tableWhere) {
+	private String queryEx(QueryIncludesEX queryIncludesEX, Map<String, List<String>> tableWhere) {
 		SortedSet<String> tableNameWheres = new TreeSet<String>();
 		if (queryIncludesEX == null) {
 			return "";
 		}
-		String includeSql = cludeSqlExcutor(queryIncludesEX.getIncludes(), tableNameWheres,tableWhere);
-		String excludeSql = cludeSqlExcutor(queryIncludesEX.getExcludes(), tableNameWheres,tableWhere);
+		String includeSql = cludeSqlExcutor(queryIncludesEX.getIncludes(), tableNameWheres, tableWhere);
+		String excludeSql = cludeSqlExcutor(queryIncludesEX.getExcludes(), tableNameWheres, tableWhere);
 
 		String tempSql = "";
 		if (includeSql.length() > 0) {
@@ -886,7 +1011,8 @@ public class AdvancedQueryController {
 		return tempSql;
 	}
 
-	private String cludeSqlExcutor(List<QueryIncludesEXCondition> queryIncludesEX, SortedSet<String> tableNameWheres,Map<String,List<String>> tableWhere) {
+	private String cludeSqlExcutor(List<QueryIncludesEXCondition> queryIncludesEX, SortedSet<String> tableNameWheres,
+			Map<String, List<String>> tableWhere) {
 		String includeSql = " select distinct " + JLPConts.PatientGlobalTable + ".Id   from ";
 		String allSqlWhere = "";
 		for (QueryIncludesEXCondition queryIncludesEXCondition : queryIncludesEX) {
@@ -937,7 +1063,7 @@ public class AdvancedQueryController {
 			return "";
 		}
 //	     #region 获取查询结果和数量
-		String tableWhere1 = toTableString(tableNameWheres, "",tableWhere);
+		String tableWhere1 = toTableString(tableNameWheres, "", tableWhere);
 		includeSql += tableWhere1 + " where 1=1 " + allSqlWhere;
 		return includeSql;
 	}

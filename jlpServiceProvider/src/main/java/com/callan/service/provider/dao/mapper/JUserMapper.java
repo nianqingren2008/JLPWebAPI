@@ -63,6 +63,9 @@ public interface JUserMapper {
     
     @Select("SELECT id FROM J_USERS WHERE token = #{token}")
 	public Long getIdByToken(String token);
+
+    @Select("SELECT * FROM J_USERS WHERE token = #{token}")
+	public JUser getUserByToken(String authorization);
     
 }
 

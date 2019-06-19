@@ -1,6 +1,7 @@
 package com.callan.service.provider.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.db.JSystemconfig;
@@ -14,4 +15,5 @@ public interface IJSystemConfigService {
 	List<JSystemconfig> getAll();
 
 	CacheResponse getAll4Id();
+
 }

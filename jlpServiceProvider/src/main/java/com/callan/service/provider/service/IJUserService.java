@@ -35,4 +35,6 @@ public interface IJUserService {
 	Long getUserRoleByToken(String authorization);
 
 	Long getIdByToken(String authorization);
+	
+	JUser getUserByToken(String authorization);
 }
