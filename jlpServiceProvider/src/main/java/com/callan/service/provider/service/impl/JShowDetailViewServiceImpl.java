@@ -54,47 +54,40 @@ public class JShowDetailViewServiceImpl implements IJShowDetailViewService {
 		return map.get(viewId);
 	}
 	
-	@Override
-	public List<JShowDetailView> getByViewId(Long viewId,boolean activeFlag) {
-		IJShowDetailViewService base = (IJShowDetailViewService) AopContext.currentProxy();
-		Map<Long,List<JShowDetailView>> map = 
-				(Map<Long,List<JShowDetailView>>) base.getAll4ViewId(activeFlag).getData();
-		return map.get(viewId);
-	}
 	
-	@LocalCacheable
-	@Override
-	public CacheResponse getAll4ViewId(boolean activeFlag) {
-		Map<Long,List<JShowDetailView>> map = new HashMap<>();
-		List<JShowDetailView> list = jShowDetailViewMapper.getAll();
-		
-		for(JShowDetailView jShowDetailView : list) {
-			if(map.get(jShowDetailView.getViewid()) == null) {
-				List<JShowDetailView> viewIdList = new ArrayList<JShowDetailView>();
-				if(activeFlag) {
-					if(JLPConts.ActiveFlag.equals(jShowDetailView.getActiveflag())) {
-						viewIdList.add(jShowDetailView);
-					}
-				}else {
-					viewIdList.add(jShowDetailView);
-				}
-				map.put(jShowDetailView.getViewid(), viewIdList);
-			}else {
-				if(activeFlag) {
-					if(JLPConts.ActiveFlag.equals(jShowDetailView.getActiveflag())) {
-						map.get(jShowDetailView.getViewid()).add(jShowDetailView);
-					}
-				}else {
-					map.get(jShowDetailView.getViewid()).add(jShowDetailView);
-				}
-			}
-			
-		}
-		CacheResponse response = new CacheResponse();
-		response.setCode(0);
-		response.setData(map);
-		return response;
-	}
+//	@LocalCacheable
+//	@Override
+//	public CacheResponse getAll4ViewId() {
+//		Map<Long,List<JShowDetailView>> map = new HashMap<>();
+//		List<JShowDetailView> list = jShowDetailViewMapper.getAll();
+//		
+//		for(JShowDetailView jShowDetailView : list) {
+//			if(map.get(jShowDetailView.getViewid()) == null) {
+//				List<JShowDetailView> viewIdList = new ArrayList<JShowDetailView>();
+//				if(activeFlag) {
+//					if(JLPConts.ActiveFlag.equals(jShowDetailView.getActiveflag())) {
+//						viewIdList.add(jShowDetailView);
+//					}
+//				}else {
+//					viewIdList.add(jShowDetailView);
+//				}
+//				map.put(jShowDetailView.getViewid(), viewIdList);
+//			}else {
+//				if(activeFlag) {
+//					if(JLPConts.ActiveFlag.equals(jShowDetailView.getActiveflag())) {
+//						map.get(jShowDetailView.getViewid()).add(jShowDetailView);
+//					}
+//				}else {
+//					map.get(jShowDetailView.getViewid()).add(jShowDetailView);
+//				}
+//			}
+//			
+//		}
+//		CacheResponse response = new CacheResponse();
+//		response.setCode(0);
+//		response.setData(map);
+//		return response;
+//	}
 	
 	@LocalCacheable
 	@Override

@@ -181,9 +181,10 @@ public class DownloadController {
 	 * 访问图片路径
 	 */
 	@ApiOperation(value = "访问图片路径")
-	@RequestMapping(value = "/api/DownLoad/image/{path}", method = { RequestMethod.GET })
-	public String Get(String path, HttpServletRequest request, HttpServletResponse response) {
-
+	@RequestMapping(value = "/api/DownLoad/image/**", method = { RequestMethod.GET })
+	public String Get(HttpServletRequest request, HttpServletResponse response) {
+		String path = request.getRequestURI();
+		path =path.substring(path.indexOf("/image/")+6,path.length());
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
@@ -194,19 +195,24 @@ public class DownloadController {
 		if (systemconfig != null && StringUtils.isNotBlank(systemconfig.getKeyvalue())) {
 			filePath = systemconfig.getKeyvalue();
 		}
-		filePath = filePath + "image/" + path;
-		String localDir = filePath + "image/";
+		String localDir = filePath + "/image";
+		filePath = filePath + "/image" + path;
+		
 		File file = new File(filePath);
 
 		if (!file.exists()) {
-			File localDirFile = new File(localDir);
+			String localDir1 = filePath.substring(0,filePath.lastIndexOf("/"));
+			System.out.println("localDir1---" + localDir1);
+			File localDirFile = new File(localDir1);
 
 			if (!localDirFile.isDirectory()) {
-				localDirFile.mkdir();
+				localDirFile.mkdirs();
 			}
 
 			try {
-				FTPClient ftp = FtpUtil.ftpConn("ftp://pathdb.tjh.com", 22, "ftpuser", "pacs");
+				FTPClient ftp = FtpUtil.ftpConn("pathdb.tjh.com", 22, "ftpuser", "pacs");
+				System.out.println("localDir---" + localDir);
+				System.out.println("path---" + path);
 				FtpUtil.dowloadFile(log, ftp, localDir, "", path);
 			} catch (Exception e) {
 				log.error(e);

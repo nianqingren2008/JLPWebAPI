@@ -20,22 +20,13 @@ public class ConnPathologyDb {
 
 	static ThreadLocal<Connection> threadPool = new ThreadLocal<Connection>();
 
-	public Connection getConnection() {
+	public Connection getConnection() throws Exception {
 		Connection dbConn = null;
 		if (threadPool.get() != null) {
 			return threadPool.get();
 		} else {
-			try {
 				Class.forName(pathdb_driver);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-
-			try {
 				dbConn = DriverManager.getConnection(pathdb_url, pathdb_user, pathdb_pwd);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
 			if (dbConn != null) {
 				threadPool.set(dbConn);
 			}
@@ -46,8 +37,8 @@ public class ConnPathologyDb {
 	public void releaseConnection() {
 		try {
 			threadPool.get().close();
-		} catch (SQLException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+//			e.printStackTrace();
 		}
 		threadPool.remove();
 	}

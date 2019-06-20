@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.pojo.db.JShowDetailView;
 
 
@@ -19,7 +20,7 @@ public interface JShowDetailViewMapper {
 	 * 
 	 * @return
 	 */
-	@Select("SELECT * FROM J_SHOWDETAILVIEW")
+	@Select("SELECT * FROM J_SHOWDETAILVIEW where activeflag='"+JLPConts.ActiveFlag+"'")
     @Results({
         @Result(property = "id",  column = "id" ),
         @Result(property = "activeflag", column = "activeflag")

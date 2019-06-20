@@ -1,5 +1,6 @@
 package com.callan.service.provider.controller;
 
+import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,7 +24,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
+import com.callan.service.provider.config.ConnPathologyDb;
 import com.callan.service.provider.config.JLPConts;
+import com.callan.service.provider.config.JLPException;
 import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ObjectUtil;
 import com.callan.service.provider.config.ThreadPoolConfig;
@@ -146,7 +149,7 @@ public class AdvancedQueryController {
 		JTableDict mainTable = null;
 
 		// 获取显示视图信息
-		List<JShowDetailView> jShowDetailViewList = jShowDetailViewService.getByViewId(jShowView.getId(), true);
+		List<JShowDetailView> jShowDetailViewList = jShowDetailViewService.getByViewId(jShowView.getId());
 //        
 		List<JTableFieldDict> jTableFieldDictList = new ArrayList<JTableFieldDict>();
 		for (JShowDetailView jShowDetailView : jShowDetailViewList) {
@@ -195,16 +198,7 @@ public class AdvancedQueryController {
 			return json;
 		}
 
-		List<ColunmsModel> columns = new ArrayList<ColunmsModel>();
-		for (JTableFieldDict jTableFieldDict : jTableFieldDictList) {
-			ColunmsModel colunmsModel = new ColunmsModel();
-			colunmsModel.setDataIndex(jTableFieldDict.getName().toLowerCase());
-			colunmsModel.setKey(jTableFieldDict.getName().toLowerCase());
-			colunmsModel.setTitle(jTableFieldDict.getjShowDetailView().getFieldtitle());
-			colunmsModel.setIsLongStr("clob".equals(jTableFieldDict.getType()));
-			colunmsModel.setIsSearched(JLPConts.ActiveFlag.equals(jTableFieldDict.getQueryflag()));
-			columns.add(colunmsModel);
-		}
+		
 
 		// 获取查询所有表名
 		List<QueryConds> queryCondsList = advanceQueryRequest.getQueries().getQueryConds();
@@ -286,13 +280,27 @@ public class AdvancedQueryController {
 		fieldNames.add(new FieldName(JLPConts.PatientGlobalTable + ".Id as \"_key\""));
 		SortedSet<String> fieldShowNames = new TreeSet<String>();
 		SortedSet<String> showTableNames = new TreeSet<String>();
-		for (JShowDetailView JShowDetailView : jShowDetailViewListShow) {
-			tableNames.add(JShowDetailView.getjTableDict().getName());
-			showTableNames.add(JShowDetailView.getjTableDict().getName());
+		
+		List<ColunmsModel> columns = new ArrayList<ColunmsModel>();
+		
+		
+		for (JShowDetailView showDetailView : jShowDetailViewListShow) {
+			tableNames.add(showDetailView.getjTableDict().getName());
+			showTableNames.add(showDetailView.getjTableDict().getName());
 			fieldNames.add(new FieldName(
-					(JShowDetailView.getjTableDict().getName() + "." + JShowDetailView.getjTableFieldDict().getName())
+					(showDetailView.getjTableDict().getName() + "." + showDetailView.getjTableFieldDict().getName())
 							.toLowerCase()));
-			fieldShowNames.add(JShowDetailView.getjTableFieldDict().getName().toLowerCase());
+			fieldShowNames.add(showDetailView.getjTableFieldDict().getName().toLowerCase());
+			
+			JTableFieldDict  jTableFieldDict = showDetailView.getjTableFieldDict();
+			ColunmsModel colunmsModel = new ColunmsModel();
+			colunmsModel.setDataIndex(jTableFieldDict.getName().toLowerCase());
+			colunmsModel.setKey(jTableFieldDict.getName().toLowerCase());
+			colunmsModel.setTitle(jTableFieldDict.getjShowDetailView().getFieldtitle());
+			colunmsModel.setIsLongStr("clob".equals(jTableFieldDict.getType()));
+			colunmsModel.setIsSearched(JLPConts.ActiveFlag.equals(jTableFieldDict.getQueryflag()));
+			columns.add(colunmsModel);
+			
 		}
 		tableNames.addAll(tableNameMainWheres);
 
@@ -309,7 +317,7 @@ public class AdvancedQueryController {
 		if (systemconfig != null) {
 			imageKey = systemconfig.getKeyvalue();
 		}
-		String imageField = "_examImage";
+		String imageField = "_examimage";
 		String pathImageUrl = null;
 		systemconfig = (JSystemconfig) systemConfigService.getByClassTypeAndKeyName("image", "pathHtml").getData();
 		if (systemconfig != null) {
@@ -322,7 +330,7 @@ public class AdvancedQueryController {
 			pathImageKey = systemconfig.getKeyvalue();
 		}
 
-		String pathImageField = "_pathImage";
+		String pathImageField = "_pathimage";
 		for (String str : tableNames) {
 			if (imageKey.contains(str)) {
 				IsImageUrl = true;
@@ -538,42 +546,49 @@ public class AdvancedQueryController {
 
 		String pathSql = "select t.F_BLH,t.F_TXURL from V_PACS_FCK_ZLK_TX t where t.F_BLH in (?)";
 
-		for (Map<String, Object> map : ts) {
-			if (map.containsKey(fieldName)) {
-				List<Map<String, Object>> resultList;
-				try {
-					resultList = pathologyDao.queryForSQL(pathSql, new Object[] { map.get(fieldName) });
+		ConnPathologyDb connPathologyDb = new ConnPathologyDb();
+		Connection conn;
+		try {
+			conn = connPathologyDb.getConnection();
+			for (Map<String, Object> map : ts) {
+				if (map.containsKey(fieldName)) {
+					List<Map<String, Object>> resultList;
+					try {
+						resultList = pathologyDao.queryForSQL(conn,pathSql, new Object[] { map.get(fieldName) });
+						if (resultList != null && resultList.size() > 0) {
+							String value = "";
+							for (Map<String, Object> valueMap : resultList) {
+								Url = Url.replace("{0}", preUrl);
+								String tempValue  = ObjectUtil.objToString(valueMap.get("F_TXURL"));
+								if (IsPath) {
+									tempValue = tempValue.replace("ftp://", "").replace("FTP://", "");
+									if (tempValue.indexOf("/") == 0) {
+										tempValue += "";
+									} else {
 
-					if (resultList != null && resultList.size() > 0) {
-						Url = Url.replace("{0}", "");
-						Url = Url.replace("{1}", "");
-						String value = "";
-						for (Map<String, Object> valueMap : resultList) {
-							value += preUrl + Url;
-							String tempValue  = ObjectUtil.objToString(valueMap.get("F_TXURL"));
-							if (IsPath) {
-								tempValue = tempValue.replace("ftp://", "").replace("FTP://", "");
-								if (tempValue.indexOf("/") == 0) {
-									tempValue += "";
-								} else {
-
-									tempValue = tempValue.substring(tempValue.indexOf("/") + 1);
-								}
-							} 
-							value += tempValue + ",";
+										tempValue = tempValue.substring(tempValue.indexOf("/") + 1);
+									}
+								} 
+								Url = Url.replace("{1}", tempValue);
+								value = Url + ",";
+							}
+							if(value.length() > 0 && value.endsWith(",")) {
+								value = value.substring(0,value.length()-1);
+							}
+							map.put(fieldName, value);
 						}
-						if(value.length() > 0 && value.endsWith(",")) {
-							value = value.substring(0,value.length()-1);
-						}
-						map.put(fieldName, value);
+					} catch (JLPException e) {
+						log.error(e);
 					}
-				} catch (Exception e) {
-					log.error(e);
 				}
+
 			}
-
+		} catch (Throwable e1) {
+			e1.printStackTrace();
+		}finally {
+			connPathologyDb.releaseConnection();
 		}
-
+		System.out.println("--------------------------------------------------------------------------------------------");
 		return ts;
 	}
 
@@ -621,7 +636,7 @@ public class AdvancedQueryController {
 		JTableDict mainTable = null;
 
 		// 获取显示视图信息
-		List<JShowDetailView> jShowDetailViewList = jShowDetailViewService.getByViewId(jShowView.getId(), true);
+		List<JShowDetailView> jShowDetailViewList = jShowDetailViewService.getByViewId(jShowView.getId());
 //        
 		List<JTableFieldDict> jTableFieldDictList = new ArrayList<JTableFieldDict>();
 		for (JShowDetailView jShowDetailView : jShowDetailViewList) {

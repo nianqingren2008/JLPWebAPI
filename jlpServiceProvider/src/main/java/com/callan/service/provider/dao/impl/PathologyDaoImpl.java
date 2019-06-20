@@ -4,31 +4,30 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.callan.service.provider.config.JLPException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import com.callan.service.provider.config.ConnPathologyDb;
-import com.callan.service.provider.config.JLPLog;
-import com.callan.service.provider.config.ThreadPoolConfig;
+import com.callan.service.provider.config.JLPException;
 import com.callan.service.provider.dao.IPathologyDao;
+import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 @Service
 public class PathologyDaoImpl implements IPathologyDao {
 
 	@Override
-	public List<Map<String, Object>> queryForSQL(String sql, Object[] params) throws Exception {
-		Connection conn = null;
+	public List<Map<String, Object>> queryForSQL(Connection conn,String sql, Object[] params) {
 		PreparedStatement pst = null;
 		List dataList = new ArrayList<>();
-		ConnPathologyDb connPathologyDb = new ConnPathologyDb();
+		
 		try {
-			conn = connPathologyDb.getConnection();
+			if(conn == null) {
+				throw new JLPException("获取数据库连接失败");
+			}
 			pst = conn.prepareStatement(sql);
 			int index = 1;
 			for (Object para : params) {
@@ -51,7 +50,7 @@ public class PathologyDaoImpl implements IPathologyDao {
 			e.printStackTrace();
 			throw new JLPException(e.getMessage());
 		} finally {
-			connPathologyDb.releaseConnection();
+			
 		}
 		return dataList;
 	}

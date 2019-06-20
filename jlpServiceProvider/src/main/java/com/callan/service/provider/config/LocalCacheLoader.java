@@ -65,7 +65,6 @@ public class LocalCacheLoader implements InitializingBean{
 					
 					jShowDetailViewService.getAll4Id();
 					jShowDetailViewService.getAll4ViewId();
-					jShowDetailViewService.getAll4ViewId(true);
 					
 					jShowViewService.getAll4Id();
 					

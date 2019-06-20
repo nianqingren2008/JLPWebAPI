@@ -320,7 +320,7 @@ public class PanoramaController {
 
 		Long panoramashowviewId = panoramashowview.getId();
 		JShowView showView = showViewService.getOne(panoramashowviewId);
-		List<JShowDetailView> detailViewList = showDetailViewService.getByViewId(showView.getId(), true);
+		List<JShowDetailView> detailViewList = showDetailViewService.getByViewId(showView.getId());
 		Set<String> tableCodeSet = new HashSet<String>();
 
 		TreeSet<JTableFieldDict> fieldDictSet = new TreeSet<JTableFieldDict>(new Comparator<JTableFieldDict>() {
@@ -487,7 +487,7 @@ public class PanoramaController {
 
 		Long panoramashowviewId = panoramashowview.getId();
 		JShowView showView = showViewService.getOne(panoramashowviewId);
-		List<JShowDetailView> detailViewList = showDetailViewService.getByViewId(showView.getId(), true);
+		List<JShowDetailView> detailViewList = showDetailViewService.getByViewId(showView.getId());
 		Set<String> tableCodeSet = new HashSet<String>();
 
 		TreeSet<JTableFieldDict> fieldDictSet = new TreeSet<JTableFieldDict>(new Comparator<JTableFieldDict>() {

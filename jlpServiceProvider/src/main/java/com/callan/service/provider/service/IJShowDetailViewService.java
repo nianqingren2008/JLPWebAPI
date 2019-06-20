@@ -30,13 +30,6 @@ public interface IJShowDetailViewService {
 	 */
 	List<JShowDetailView> getByViewId(Long id);
 
-	/**
-	 * 根据viewId获取Detail集合  只获取有效记录
-	 * @param viewId
-	 * @param activeFlag
-	 * @return
-	 */
-	List<JShowDetailView> getByViewId(Long viewId, boolean activeFlag);
 	
 	/**
 	 * 获取所有值   key为viewId
@@ -46,16 +39,10 @@ public interface IJShowDetailViewService {
 	CacheResponse getAll4Id();
 
 	/**
-	 * 获取所有值  并按viewId归类
-	 * @param id
-	 * @return
-	 */
-	CacheResponse getAll4ViewId();
-	/**
 	 * 获取所有值  并按viewId归类 只取 有效记录
 	 * @param activeFlag
 	 * @return
 	 */
-	CacheResponse getAll4ViewId(boolean activeFlag);
+	CacheResponse getAll4ViewId();
 
 }
