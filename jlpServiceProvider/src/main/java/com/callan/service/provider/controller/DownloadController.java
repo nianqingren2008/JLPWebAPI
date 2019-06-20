@@ -1,25 +1,32 @@
 package com.callan.service.provider.controller;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.net.ftp.FTPClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
+import com.callan.service.provider.config.FtpUtil;
 import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.base.BaseResponse;
@@ -42,7 +49,7 @@ public class DownloadController {
 
 	@Autowired
 	private IJSystemConfigService systemConfigService;
-	
+
 	@Autowired
 	private IJFiletypeService filetypeService;
 
@@ -60,8 +67,8 @@ public class DownloadController {
 		String filePath = getLocalPath();
 		JDownloadfile downloadfile = downloadFileService.getByIdAndFileCode(id, fileCode);
 
-		JSystemconfig systemConfig = (JSystemconfig) systemConfigService
-				.getByClassTypeAndKeyName("system", "imagebase").getData();
+		JSystemconfig systemConfig = (JSystemconfig) systemConfigService.getByClassTypeAndKeyName("system", "imagebase")
+				.getData();
 
 		if (systemConfig != null && StringUtils.isNotBlank(systemConfig.getKeyvalue())) {
 			File file = new File(systemConfig.getKeyvalue());
@@ -139,23 +146,23 @@ public class DownloadController {
 	}
 
 	/**
-     * 
-     * @return
-     */
+	 * 
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	@ApiOperation(value = "获取支持的文件类型")
 	@RequestMapping(value = "/api/DownLoad/filetype", method = { RequestMethod.GET })
-    public String getAllFileTypes() {
-    	Map<String, Object> resultMap = new HashMap<String, Object>();
-    	List<JFiletype> fileTypes = (List<JFiletype>) filetypeService.getAll();
-    	BaseResponse baseResponse = new BaseResponse();
+	public String getAllFileTypes() {
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		List<JFiletype> fileTypes = (List<JFiletype>) filetypeService.getAll();
+		BaseResponse baseResponse = new BaseResponse();
 		resultMap.put("response", baseResponse);
 		resultMap.put("filetypes", fileTypes);
 		String json = JSONObject.toJSONString(resultMap);
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		log.info("response : " + json);
 		return json;
-    }
+	}
 
 	private String getLocalPath() {
 		String confFilePath = DownloadController.class.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -170,4 +177,120 @@ public class DownloadController {
 		return confFilePath;
 	}
 
+	/**
+	 * 访问图片路径
+	 */
+	@ApiOperation(value = "访问图片路径")
+	@RequestMapping(value = "/api/DownLoad/image/{path}", method = { RequestMethod.GET })
+	public String Get(String path, HttpServletRequest request, HttpServletResponse response) {
+
+		JLPLog log = ThreadPoolConfig.getBaseContext();
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		String filePath = getBasePath();
+		JSystemconfig systemconfig = (JSystemconfig) systemConfigService.getByClassTypeAndKeyName("system", "imagebase")
+				.getData();
+
+		if (systemconfig != null && StringUtils.isNotBlank(systemconfig.getKeyvalue())) {
+			filePath = systemconfig.getKeyvalue();
+		}
+		filePath = filePath + "image/" + path;
+		String localDir = filePath + "image/";
+		File file = new File(filePath);
+
+		if (!file.exists()) {
+			File localDirFile = new File(localDir);
+
+			if (!localDirFile.isDirectory()) {
+				localDirFile.mkdir();
+			}
+
+			try {
+				FTPClient ftp = FtpUtil.ftpConn("ftp://pathdb.tjh.com", 22, "ftpuser", "pacs");
+				FtpUtil.dowloadFile(log, ftp, localDir, "", path);
+			} catch (Exception e) {
+				log.error(e);
+			}
+
+		}
+
+		file = new File(filePath);
+
+		if (!file.exists()) {
+
+			BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("404");
+			response.setStatus(404);
+			baseResponse.setText("下载文件失败");
+			resultMap.put("response", baseResponse);
+			String json = JSONObject.toJSONString(resultMap);
+			log.info("response : " + json);
+			return json;
+		}
+
+		log.info("图像下载路径为：" + filePath);
+		if (file.exists()) {
+			try {
+				response.setContentType("image/jpeg/jpg/png/gif/bmp/tiff/svg");
+		        if(file.exists()) {
+		            FileInputStream in = new FileInputStream(file);
+		            OutputStream os = response.getOutputStream();
+		            byte[] b = new byte[1024];
+		            while(in.read(b)!= -1) {
+		                os.write(b);
+		            }
+		            in.close();
+		            os.flush();
+		            os.close();
+		        } 
+			    BaseResponse baseResponse = new BaseResponse();
+				resultMap.put("response", baseResponse);
+				String json = JSONObject.toJSONString(resultMap);
+				log.info("response : " + json);
+				return json;
+			}catch(Exception e) {
+				log.error(e);
+				BaseResponse baseResponse = new BaseResponse();
+				baseResponse.setCode("400");
+				baseResponse.setText("下载文件失败");
+				resultMap.put("response", baseResponse);
+				String json = JSONObject.toJSONString(resultMap);
+				log.info("response : " + json);
+				return json;
+			}
+			    
+		} else {
+			log.error("下载文件不存在,filePath: " + filePath);
+			BaseResponse baseResponse = new BaseResponse();
+			baseResponse.setCode("404");
+			response.setStatus(404);
+			baseResponse.setText("下载文件失败");
+			resultMap.put("response", baseResponse);
+			String json = JSONObject.toJSONString(resultMap);
+			log.info("response : " + json);
+			return json;
+		}
+	}
+
+	
+	private String getBasePath() {
+		
+		String confFilePath = JLPLog.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		int end = confFilePath.lastIndexOf(".jar");
+		if(end == -1) {
+			end = confFilePath.length();
+		}
+		confFilePath = confFilePath.substring(0, end);
+		int firstIndex = confFilePath.lastIndexOf(System.getProperty("path.separator")) + 1;
+		int lastIndex = confFilePath.lastIndexOf("/") + 1;
+		confFilePath = confFilePath.substring(firstIndex, lastIndex);
+		
+		if(confFilePath.contains("target")) {
+			confFilePath = confFilePath + "../../";
+		}
+		
+		return confFilePath;
+	}
+
+	
 }
