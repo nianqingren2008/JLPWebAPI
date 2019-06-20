@@ -18,15 +18,9 @@ spring:
      password: jlp321!@#
 
 spring.datasource.driver-class-name: oracle.jdbc.driver.OracleDriver
-spring.datasource.url: jdbc:oracle:thin:@192.168.17.46:1521:orcl
+spring.datasource.url: jdbc:oracle:thin:@192.168.17.173:1521:orcl
 spring.datasource.username: jlp
 spring.datasource.password: jlp
-
-
-sqlserverdb.driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-sqlserverdb.url: jdbc:sqlserver://pathdb.tjh.com:1433;databaseName=pathnet
-sqlserverdb.username: pacs_path_view
-sqlserverdb.password: pacs_path_view
 
 feign:
   hystrix:
