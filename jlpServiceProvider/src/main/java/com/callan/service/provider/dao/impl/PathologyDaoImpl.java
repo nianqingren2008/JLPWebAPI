@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.callan.service.provider.config.JLPException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
@@ -48,7 +49,7 @@ public class PathologyDaoImpl implements IPathologyDao {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new RuntimeException(e.getMessage());
+			throw new JLPException(e.getMessage());
 		} finally {
 			connPathologyDb.releaseConnection();
 		}

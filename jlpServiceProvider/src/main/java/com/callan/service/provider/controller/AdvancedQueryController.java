@@ -335,13 +335,13 @@ public class AdvancedQueryController {
 		if (IsImageUrl) {
 			fieldNames.add(new FieldName(imageKey + "  as \"_examImage\""));
 		} else {
-			fieldNames.add(new FieldName("'' as \"_examImage\""));
+			fieldNames.add(new FieldName("'' as \"_examimage\""));
 		}
 
 		if (IsPathImageUrl) {
 			fieldNames.add(new FieldName(pathImageKey + " as \"_pathImage\"" ));
 		} else {
-			fieldNames.add(new FieldName("'' as \"_pathImage\"" ));
+			fieldNames.add(new FieldName("'' as \"_pathimage\"" ));
 		}
 
 //		for(String tableName : tableNames) {
