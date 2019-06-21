@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -53,6 +54,17 @@ public class DownloadController {
 	@Autowired
 	private IJFiletypeService filetypeService;
 
+	//"pathdb.tjh.com", 22, "ftpuser", "pacs"
+	@Value("${pathFtpUrl}")
+	private String pathFtpUrl = "pathdb.tjh.com";
+	@Value("${pathFtpPort}")
+	private int pathFtpPort = 22;
+	@Value("${pathFtpUser}")
+	private String pathFtpUser = "ftpuser";
+	@Value("${pathFtpPwd}")
+	private String pathFtpPwd = "pacs";
+	
+	
 	/**
 	 * 下载文件
 	 * 
@@ -202,7 +214,6 @@ public class DownloadController {
 
 		if (!file.exists()) {
 			String localDir1 = filePath.substring(0,filePath.lastIndexOf("/"));
-			System.out.println("localDir1---" + localDir1);
 			File localDirFile = new File(localDir1);
 
 			if (!localDirFile.isDirectory()) {
@@ -210,9 +221,7 @@ public class DownloadController {
 			}
 
 			try {
-				FTPClient ftp = FtpUtil.ftpConn("pathdb.tjh.com", 22, "ftpuser", "pacs");
-				System.out.println("localDir---" + localDir);
-				System.out.println("path---" + path);
+				FTPClient ftp = FtpUtil.ftpConn(pathFtpUrl, pathFtpPort, pathFtpUser	, pathFtpPwd);
 				FtpUtil.dowloadFile(log, ftp, localDir, "", path);
 			} catch (Exception e) {
 				log.error(e);

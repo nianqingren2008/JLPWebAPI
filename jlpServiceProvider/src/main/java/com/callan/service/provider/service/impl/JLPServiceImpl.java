@@ -1,5 +1,6 @@
 package com.callan.service.provider.service.impl;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,11 +13,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.callan.service.provider.config.ConnPathologyDb;
 import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.config.JLPException;
 import com.callan.service.provider.config.JLPLog;
@@ -24,6 +27,7 @@ import com.callan.service.provider.config.ObjectUtil;
 import com.callan.service.provider.config.RedisUtil;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.dao.IJLPDao;
+import com.callan.service.provider.dao.IPathologyDao;
 import com.callan.service.provider.pojo.cache.SerializeUtil;
 import com.callan.service.provider.pojo.cache.Sha1Util;
 import com.callan.service.provider.pojo.db.JStatisconfdetail;
@@ -41,6 +45,9 @@ public class JLPServiceImpl implements IJLpService {
 	@Autowired
 	RedisUtil redisUtil;
 
+	@Autowired
+	IPathologyDao pathologyDao;
+	
 	/*
 	 * 每页数据存活时长 单位为秒，3600s
 	 */
@@ -126,7 +133,9 @@ public class JLPServiceImpl implements IJLpService {
 	@Override
 	public List<Map<String, Object>> queryForAdvanceQuery(SortedSet<String> tableNames, String tempSql,
 			String patientTableWhere, Map<String, List<String>> tableWhere, String finalSelectFields,
-			String tempSqlWhere, int pageNum, int pageSize, String sqlCount) {
+			String tempSqlWhere, int pageNum, int pageSize, String sqlCount
+			,String preUrl,boolean isImageUrl, String imageUrl, String imageField, String pathImageUrl
+			, String pathImageField, boolean isPathImageUrl) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 
 		try {
@@ -145,10 +154,13 @@ public class JLPServiceImpl implements IJLpService {
 				}
 
 				int pageNumPlusUp = pageNum + i;
+				
 				excutePagePlus(pageSize, log, serialKeyPageUp, pageNumPlusUp, tableNames, tempSql, patientTableWhere,
-						tableWhere, finalSelectFields, tempSqlWhere);
+						tableWhere, finalSelectFields, tempSqlWhere
+						,preUrl,isImageUrl,imageUrl,imageField,pathImageUrl,pathImageField,isPathImageUrl);
 				excutePagePlus(pageSize, log, serialKeyPageDown, pageNumPlusDown, tableNames, tempSql,
-						patientTableWhere, tableWhere, finalSelectFields, tempSqlWhere);
+						patientTableWhere, tableWhere, finalSelectFields, tempSqlWhere
+						,preUrl,isImageUrl,imageUrl,imageField,pathImageUrl,pathImageField,isPathImageUrl);
 
 			}
 
@@ -228,6 +240,16 @@ public class JLPServiceImpl implements IJLpService {
 					log.error("操作redis失败", e);
 					redisUtil.del(serialKey);
 				}
+				
+				
+				String preUrlStr = preUrl.toString().substring(0, preUrl.toString().indexOf("/api/"));
+				if (isImageUrl) {
+					pageData = setImageUrl(pageData, imageUrl, imageField, "", false, log);
+				}
+				if (isPathImageUrl) {
+					pageData = setImageUrl(pageData, pathImageUrl, pathImageField, preUrlStr, isPathImageUrl, log);
+				}
+				
 //				end = System.currentTimeMillis();
 				return pageData;
 			} else if (redisUtil.get(serialKey) != null && "loading"
@@ -304,7 +326,11 @@ public class JLPServiceImpl implements IJLpService {
 
 	private void excutePagePlus(int pageSize, JLPLog log, String serialKeyPage, int pageNumPlus,
 			SortedSet<String> tableNames, String tempSql, String patientTableWhere,
-			Map<String, List<String>> tableWhere, String finalSelectFields, String tempSqlWhere) {
+			Map<String, List<String>> tableWhere, String finalSelectFields, String tempSqlWhere
+			,String preUrl,boolean isImageUrl, String imageUrl, String imageField, String pathImageUrl
+			, String pathImageField, boolean isPathImageUrl
+			
+			) {
 		if (serialKeyPage != null && redisUtil.get(serialKeyPage) == null) {
 
 			Map<String, String> sqlMap = getSqlMap(tableNames, tempSql, patientTableWhere, tableWhere,
@@ -345,6 +371,15 @@ public class JLPServiceImpl implements IJLpService {
 							}
 						}
 
+						String preUrlStr = preUrl.toString().substring(0, preUrl.toString().indexOf("/api/"));
+						if (isImageUrl) {
+							pageData = setImageUrl(pageData, imageUrl, imageField, "", false, log);
+						}
+						if (isPathImageUrl) {
+							pageData = setImageUrl(pageData, pathImageUrl, pathImageField, preUrlStr, isPathImageUrl, log);
+						}
+						
+						
 						dataMap.put("lastActiveTime", new Date());
 						dataMap.put("data", pageData);
 						long end = System.currentTimeMillis();
@@ -504,4 +539,71 @@ public class JLPServiceImpl implements IJLpService {
 		return 0;
 	}
 
+	
+	public List<Map<String, Object>> setImageUrl(List<Map<String, Object>> ts, String Url, String fieldName,
+			String preUrl, boolean IsPath, JLPLog log) {
+		if (ts == null || ts.size() < 1) {
+			return ts;
+		}
+		if (StringUtils.isBlank(fieldName)) {
+			return ts;
+		}
+
+		String pathSql = "select t.F_BLH,t.F_TXURL from V_PACS_FCK_ZLK_TX t where t.F_BLH in (?)";
+
+		ConnPathologyDb connPathologyDb = new ConnPathologyDb();
+		Connection conn = null;
+		try {
+			if (IsPath) {
+				conn = connPathologyDb.getConnection();
+			}
+			for (Map<String, Object> map : ts) {
+				if (map.containsKey(fieldName)) {
+					List<Map<String, Object>> resultList;
+					try {
+						String tempUrl = Url;
+						if (IsPath) {
+							resultList = pathologyDao.queryForSQL(conn, pathSql, new Object[] { map.get(fieldName) });
+							if (resultList != null && resultList.size() > 0) {
+								String value = "";
+								for (Map<String, Object> valueMap : resultList) {
+									
+									tempUrl = tempUrl.replace("{0}", preUrl);
+									String tempValue = ObjectUtil.objToString(valueMap.get("F_TXURL"));
+
+									tempValue = tempValue.replace("ftp://", "").replace("FTP://", "");
+									if (tempValue.indexOf("/") == 0) {
+										tempValue += "";
+									} else {
+
+										tempValue = tempValue.substring(tempValue.indexOf("/") + 1);
+									}
+
+									tempUrl = tempUrl.replace("{1}", tempValue);
+									value += tempUrl + ",";
+								}
+								if (value.length() > 0 && value.endsWith(",")) {
+									value = value.substring(0, value.length() - 1);
+								}
+								map.put(fieldName, value);
+							}
+						} else {
+							String value = ObjectUtil.objToString(map.get(fieldName));
+							if(StringUtils.isNotBlank(value)) {
+								value = tempUrl.replace("{1}", value);
+								map.put(fieldName, value);
+							}
+						}
+					} catch (JLPException e) {
+						log.error(e);
+					}
+				}
+			}
+		} catch (Throwable e1) {
+			e1.printStackTrace();
+		} finally {
+			connPathologyDb.releaseConnection();
+		}
+		return ts;
+	}
 }

@@ -94,9 +94,6 @@ public class AdvancedQueryController {
 	@Autowired
 	private IJSystemConfigService systemConfigService;
 
-	@Autowired
-	private IPathologyDao pathologyDao;
-
 	@ApiOperation(value = "病例检索模糊查询(仅列表)")
 	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST })
 	public String query1(@RequestBody String advanceQuery, String pageNum, String pageSize,
@@ -341,15 +338,15 @@ public class AdvancedQueryController {
 		}
 
 		if (IsImageUrl) {
-			fieldNames.add(new FieldName(imageKey + "  as \"_examImage\""));
+			fieldNames.add(new FieldName(imageKey + "  as \""+imageField+"\""));
 		} else {
-			fieldNames.add(new FieldName("'' as \"_examimage\""));
+			fieldNames.add(new FieldName("'' as \""+imageField+"\""));
 		}
 
 		if (IsPathImageUrl) {
-			fieldNames.add(new FieldName(pathImageKey + " as \"_pathImage\"" ));
+			fieldNames.add(new FieldName(pathImageKey + " as \""+pathImageField+"\"" ));
 		} else {
-			fieldNames.add(new FieldName("'' as \"_pathimage\"" ));
+			fieldNames.add(new FieldName("'' as \""+pathImageField+"\"" ));
 		}
 
 //		for(String tableName : tableNames) {
@@ -480,10 +477,15 @@ public class AdvancedQueryController {
 //				+ " order by " + JLPConts.PatientGlobalTable + ".Id";
 //		
 //		retData = jlpService.queryForSQLStreaming(SqlPageData10,SqlPageData1000,SqlPageData100000,SqlAllData, pageNumInt, pageSizeInt);
-
+		StringBuffer preUrl = request.getRequestURL();
+		
+		
+		
 		try {
 			retData = jlpService.queryForAdvanceQuery(tableNames, tempSql, patientTableWhere, tableWhere,
-					finalSelectFields, tempSqlWhere, pageNumInt, pageSizeInt, sqlCount);
+					finalSelectFields, tempSqlWhere, pageNumInt, pageSizeInt, sqlCount,preUrl.toString(),
+					IsImageUrl,imageUrl,imageField,pathImageUrl,pathImageField,IsPathImageUrl);
+			
 		} catch (Exception e) {
 			response.getResponse().setCode("0000");
 			response.getResponse().setText("获取数据错误，原因: " + e.getMessage());
@@ -492,7 +494,7 @@ public class AdvancedQueryController {
 			return json;
 		}
 		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "5996590f4d137887e12651c3aaad4105"
+		String authorization = request.getHeader("Authorization") == null ? "e1cb039e7adf7633a1de93e5f8da0dea"
 				: request.getHeader("Authorization");
 
 		Long userRole = jUserService.getUserRoleByToken(authorization);
@@ -513,14 +515,20 @@ public class AdvancedQueryController {
 
 		}
 
-		StringBuffer preUrl = request.getRequestURL();
-		String preUrlStr = preUrl.toString().substring(0, preUrl.toString().indexOf("/api/"));
-		if (IsImageUrl) {
-			retData = SetImageUrl(retData, imageUrl, imageField, "", false, log);
+		for (Map<String, Object> data : retData) {
+			Set<String> keySet = data.keySet();
+			for (String key : keySet) {
+				if (data.get(key) instanceof Date) {
+					try {
+						data.put(key, sdf.format(data.get(key)));
+					} catch (Exception e) {
+						log.error(e);
+					}
+				}
+			}
 		}
-		if (IsPathImageUrl) {
-			retData = SetImageUrl(retData, pathImageUrl, pathImageField, preUrlStr, IsPathImageUrl, log);
-		}
+		
+		
 
 //			}
 		response.setColumns(columns);
@@ -535,62 +543,7 @@ public class AdvancedQueryController {
 		return json;
 	}
 
-	public List<Map<String, Object>> SetImageUrl(List<Map<String, Object>> ts, String Url, String fieldName,
-			String preUrl, boolean IsPath, JLPLog log) {
-		if (ts == null || ts.size() < 1) {
-			return ts;
-		}
-		if (StringUtils.isBlank(fieldName)) {
-			return ts;
-		}
-
-		String pathSql = "select t.F_BLH,t.F_TXURL from V_PACS_FCK_ZLK_TX t where t.F_BLH in (?)";
-
-		ConnPathologyDb connPathologyDb = new ConnPathologyDb();
-		Connection conn;
-		try {
-			conn = connPathologyDb.getConnection();
-			for (Map<String, Object> map : ts) {
-				if (map.containsKey(fieldName)) {
-					List<Map<String, Object>> resultList;
-					try {
-						resultList = pathologyDao.queryForSQL(conn,pathSql, new Object[] { map.get(fieldName) });
-						if (resultList != null && resultList.size() > 0) {
-							String value = "";
-							for (Map<String, Object> valueMap : resultList) {
-								Url = Url.replace("{0}", preUrl);
-								String tempValue  = ObjectUtil.objToString(valueMap.get("F_TXURL"));
-								if (IsPath) {
-									tempValue = tempValue.replace("ftp://", "").replace("FTP://", "");
-									if (tempValue.indexOf("/") == 0) {
-										tempValue += "";
-									} else {
-
-										tempValue = tempValue.substring(tempValue.indexOf("/") + 1);
-									}
-								} 
-								Url = Url.replace("{1}", tempValue);
-								value = Url + ",";
-							}
-							if(value.length() > 0 && value.endsWith(",")) {
-								value = value.substring(0,value.length()-1);
-							}
-							map.put(fieldName, value);
-						}
-					} catch (JLPException e) {
-						log.error(e);
-					}
-				}
-
-			}
-		} catch (Throwable e1) {
-			e1.printStackTrace();
-		}finally {
-			connPathologyDb.releaseConnection();
-		}
-		System.out.println("--------------------------------------------------------------------------------------------");
-		return ts;
-	}
+	
 
 	@ApiOperation(value = "病例检索模糊查询(仅数量)")
 	@RequestMapping(value = "/api/AdvanceQuery/count", method = { RequestMethod.POST })

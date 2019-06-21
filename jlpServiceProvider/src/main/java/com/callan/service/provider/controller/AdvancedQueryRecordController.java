@@ -75,7 +75,7 @@ public class AdvancedQueryRecordController {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+		String authorization = request.getHeader("Authorization") == null ? "6995033dec41df257013eef145dded3f"
 				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null || userId == 0) {

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 
+import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.pojo.db.JStatisconfdetail;
 
 public interface IJLpService {
@@ -30,7 +31,9 @@ public interface IJLpService {
 
 	public List<Map<String, Object>> queryForAdvanceQuery(SortedSet<String> tableNames, String tempSql,
 			String patientTableWhere, Map<String, List<String>> tableWhere, String finalSelectFields,
-			String tempSqlWhere, int pageNumInt, int pageSizeInt, String sqlCount);
+			String tempSqlWhere, int pageNumInt, int pageSizeInt, String sqlCount,String preUrl
+			, boolean isImageUrl, String imageUrl, String imageField, String pathImageUrl
+			, String pathImageField, boolean isPathImageUrl);
 
 	public int queryForCount(String sqlCount);
 }

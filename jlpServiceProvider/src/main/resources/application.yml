@@ -30,3 +30,7 @@ pathdb_url: jdbc:sqlserver://pathdb.tjh.com:1433;DatabaseName=pathnet
 pathdb_user: pacs_path_view
 pathdb_pwd: pacs_path_view
 
+pathFtpUrl: pathdb.tjh.com
+pathFtpPort:  22
+pathFtpUser: ftpuser
+pathFtpPwd: pacs

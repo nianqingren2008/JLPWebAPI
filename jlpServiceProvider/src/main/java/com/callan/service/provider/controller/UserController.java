@@ -7,6 +7,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -86,11 +87,11 @@ public class UserController {
 
 	@ApiOperation(value = "更改用户密码")
 	@RequestMapping(value = "/api/changepwd", method = { RequestMethod.POST })
-	public String ChangePwd(UserChangePwd userChangePwd, HttpServletRequest request,HttpServletResponse resq) {
+	public String ChangePwd(@RequestBody UserChangePwd userChangePwd, HttpServletRequest request,HttpServletResponse resq) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		ControllerBaseResponse response = new ControllerBaseResponse();
 		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+		String authorization = request.getHeader("Authorization") == null ? "6995033dec41df257013eef145dded3f" : request.getHeader("Authorization");
 
 		JUser user = jUserService.getUserByToken(authorization);
 		if (user == null) {
@@ -100,7 +101,7 @@ public class UserController {
 			return response.toJsonString();
 		}
 
-		if (user.getLoginpwd() != userChangePwd.getUserPwd()) {
+		if (!user.getLoginpwd().equals(userChangePwd.getUserPwd())) {
 			resq.setStatus(400);
 			response.getResponse().setCode("400");
 			response.getResponse().setText("用户名或密码错误");
