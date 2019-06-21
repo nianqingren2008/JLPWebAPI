@@ -33,6 +33,11 @@ public class JAdvancedqrServiceImpl implements IJAdvancedqrService {
 	public void save(JAdvancedqr jAdvancedqr) {
 		advancedqrMapper.save(jAdvancedqr);
 	}
+
+	@Override
+	public void update(JAdvancedqr advancedqr) {
+		advancedqrMapper.update(advancedqr);
+	}
 	
 
 }

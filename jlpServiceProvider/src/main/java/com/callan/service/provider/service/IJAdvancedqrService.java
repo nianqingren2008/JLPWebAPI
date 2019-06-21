@@ -13,5 +13,7 @@ public interface IJAdvancedqrService {
 	List<JAdvancedqr> getByProjectId(Long projectId);
 
 	void save(JAdvancedqr jAdvancedqr);
+
+	void update(JAdvancedqr advancedqr);
 	
 }

@@ -36,8 +36,9 @@ public interface JQueryrecordDetailMapper {
     @Insert("insert into j_queryrecorddetails (ID, QUERYID, DETAILID, LEFTBRACKETS,"
     		+ " FIELDNAME, RELATIONTYPE, FIELDVALUETYPE, FIELDVALUE, RIGHTBRACKETS, "
     		+ "LOGICALTYPE, UPDATEDATE, CREATEDATE, ACTIVEFLAG) "
-    		+ "values (#{id}, #{ queryid}, #{ detailid}, #{ leftbrackets}, "
-    		+ "#{ fieldname}, #{ relationtype}, #{fieldvaluetype,jdbcType=VARCHAR}, #{ fieldvalue}, "
-    		+ "#{ rightbrackets}, #{logicaltype,jdbcType=VARCHAR}, #{ updatedate}, #{ createdate}, #{ activeflag})")
+    		+ "values (#{id,jdbcType=DECIMAL}, #{ queryid,jdbcType=DECIMAL}, #{ detailid,jdbcType=DECIMAL}, #{ leftbrackets,jdbcType=VARCHAR}, "
+    		+ "#{ fieldname,jdbcType=VARCHAR}, #{ relationtype,jdbcType=VARCHAR}, #{fieldvaluetype,jdbcType=DECIMAL}, #{ fieldvalue,jdbcType=VARCHAR}, "
+    		+ "#{ rightbrackets,jdbcType=VARCHAR}, #{logicaltype,jdbcType=VARCHAR}, #{ updatedate,jdbcType=TIMESTAMP}"
+    		+ ", #{ createdate,jdbcType=TIMESTAMP}, #{ activeflag,jdbcType=VARCHAR})")
 	public void save(JQueryrecordDetails queryrecord);
 }

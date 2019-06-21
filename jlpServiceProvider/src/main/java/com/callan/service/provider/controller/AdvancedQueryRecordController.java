@@ -10,8 +10,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -71,16 +74,17 @@ public class AdvancedQueryRecordController {
 
 	@ApiOperation(value = "获取纳排条件列表")
 	@RequestMapping(value = "/api/AdvancedQueryRecord/list", method = { RequestMethod.GET })
-	public String getRecords(HttpServletRequest request) {
+	public String getRecords(HttpServletRequest request,HttpServletResponse reponse) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "6995033dec41df257013eef145dded3f"
+		String authorization = request.getHeader("Authorization") == null ? "3fcf61f4ac8b6fd49377ecd947016184"
 				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null || userId == 0) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			reponse.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("用户信息获取失败，请检查请求头");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
@@ -114,16 +118,17 @@ public class AdvancedQueryRecordController {
 
 	@ApiOperation(value = "获取纳排详细条件")
 	@RequestMapping(value = "/api/AdvancedQueryRecord/detail/{id}", method = { RequestMethod.GET })
-	public String getRecordDetail(HttpServletRequest request, @RequestParam Long id) {
+	public String getRecordDetail(HttpServletRequest request, @PathVariable Long id,HttpServletResponse response) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 从前台header中获取token参数
 		JLPLog log = ThreadPoolConfig.getBaseContext();
-		String authorization = request.getHeader("Authorization") == null ? "f5d3689f6aa282f23d496907593b5176"
+		String authorization = request.getHeader("Authorization") == null ? "3fcf61f4ac8b6fd49377ecd947016184"
 				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null || userId == 0) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("用户信息获取失败，请检查请求头");
 			resultMap.put("response", baseResponse);
 			String json = JSONObject.toJSONString(resultMap);
@@ -134,7 +139,8 @@ public class AdvancedQueryRecordController {
 
 		if (advancedqr == null || advancedqr.getUserid() != userId) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("不存在此纳排记录");
 			resultMap.put("response", baseResponse);
 			String json = JSONObject.toJSONString(resultMap);
@@ -266,7 +272,8 @@ public class AdvancedQueryRecordController {
 	 */
 	@ApiOperation(value = "添加纳排记录")
 	@RequestMapping(value = "/api/AdvancedQueryRecord/add", method = { RequestMethod.POST })
-	public String addRecord(@RequestBody String advancedQueryRecord, HttpServletRequest request) {
+	@Transactional
+	public String addRecord(@RequestBody String advancedQueryRecord, HttpServletRequest request,HttpServletResponse response) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		log.info("request --> " + advancedQueryRecord);
@@ -281,7 +288,8 @@ public class AdvancedQueryRecordController {
 		// 判断传入条件是否为空
 		if (advancedQueryRecordModel == null) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("无有效的条件");
 			resultMap.put("response", baseResponse);
 			String json = JSONObject.toJSONString(resultMap);
@@ -291,12 +299,13 @@ public class AdvancedQueryRecordController {
 
 		// 纳排记录主表信息
 		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+		String authorization = request.getHeader("Authorization") == null ? "3fcf61f4ac8b6fd49377ecd947016184"
 				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null || userId == 0) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("用户信息获取失败，请检查请求头");
 			resultMap.put("response", baseResponse);
 			String json = JSONObject.toJSONString(resultMap);
@@ -309,7 +318,8 @@ public class AdvancedQueryRecordController {
 		if (jAdvancedqr == null || jAdvancedqr.getUserid() != userId) {
 			if (advancedQueryRecordModel.getId() != 0) {
 				BaseResponse baseResponse = new BaseResponse();
-				baseResponse.setCode("0000");
+				response.setStatus(400);
+				baseResponse.setCode("400");
 				baseResponse.setText("无有效的条件");
 				resultMap.put("response", baseResponse);
 				String json = JSONObject.toJSONString(resultMap);
@@ -463,7 +473,8 @@ public class AdvancedQueryRecordController {
 		long queryId = jlpService.getNextSeq("J_QUERYRECORD");
 		queryrecord.setId(queryId);
 		advancedqrItem.setQueryid(queryId);
-
+		long queryItemId = jlpService.getNextSeq("J_ADVANCEDQRITEM");
+		advancedqrItem.setId(queryItemId);
 		List<QueryConds> condsList = advancedQueryRecord.getQueries().getQueryConds();
 		List<JQueryrecordDetails> detailList = toJqueryrecorddetailList(condsList, queryId);
 		queryrecordService.save(queryrecord);
@@ -512,14 +523,15 @@ public class AdvancedQueryRecordController {
 	 */
 	@ApiOperation(value = "删除纳排记录")
 	@RequestMapping(value = "/api/AdvancedQueryRecord/delete/{id}", method = { RequestMethod.GET })
-	public String delete(@RequestParam long id, HttpServletRequest request) {
+	public String delete(@PathVariable Long id, HttpServletRequest request,HttpServletResponse response) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+		String authorization = request.getHeader("Authorization") == null ? "3fcf61f4ac8b6fd49377ecd947016184"
 				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null || userId == 0) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("用户信息获取失败，请检查请求头");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
@@ -528,13 +540,14 @@ public class AdvancedQueryRecordController {
 
 		if (advancedqr == null || advancedqr.getUserid() != userId) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("不存在此纳排记录");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
 		advancedqr.setActiveflag(JLPConts.Inactive);
-		advancedqrService.save(advancedqr);
+		advancedqrService.update(advancedqr);
 		BaseResponse baseResponse = new BaseResponse();
 		resultMap.put("response", baseResponse);
 		return JSONObject.toJSONString(resultMap);

@@ -14,6 +14,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,7 +118,8 @@ public class PanoramaController {
 
 	@ApiOperation(value = "获取全景视图患者住院列表")
 	@RequestMapping(value = "/api/Panorama/{Id}", method = { RequestMethod.GET })
-	public String getPanoramaDetail(@PathVariable Long Id, Integer pageSize, Integer pageNum, HttpServletRequest request) {
+	public String getPanoramaDetail(@PathVariable Long Id, Integer pageSize, Integer pageNum
+			, HttpServletRequest request,HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
@@ -129,7 +131,8 @@ public class PanoramaController {
 		DPatientglobal patientglobal = patientglobalService.getOne(Id);
 		if (patientglobal == null) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("未找到该患者信息！");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
@@ -289,7 +292,8 @@ public class PanoramaController {
 
 	@ApiOperation(value = "全景视图信息")
 	@RequestMapping(value = "/api/Panorama/{PanoramaType}/{Id}", method = { RequestMethod.GET })
-	public String panoramaTypeId(@PathVariable String PanoramaType,@PathVariable  Long Id, Integer pageSize, Integer pageNum, HttpServletRequest request) {
+	public String panoramaTypeId(@PathVariable String PanoramaType,@PathVariable  Long Id
+			, Integer pageSize, Integer pageNum, HttpServletRequest request,HttpServletResponse response) {
 
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -308,7 +312,8 @@ public class PanoramaController {
 
 		if (detailList.size() == 0 || (panoramashowview == null)) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("请求资源错误");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
@@ -321,14 +326,16 @@ public class PanoramaController {
 		DPatientvisit dPatientvisit = patientvisitService.getOne(Id);
 		if (dPatientvisit == null) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("未找到住院信息");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
 		if (StringUtils.isBlank(dPatientvisit.getPatientid()) || StringUtils.isBlank(dPatientvisit.getVisitid())) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("该患者住院信息错误");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
@@ -353,7 +360,8 @@ public class PanoramaController {
 		}
 		if (fieldDictSet.size() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("未配置全景信息视图" + PanoramaType + "，请联系技术人员！");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
@@ -361,7 +369,8 @@ public class PanoramaController {
 
 		if (tableNameSet.size() > 1) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("全景信息视图" + PanoramaType + "}暂时不支持多表联合查看，请联系技术人员！");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
@@ -462,7 +471,7 @@ public class PanoramaController {
 //
 	@ApiOperation(value = "检验结果信息获取")
 	@RequestMapping(value = "/api/Panorama/LabResult/{Id}", method = { RequestMethod.GET })
-	public String LabResult(@PathVariable Long Id, Integer pageSize, Integer pageNum) {
+	public String LabResult(@PathVariable Long Id, Integer pageSize, Integer pageNum,HttpServletResponse response) {
 
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -482,28 +491,31 @@ public class PanoramaController {
 		if (detailList.size() == 0 || (panoramashowview == null)
 				|| !"labresult".equals(panoramashowview.getAccesscode())) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("请求资源错误");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
 
 		boolean hasPage = true;
-		if (pageNum == 0 || pageSize == 0) {
+		if (pageNum == null || pageSize == null || pageNum == 0 || pageSize == 0) {
 			hasPage = false;
 		}
 
 		DLabmasterinfo labmasterinfo = labmasterinfoService.getOne(Id);
 		if (labmasterinfo == null) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("未找到该检验信息！");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
 		if (StringUtils.isBlank(labmasterinfo.getApplyno())) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("该检验信息数据缺失！");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
@@ -528,7 +540,8 @@ public class PanoramaController {
 		}
 		if (fieldDictSet.size() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("未配置全景信息视图labresult，请联系技术人员！");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
@@ -536,7 +549,8 @@ public class PanoramaController {
 
 		if (tableNameSet.size() > 1) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("全景信息视图labresult暂时不支持多表联合查看，请联系技术人员！");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
@@ -585,7 +599,7 @@ public class PanoramaController {
 
 	@ApiOperation(value = "患者住院信息")
 	@RequestMapping(value = "/api/Panorama/Inpat/{Id}", method = { RequestMethod.GET })
-	public String Inpat(@PathVariable Long Id) {
+	public String Inpat(@PathVariable Long Id,HttpServletResponse response) {
 
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -593,14 +607,16 @@ public class PanoramaController {
 		DPatientvisit dPatientvisit = patientvisitService.getOne(Id);
 		if (dPatientvisit == null) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("未找到该住院信息！");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
 		if (StringUtils.isBlank(dPatientvisit.getPatientid()) || StringUtils.isBlank(dPatientvisit.getVisitid())) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("该患者住院信息错误！");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);

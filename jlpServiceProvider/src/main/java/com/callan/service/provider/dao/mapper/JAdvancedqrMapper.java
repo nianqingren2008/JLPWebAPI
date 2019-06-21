@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.One;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.pojo.db.JAdvancedqr;
@@ -55,6 +56,22 @@ public interface JAdvancedqrMapper {
 
 
   @Insert("INSERT INTO J_ADVANCEDQR(ID,userid,projectid,aqname,sortno,createdate,activeflag) "
-  		+ " VALUES(#{id}, #{userid}, #{projectid},#{aqname},#{sortno},#{createdate},#{activeflag})")
+  		+ " VALUES(#{id,jdbcType=DECIMAL}, #{userid,jdbcType=DECIMAL}"
+  		+ ", #{projectid,jdbcType=DECIMAL},#{aqname,jdbcType=VARCHAR}"
+  		+ ",#{sortno,jdbcType=DECIMAL},#{createdate,jdbcType=TIMESTAMP}"
+  		+ ",#{activeflag,jdbcType=VARCHAR})")
 	public void save(JAdvancedqr jAdvancedqr);
+
+
+  @Update({
+      "update J_ADVANCEDQR",
+      "set userid = #{userid,jdbcType=DECIMAL},",
+        "projectid = #{projectid,jdbcType=DECIMAL},",
+        "aqname = #{aqname,jdbcType=VARCHAR},",
+        "sortno = #{sortno,jdbcType=DECIMAL},",
+        "createdate = #{createdate,jdbcType=TIMESTAMP},",
+        "activeflag = #{activeflag,jdbcType=VARCHAR} ",
+      "where ID = #{id,jdbcType=DECIMAL}"
+  })
+public void update(JAdvancedqr advancedqr);
 }
