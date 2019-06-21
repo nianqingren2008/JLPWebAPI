@@ -612,14 +612,14 @@ public class JLPServiceImpl implements IJLpService {
 				if (map.containsKey(fieldName)) {
 					List<Map<String, Object>> resultList;
 					try {
-						String tempUrl = Url;
+						
 						if (IsPath) {
 							resultList = pathologyDao.queryForSQL(conn, pathSql, new Object[] { map.get(fieldName) });
 							if (resultList != null && resultList.size() > 0) {
 								String value = "";
 								for (Map<String, Object> valueMap : resultList) {
-									
-									tempUrl = tempUrl.replace("{0}", preUrl);
+									String pathTempUrl = Url;
+									 pathTempUrl = pathTempUrl.replace("{0}", preUrl);
 									String tempValue = ObjectUtil.objToString(valueMap.get("F_TXURL"));
 
 									tempValue = tempValue.replace("ftp://", "").replace("FTP://", "");
@@ -630,8 +630,8 @@ public class JLPServiceImpl implements IJLpService {
 										tempValue = tempValue.substring(tempValue.indexOf("/") + 1);
 									}
 
-									tempUrl = tempUrl.replace("{1}", tempValue);
-									value += tempUrl + ",";
+									pathTempUrl = pathTempUrl.replace("{1}", tempValue);
+									value += pathTempUrl + ",";
 								}
 								if (value.length() > 0 && value.endsWith(",")) {
 									value = value.substring(0, value.length() - 1);
@@ -639,9 +639,10 @@ public class JLPServiceImpl implements IJLpService {
 								map.put(fieldName, value);
 							}
 						} else {
+							String imageTempUrl = Url;
 							String value = ObjectUtil.objToString(map.get(fieldName));
 							if(StringUtils.isNotBlank(value)) {
-								value = tempUrl.replace("{1}", value);
+								value = imageTempUrl.replace("{1}", value);
 								map.put(fieldName, value);
 							}
 						}
