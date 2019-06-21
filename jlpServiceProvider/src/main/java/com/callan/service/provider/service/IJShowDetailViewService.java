@@ -45,4 +45,6 @@ public interface IJShowDetailViewService {
 	 */
 	CacheResponse getAll4ViewId();
 
+	JShowDetailView getByFieldId(long code);
+
 }

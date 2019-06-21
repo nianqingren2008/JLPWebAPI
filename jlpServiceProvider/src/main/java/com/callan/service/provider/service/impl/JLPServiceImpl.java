@@ -1,11 +1,13 @@
 package com.callan.service.provider.service.impl;
 
 import java.sql.Connection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -30,8 +32,14 @@ import com.callan.service.provider.dao.IJLPDao;
 import com.callan.service.provider.dao.IPathologyDao;
 import com.callan.service.provider.pojo.cache.SerializeUtil;
 import com.callan.service.provider.pojo.cache.Sha1Util;
+import com.callan.service.provider.pojo.db.JRight;
+import com.callan.service.provider.pojo.db.JRoleRight;
+import com.callan.service.provider.pojo.db.JSensitiveWord;
 import com.callan.service.provider.pojo.db.JStatisconfdetail;
 import com.callan.service.provider.service.IJLpService;
+import com.callan.service.provider.service.IJRoleRightService;
+import com.callan.service.provider.service.IJSensitiveWordService;
+import com.callan.service.provider.service.IJUserService;
 
 @Service
 public class JLPServiceImpl implements IJLpService {
@@ -47,6 +55,12 @@ public class JLPServiceImpl implements IJLpService {
 
 	@Autowired
 	IPathologyDao pathologyDao;
+	
+	@Autowired
+	private IJSensitiveWordService jSensitiveWordService;
+
+	@Autowired
+	private IJRoleRightService roleRightService;
 	
 	/*
 	 * 每页数据存活时长 单位为秒，3600s
@@ -135,7 +149,7 @@ public class JLPServiceImpl implements IJLpService {
 			String patientTableWhere, Map<String, List<String>> tableWhere, String finalSelectFields,
 			String tempSqlWhere, int pageNum, int pageSize, String sqlCount
 			,String preUrl,boolean isImageUrl, String imageUrl, String imageField, String pathImageUrl
-			, String pathImageField, boolean isPathImageUrl) {
+			, String pathImageField, boolean isPathImageUrl,Long userRole) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 
 		try {
@@ -157,10 +171,10 @@ public class JLPServiceImpl implements IJLpService {
 				
 				excutePagePlus(pageSize, log, serialKeyPageUp, pageNumPlusUp, tableNames, tempSql, patientTableWhere,
 						tableWhere, finalSelectFields, tempSqlWhere
-						,preUrl,isImageUrl,imageUrl,imageField,pathImageUrl,pathImageField,isPathImageUrl);
+						,preUrl,isImageUrl,imageUrl,imageField,pathImageUrl,pathImageField,isPathImageUrl,userRole);
 				excutePagePlus(pageSize, log, serialKeyPageDown, pageNumPlusDown, tableNames, tempSql,
 						patientTableWhere, tableWhere, finalSelectFields, tempSqlWhere
-						,preUrl,isImageUrl,imageUrl,imageField,pathImageUrl,pathImageField,isPathImageUrl);
+						,preUrl,isImageUrl,imageUrl,imageField,pathImageUrl,pathImageField,isPathImageUrl,userRole);
 
 			}
 
@@ -221,6 +235,12 @@ public class JLPServiceImpl implements IJLpService {
 				}
 				log.info("queryForSQLStreaming-----sql : " + sql);
 
+				
+				pageData = excuteData(preUrl, isImageUrl, imageUrl, imageField, pathImageUrl, pathImageField,
+						isPathImageUrl, userRole, log, pageData);
+				
+				
+				
 				dataMap.put("lastActiveTime", new Date());
 				dataMap.put("data", pageData);
 				long end = System.currentTimeMillis();
@@ -242,13 +262,7 @@ public class JLPServiceImpl implements IJLpService {
 				}
 				
 				
-				String preUrlStr = preUrl.toString().substring(0, preUrl.toString().indexOf("/api/"));
-				if (isImageUrl) {
-					pageData = setImageUrl(pageData, imageUrl, imageField, "", false, log);
-				}
-				if (isPathImageUrl) {
-					pageData = setImageUrl(pageData, pathImageUrl, pathImageField, preUrlStr, isPathImageUrl, log);
-				}
+				
 				
 //				end = System.currentTimeMillis();
 				return pageData;
@@ -281,6 +295,49 @@ public class JLPServiceImpl implements IJLpService {
 			throw new JLPException(e.getMessage());
 		}
 		return new ArrayList<Map<String, Object>>();
+	}
+
+	private List<Map<String, Object>> excuteData(String preUrl, boolean isImageUrl, String imageUrl, String imageField,
+			String pathImageUrl, String pathImageField, boolean isPathImageUrl, Long userRole, JLPLog log,
+			List<Map<String, Object>> pageData) {
+		String preUrlStr = preUrl.toString().substring(0, preUrl.toString().indexOf("/api/"));
+		if (isImageUrl) {
+			pageData = setImageUrl(pageData, imageUrl, imageField, "", false, log);
+		}
+		if (isPathImageUrl) {
+			pageData = setImageUrl(pageData, pathImageUrl, pathImageField, preUrlStr, isPathImageUrl, log);
+		}
+		
+		if (userRole != null && userRole != 0L) {
+			List<JRoleRight> roleRightList = roleRightService.getByRoleId(userRole);
+			if (roleRightList != null && roleRightList.size() > 0) {
+				JRight jRight = roleRightList.get(0).getjRight();
+				if (jRight == null || jRight.getId() != 4L) {
+					// 获取敏感字段配置
+					Map<String, JSensitiveWord> sensitiveWordMap = (Map<String, JSensitiveWord>) jSensitiveWordService
+							.getAll4Name().getData();
+					if (!sensitiveWordMap.isEmpty()) {
+						// 将敏感字段设置为 ***
+						pageData = sensitiveWord(pageData, sensitiveWordMap, log);
+					}
+				}
+			}
+
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		for (Map<String, Object> data : pageData) {
+			Set<String> keySet = data.keySet();
+			for (String key1 : keySet) {
+				if (data.get(key1) instanceof Date) {
+					try {
+						data.put(key1, sdf.format(data.get(key1)));
+					} catch (Exception e) {
+						log.error(e);
+					}
+				}
+			}
+		}
+		return pageData;
 	}
 
 	class CountTask implements Callable<Integer> {
@@ -328,7 +385,7 @@ public class JLPServiceImpl implements IJLpService {
 			SortedSet<String> tableNames, String tempSql, String patientTableWhere,
 			Map<String, List<String>> tableWhere, String finalSelectFields, String tempSqlWhere
 			,String preUrl,boolean isImageUrl, String imageUrl, String imageField, String pathImageUrl
-			, String pathImageField, boolean isPathImageUrl
+			, String pathImageField, boolean isPathImageUrl,Long userRole
 			
 			) {
 		if (serialKeyPage != null && redisUtil.get(serialKeyPage) == null) {
@@ -371,14 +428,8 @@ public class JLPServiceImpl implements IJLpService {
 							}
 						}
 
-						String preUrlStr = preUrl.toString().substring(0, preUrl.toString().indexOf("/api/"));
-						if (isImageUrl) {
-							pageData = setImageUrl(pageData, imageUrl, imageField, "", false, log);
-						}
-						if (isPathImageUrl) {
-							pageData = setImageUrl(pageData, pathImageUrl, pathImageField, preUrlStr, isPathImageUrl, log);
-						}
-						
+						pageData = excuteData(preUrl, isImageUrl, imageUrl, imageField, pathImageUrl, pathImageField,
+								isPathImageUrl, userRole, log, pageData);
 						
 						dataMap.put("lastActiveTime", new Date());
 						dataMap.put("data", pageData);
@@ -605,5 +656,72 @@ public class JLPServiceImpl implements IJLpService {
 			connPathologyDb.releaseConnection();
 		}
 		return ts;
+	}
+	
+	private List<Map<String, Object>> sensitiveWord(List<Map<String, Object>> retData,
+			Map<String, JSensitiveWord> sensitiveWordMap, JLPLog log) {
+		if (retData == null || retData.size() == 0) {
+			return retData;
+		}
+		if (sensitiveWordMap == null || sensitiveWordMap.isEmpty()) {
+			return retData;
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		for (Map<String, Object> data : retData) {
+			Set<String> keySet = data.keySet();
+			for (String key : keySet) {
+				if (data.get(key) instanceof Date) {
+					try {
+						data.put(key, sdf.format(data.get(key)));
+					} catch (Exception e) {
+						log.error(e);
+					}
+				}
+				if (sensitiveWordMap.containsKey(key)) {
+					String value = data.get(key) + "";
+					data.put(key, toSensitivewordEx(value));
+				}
+			}
+		}
+		return retData;
+	}
+
+	private String toSensitivewordEx(String str) {
+		if (StringUtils.isBlank(str)) {
+			return str;
+		}
+		String ret = str;
+		switch (str.length()) {
+		case 1:
+			ret = "*";
+			break;
+		case 2:
+			ret = str.substring(0, 1) + "*";
+			break;
+		case 3:
+			ret = str.substring(0, 1) + "**";
+			break;
+		default:
+			int wordCount = str.length() / 4;
+			int sensitivityCount = str.length() - (str.length() / 2);
+			ret = padRight(str.substring(0, wordCount), sensitivityCount, '*')
+					+ str.substring(str.length() - wordCount, str.length());
+			break;
+		}
+		return ret;
+	}
+	
+	private String padRight(String src, int len, char ch) {
+		int diff = len - src.length();
+		if (diff <= 0) {
+			return src;
+		}
+
+		char[] charr = new char[len];
+		System.arraycopy(src.toCharArray(), 0, charr, 0, src.length());
+		for (int i = src.length(); i < len; i++) {
+			charr[i] = ch;
+		}
+		return new String(charr);
 	}
 }

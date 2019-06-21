@@ -83,13 +83,7 @@ public class AdvancedQueryController {
 //	private IJRightService jRightService;
 
 	@Autowired
-	private IJSensitiveWordService jSensitiveWordService;
-
-	@Autowired
 	private IJUserService jUserService;
-
-	@Autowired
-	private IJRoleRightService roleRightService;
 
 	@Autowired
 	private IJSystemConfigService systemConfigService;
@@ -479,12 +473,16 @@ public class AdvancedQueryController {
 //		retData = jlpService.queryForSQLStreaming(SqlPageData10,SqlPageData1000,SqlPageData100000,SqlAllData, pageNumInt, pageSizeInt);
 		StringBuffer preUrl = request.getRequestURL();
 		
-		
+		// 从前台header中获取token参数
+				String authorization = request.getHeader("Authorization") == null ? "e1cb039e7adf7633a1de93e5f8da0dea"
+						: request.getHeader("Authorization");
+
+				Long userRole = jUserService.getUserRoleByToken(authorization);
 		
 		try {
 			retData = jlpService.queryForAdvanceQuery(tableNames, tempSql, patientTableWhere, tableWhere,
 					finalSelectFields, tempSqlWhere, pageNumInt, pageSizeInt, sqlCount,preUrl.toString(),
-					IsImageUrl,imageUrl,imageField,pathImageUrl,pathImageField,IsPathImageUrl);
+					IsImageUrl,imageUrl,imageField,pathImageUrl,pathImageField,IsPathImageUrl,userRole);
 			
 		} catch (Exception e) {
 			response.getResponse().setCode("0000");
@@ -493,40 +491,8 @@ public class AdvancedQueryController {
 			log.info("response --> " + json);
 			return json;
 		}
-		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "e1cb039e7adf7633a1de93e5f8da0dea"
-				: request.getHeader("Authorization");
-
-		Long userRole = jUserService.getUserRoleByToken(authorization);
-		if (userRole != null && userRole != 0L) {
-			List<JRoleRight> roleRightList = roleRightService.getByRoleId(userRole);
-			if (roleRightList != null && roleRightList.size() > 0) {
-				JRight jRight = roleRightList.get(0).getjRight();
-				if (jRight == null || jRight.getId() != 4L) {
-					// 获取敏感字段配置
-					Map<String, JSensitiveWord> sensitiveWordMap = (Map<String, JSensitiveWord>) jSensitiveWordService
-							.getAll4Name().getData();
-					if (!sensitiveWordMap.isEmpty()) {
-						// 将敏感字段设置为 ***
-						retData = sensitiveWord(retData, sensitiveWordMap, log);
-					}
-				}
-			}
-
-		}
-
-		for (Map<String, Object> data : retData) {
-			Set<String> keySet = data.keySet();
-			for (String key : keySet) {
-				if (data.get(key) instanceof Date) {
-					try {
-						data.put(key, sdf.format(data.get(key)));
-					} catch (Exception e) {
-						log.error(e);
-					}
-				}
-			}
-		}
+		
+		
 		
 		
 
@@ -755,74 +721,8 @@ public class AdvancedQueryController {
 		return json;
 	}
 
-	SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
-	private List<Map<String, Object>> sensitiveWord(List<Map<String, Object>> retData,
-			Map<String, JSensitiveWord> sensitiveWordMap, JLPLog log) {
-		if (retData == null || retData.size() == 0) {
-			return retData;
-		}
-		if (sensitiveWordMap == null || sensitiveWordMap.isEmpty()) {
-			return retData;
-		}
-
-		for (Map<String, Object> data : retData) {
-			Set<String> keySet = data.keySet();
-			for (String key : keySet) {
-				if (data.get(key) instanceof Date) {
-					try {
-						data.put(key, sdf.format(data.get(key)));
-					} catch (Exception e) {
-						log.error(e);
-					}
-				}
-				if (sensitiveWordMap.containsKey(key)) {
-					String value = data.get(key) + "";
-					data.put(key, toSensitivewordEx(value));
-				}
-			}
-		}
-		return retData;
-	}
-
-	private String toSensitivewordEx(String str) {
-		if (StringUtils.isBlank(str)) {
-			return str;
-		}
-		String ret = str;
-		switch (str.length()) {
-		case 1:
-			ret = "*";
-			break;
-		case 2:
-			ret = str.substring(0, 1) + "*";
-			break;
-		case 3:
-			ret = str.substring(0, 1) + "**";
-			break;
-		default:
-			int wordCount = str.length() / 4;
-			int sensitivityCount = str.length() - (str.length() / 2);
-			ret = padRight(str.substring(0, wordCount), sensitivityCount, '*')
-					+ str.substring(str.length() - wordCount, str.length());
-			break;
-		}
-		return ret;
-	}
-
-	private String padRight(String src, int len, char ch) {
-		int diff = len - src.length();
-		if (diff <= 0) {
-			return src;
-		}
-
-		char[] charr = new char[len];
-		System.arraycopy(src.toCharArray(), 0, charr, 0, src.length());
-		for (int i = src.length(); i < len; i++) {
-			charr[i] = ch;
-		}
-		return new String(charr);
-	}
+	
 
 //	private String getKeysWhere(List<Map<String, Object>> dataGrid) {
 //		String ret = "";

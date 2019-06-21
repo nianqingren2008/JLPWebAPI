@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -55,6 +56,7 @@ import com.callan.service.provider.service.IJRoleRightService;
 import com.callan.service.provider.service.IJSensitiveWordService;
 import com.callan.service.provider.service.IJShowDetailViewService;
 import com.callan.service.provider.service.IJShowViewService;
+import com.callan.service.provider.service.IJTableDictService;
 import com.callan.service.provider.service.IJTableFieldDictService;
 import com.callan.service.provider.service.IJUserService;
 
@@ -95,6 +97,9 @@ public class PanoramaController {
 
 	@Autowired
 	private IJTableFieldDictService tableFieldDictService;
+	
+	@Autowired
+	private IJTableDictService tableDictService;
 
 	@Autowired
 	private IJLpService JLpService;
@@ -279,7 +284,7 @@ public class PanoramaController {
 
 	@ApiOperation(value = "全景视图信息")
 	@RequestMapping(value = "/api/Panorama/{PanoramaType}/{Id}", method = { RequestMethod.GET })
-	public String panoramaTypeId(String PanoramaType, long Id, int pageSize, int pageNum, HttpServletRequest request) {
+	public String panoramaTypeId(@PathVariable String PanoramaType,@PathVariable  Long Id, Integer pageSize, Integer pageNum, HttpServletRequest request) {
 
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -299,7 +304,7 @@ public class PanoramaController {
 		}
 
 		boolean hasPage = true;
-		if (pageNum == 0 || pageSize == 0) {
+		if (pageNum == null || pageSize == null || pageNum == 0 || pageSize == 0) {
 			hasPage = false;
 		}
 		DPatientvisit dPatientvisit = patientvisitService.getOne(Id);
@@ -321,7 +326,7 @@ public class PanoramaController {
 		Long panoramashowviewId = panoramashowview.getId();
 		JShowView showView = showViewService.getOne(panoramashowviewId);
 		List<JShowDetailView> detailViewList = showDetailViewService.getByViewId(showView.getId());
-		Set<String> tableCodeSet = new HashSet<String>();
+		Set<String> tableNameSet = new HashSet<String>();
 
 		TreeSet<JTableFieldDict> fieldDictSet = new TreeSet<JTableFieldDict>(new Comparator<JTableFieldDict>() {
 			@Override
@@ -332,7 +337,7 @@ public class PanoramaController {
 
 		for (JShowDetailView showDetailView : detailViewList) {
 			JTableFieldDict tableFieldDict = tableFieldDictService.getOne(showDetailView.getFieldid());
-			tableCodeSet.add(tableFieldDict.getTablecode());
+			tableNameSet.add(tableDictService.getByCode(tableFieldDict.getTablecode(), true).getName());
 			fieldDictSet.add(tableFieldDict);
 		}
 		if (fieldDictSet.size() == 0) {
@@ -343,7 +348,7 @@ public class PanoramaController {
 			return JSONObject.toJSONString(resultMap);
 		}
 
-		if (tableCodeSet.size() > 1) {
+		if (tableNameSet.size() > 1) {
 			BaseResponse baseResponse = new BaseResponse();
 			baseResponse.setCode("0000");
 			baseResponse.setText("全景信息视图" + PanoramaType + "}暂时不支持多表联合查看，请联系技术人员！");
@@ -357,7 +362,8 @@ public class PanoramaController {
 			ColunmsModel colunmsModel = new ColunmsModel();
 			colunmsModel.setDataIndex(jTableFieldDict.getName().toLowerCase());
 			colunmsModel.setKey(jTableFieldDict.getName().toLowerCase());
-			colunmsModel.setTitle(jTableFieldDict.getjShowDetailView().getFieldtitle());
+			JShowDetailView showDetailView = showDetailViewService.getByFieldId(jTableFieldDict.getId());
+			colunmsModel.setTitle(showDetailView.getFieldtitle());
 			colunmsModel.setIsLongStr("clob".equals(jTableFieldDict.getType()));
 			colunmsModel.setIsSearched(JLPConts.ActiveFlag.equals(jTableFieldDict.getQueryflag()));
 			columns.add(colunmsModel);
@@ -367,12 +373,12 @@ public class PanoramaController {
 		String patientId = dPatientvisit.getPatientid();
 		String visitId = dPatientvisit.getVisitid();
 
-		fieldSet.add("Id as hide_key");
+		fieldSet.add("Id as \"_key\"");
 		String fieldStrs = fieldSet.toString().substring(1, fieldSet.toString().length() - 1);
-		String tableName = tableCodeSet.iterator().next();
+		String tableName = tableNameSet.iterator().next();
 		int totals = 0;
 
-		String Sql = "select distinct" + fieldStrs + " from " + tableName + " where ";
+		String Sql = "select distinct " + fieldStrs + " from " + tableName + " where ";
 		if (PanoramaType == "basepatient") {
 			Sql += " Id=  '" + dPatientvisit.getPatientid() + "'";
 		} else {
@@ -488,7 +494,7 @@ public class PanoramaController {
 		Long panoramashowviewId = panoramashowview.getId();
 		JShowView showView = showViewService.getOne(panoramashowviewId);
 		List<JShowDetailView> detailViewList = showDetailViewService.getByViewId(showView.getId());
-		Set<String> tableCodeSet = new HashSet<String>();
+		Set<String> tableNameSet = new HashSet<String>();
 
 		TreeSet<JTableFieldDict> fieldDictSet = new TreeSet<JTableFieldDict>(new Comparator<JTableFieldDict>() {
 			@Override
@@ -499,7 +505,7 @@ public class PanoramaController {
 
 		for (JShowDetailView showDetailView : detailViewList) {
 			JTableFieldDict tableFieldDict = tableFieldDictService.getOne(showDetailView.getFieldid());
-			tableCodeSet.add(tableFieldDict.getTablecode());
+			tableNameSet.add(tableDictService.getByCode(tableFieldDict.getTablecode(), true).getName());
 			fieldDictSet.add(tableFieldDict);
 		}
 		if (fieldDictSet.size() == 0) {
@@ -510,7 +516,7 @@ public class PanoramaController {
 			return JSONObject.toJSONString(resultMap);
 		}
 
-		if (tableCodeSet.size() > 1) {
+		if (tableNameSet.size() > 1) {
 			BaseResponse baseResponse = new BaseResponse();
 			baseResponse.setCode("0000");
 			baseResponse.setText("全景信息视图labresult暂时不支持多表联合查看，请联系技术人员！");
@@ -524,16 +530,17 @@ public class PanoramaController {
 			ColunmsModel colunmsModel = new ColunmsModel();
 			colunmsModel.setDataIndex(jTableFieldDict.getName().toLowerCase());
 			colunmsModel.setKey(jTableFieldDict.getName().toLowerCase());
-			colunmsModel.setTitle(jTableFieldDict.getjShowDetailView().getFieldtitle());
+			JShowDetailView showDetailView = showDetailViewService.getByFieldId(jTableFieldDict.getId());
+			colunmsModel.setTitle(showDetailView.getFieldtitle());
 			colunmsModel.setIsLongStr("clob".equals(jTableFieldDict.getType()));
 			colunmsModel.setIsSearched(JLPConts.ActiveFlag.equals(jTableFieldDict.getQueryflag()));
 			columns.add(colunmsModel);
 			fieldSet.add(jTableFieldDict.getName());
 		}
 
-		fieldSet.add("Id as hide_key");
+		fieldSet.add("Id as \"_key\"");
 		String fieldStrs = fieldSet.toString().substring(1, fieldSet.toString().length() - 1);
-		String tableName = tableCodeSet.iterator().next();
+		String tableName = tableNameSet.iterator().next();
 		int totals = 0;
 		String Sql = "select distinct " + fieldStrs + " from " + tableName + " where applyNo='"
 				+ labmasterinfo.getApplyno() + "'";

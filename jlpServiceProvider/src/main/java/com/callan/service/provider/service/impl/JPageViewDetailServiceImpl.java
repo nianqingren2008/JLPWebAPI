@@ -56,8 +56,8 @@ public class JPageViewDetailServiceImpl implements IJPageViewDetailService {
 
 	@Override
 	public List<JPageviewdetail> getByPageCode(String pageCode) {
-		IJPageViewService base = (IJPageViewService) AopContext.currentProxy();
-		Map<Long, List<JPageviewdetail>> data = (Map<Long, List<JPageviewdetail>>) base.getAll4Code().getData();
+		IJPageViewDetailService base = (IJPageViewDetailService) AopContext.currentProxy();
+		Map<Long, List<JPageviewdetail>> data = (Map<Long, List<JPageviewdetail>>) base.getAll4PageCode().getData();
 		List<JPageviewdetail> entity = data.get(pageCode);
 		return entity;
 	}

@@ -33,7 +33,7 @@ public interface IJLpService {
 			String patientTableWhere, Map<String, List<String>> tableWhere, String finalSelectFields,
 			String tempSqlWhere, int pageNumInt, int pageSizeInt, String sqlCount,String preUrl
 			, boolean isImageUrl, String imageUrl, String imageField, String pathImageUrl
-			, String pathImageField, boolean isPathImageUrl);
+			, String pathImageField, boolean isPathImageUrl,Long userRole);
 
 	public int queryForCount(String sqlCount);
 }

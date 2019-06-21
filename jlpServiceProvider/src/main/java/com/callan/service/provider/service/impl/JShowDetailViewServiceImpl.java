@@ -124,4 +124,16 @@ public class JShowDetailViewServiceImpl implements IJShowDetailViewService {
 		response.setData(map);
 		return response;
 	}
+
+	@Override
+	public JShowDetailView getByFieldId(long fieldId) {
+		List<JShowDetailView> list = jShowDetailViewMapper.getAll();
+		
+		for(JShowDetailView jShowDetailView : list) {
+			if(jShowDetailView.getFieldid() == fieldId ) {
+				return jShowDetailView;
+			}
+		}
+		return null;
+	}
 }
