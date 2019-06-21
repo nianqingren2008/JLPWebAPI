@@ -114,6 +114,15 @@ public class JLPServiceImpl implements IJLpService {
 			log.debug("queryForSQL -- > sql : " + sql);
 			long start = System.currentTimeMillis();
 			List<Map<String, Object>> pageData = dao.queryForSQL(sql, new Object[] {});
+			for(Map<String,Object> map : pageData) {
+				Map<String,Object> newMap = new HashMap<String, Object>();
+				Set<String> keySet = map.keySet();
+				for(String key : keySet) {
+					newMap.put(key.toLowerCase(), map.get(key));
+				}
+				map.clear();
+				map.putAll(newMap);
+			}
 			long end = System.currentTimeMillis();
 			log.info("queryForSQL--" + (end - start) + "ms");
 			return pageData;

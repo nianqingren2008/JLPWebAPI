@@ -46,7 +46,7 @@ public class DPatientvisitServiceImpl implements IDPatientvisitService{
 	}
 
 	@Override
-	public List<DPatientvisit> getByPatientGlobalId(Long id) {
+	public List<DPatientvisit> getByPatientGlobalId(String id) {
 		
 		return dpatientvisitMapper.getByPatientGlobalId(id);
 	}

@@ -54,7 +54,7 @@ public interface DPatientvisitMapper {
         "CYDEPTCODE, CYDEPT, CYDATETIME, CHIEFCOMPLAINT, RECHISDATE, DIAGNOSERANGE, DIAGNOSECONTENT, ",
         "AFFIRMDATE, JLCREATEDATE, JLACTIVEFLAG",
         "from D_PATIENTVISIT",
-        "where ID = #{id,jdbcType=DECIMAL}"
+        "where ID = #{id,jdbcType=DECIMAL} and JLACTIVEFLAG='"+JLPConts.ActiveFlag+"'"
     })
     @Results({
         @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
@@ -108,7 +108,7 @@ public interface DPatientvisitMapper {
 	@Select("SELECT * FROM D_PATIENTVISIT where JLACTIVEFLAG='"+JLPConts.ActiveFlag+"'")
     public List<DPatientvisit> getAll();
 	
-	@Select("SELECT * FROM D_PATIENTVISIT where JLACTIVEFLAG='"+JLPConts.ActiveFlag+"' and PATIENTID = #{patientid,jdbcType=VARCHAR}")
-	List<DPatientvisit> getByPatientGlobalId(Long patientid);
+	@Select("SELECT * FROM D_PATIENTVISIT where JLACTIVEFLAG='"+JLPConts.ActiveFlag+"' and patientglobalid = #{patientglobalid,jdbcType=VARCHAR}")
+	List<DPatientvisit> getByPatientGlobalId(String patientglobalid);
 	
 }

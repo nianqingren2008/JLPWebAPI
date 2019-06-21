@@ -5,7 +5,7 @@ import java.util.Date;
 public class DPatientvisit {
     private Long id;
 
-    private Long patientglobalid;
+    private String patientglobalid;
 
     private String patientid;
 
@@ -47,11 +47,11 @@ public class DPatientvisit {
         this.id = id;
     }
 
-    public Long getPatientglobalid() {
+    public String getPatientglobalid() {
         return patientglobalid;
     }
 
-    public void setPatientglobalid(Long patientglobalid) {
+    public void setPatientglobalid(String patientglobalid) {
         this.patientglobalid = patientglobalid;
     }
 

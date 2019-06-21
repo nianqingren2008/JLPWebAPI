@@ -125,15 +125,25 @@ public class JShowDetailViewServiceImpl implements IJShowDetailViewService {
 		return response;
 	}
 
+	
+	@LocalCacheable
+	@Override
+	public CacheResponse getAll4FieldId() {
+		Map<Long,JShowDetailView> map = new HashMap<>();
+		List<JShowDetailView> list = jShowDetailViewMapper.getAll();
+		for(JShowDetailView jShowDetailView : list) {
+				map.put(jShowDetailView.getFieldid(), jShowDetailView);
+		}
+		CacheResponse response = new CacheResponse();
+		response.setCode(0);
+		response.setData(map);
+		return response;
+	}
+	
 	@Override
 	public JShowDetailView getByFieldId(long fieldId) {
-		List<JShowDetailView> list = jShowDetailViewMapper.getAll();
-		
-		for(JShowDetailView jShowDetailView : list) {
-			if(jShowDetailView.getFieldid() == fieldId ) {
-				return jShowDetailView;
-			}
-		}
-		return null;
+		IJShowDetailViewService base = (IJShowDetailViewService) AopContext.currentProxy();
+		Map<Long,JShowDetailView> map = (Map<Long,JShowDetailView>) base.getAll4FieldId().getData();
+		return map.get(fieldId);
 	}
 }

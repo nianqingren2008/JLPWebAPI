@@ -27,6 +27,7 @@ import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ObjectUtil;
 import com.callan.service.provider.config.ThreadPoolConfig;
+import com.callan.service.provider.config.XmlUtil;
 import com.callan.service.provider.pojo.advanceQueryBase.ColunmsModel;
 import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.db.DDischargesummary;
@@ -60,6 +61,7 @@ import com.callan.service.provider.service.IJTableDictService;
 import com.callan.service.provider.service.IJTableFieldDictService;
 import com.callan.service.provider.service.IJUserService;
 
+import ch.qos.logback.core.joran.spi.XMLUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -115,16 +117,16 @@ public class PanoramaController {
 
 	@ApiOperation(value = "获取全景视图患者住院列表")
 	@RequestMapping(value = "/api/Panorama/{Id}", method = { RequestMethod.GET })
-	public String getPanoramaDetail(long id, int pageSize, int pageNum, HttpServletRequest request) {
+	public String getPanoramaDetail(@PathVariable Long Id, Integer pageSize, Integer pageNum, HttpServletRequest request) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
 		boolean hasPage = true;
-		if (pageNum <= 0 || pageSize <= 0) {
+		if (pageNum == null || pageSize == null || pageNum <= 0 || pageSize <= 0) {
 			hasPage = false;
 		}
 
-		DPatientglobal patientglobal = patientglobalService.getOne(id);
+		DPatientglobal patientglobal = patientglobalService.getOne(Id);
 		if (patientglobal == null) {
 			BaseResponse baseResponse = new BaseResponse();
 			baseResponse.setCode("0000");
@@ -132,7 +134,7 @@ public class PanoramaController {
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
-		List<DPatientvisit> vistList = patientvisitService.getByPatientGlobalId(patientglobal.getId());
+		List<DPatientvisit> vistList = patientvisitService.getByPatientGlobalId(ObjectUtil.objToString(patientglobal.getId()));
 		Collections.sort(vistList, new Comparator<DPatientvisit>() {
 
 			@Override
@@ -144,6 +146,8 @@ public class PanoramaController {
 		List<DPatientvisit> patientvisitList = null;
 		if (hasPage) {
 			patientvisitList = vistList.subList((pageNum - 1) * pageSize, pageSize);
+		}else {
+			patientvisitList = vistList;
 		}
 		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		BasePatientInfoModel basePatientInfo = new BasePatientInfoModel();
@@ -161,6 +165,7 @@ public class PanoramaController {
 		basePatientInfo.setTotalRecords(patientVisitCount);
 
 		List<RecordPatients> recordList = new ArrayList<RecordPatients>();
+		if(patientvisitList != null) {
 		for (DPatientvisit visit : patientvisitList) {
 			RecordPatients recordPatients = new RecordPatients();
 			recordPatients.setIndeptNum(visit.getId().intValue());
@@ -188,7 +193,7 @@ public class PanoramaController {
 			recordPatients.setDialognose(visit.getDiagnosecontent());
 			recordList.add(recordPatients);
 		}
-
+		}
 		// 从前台header中获取token参数
 		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
 		Long userRole = jUserService.getUserRoleByToken(authorization);
@@ -292,7 +297,13 @@ public class PanoramaController {
 		List<JPageviewdetail> detailList = pageViewDetailService.getByPageCode("1002");
 		JShowView panoramashowview = null;
 		if (detailList != null && detailList.size() > 0) {
-			panoramashowview = showViewService.getByCode(detailList.get(0).getViewcode());
+			for(JPageviewdetail JPageviewdetail : detailList) {
+				JShowView showView = showViewService.getByCode(JPageviewdetail.getViewcode());
+				if(showView.getAccesscode().equals(PanoramaType)) {
+					panoramashowview = showView;
+					break;
+				}
+			}
 		}
 
 		if (detailList.size() == 0 || (panoramashowview == null)) {
@@ -374,13 +385,13 @@ public class PanoramaController {
 		String visitId = dPatientvisit.getVisitid();
 
 		fieldSet.add("Id as \"_key\"");
-		String fieldStrs = fieldSet.toString().substring(1, fieldSet.toString().length() - 1);
+		String fieldStrs = fieldSet.toString().substring(1, fieldSet.toString().length() - 1).toLowerCase();;
 		String tableName = tableNameSet.iterator().next();
 		int totals = 0;
 
 		String Sql = "select distinct " + fieldStrs + " from " + tableName + " where ";
-		if (PanoramaType == "basepatient") {
-			Sql += " Id=  '" + dPatientvisit.getPatientid() + "'";
+		if (PanoramaType.equals("basepatient")) {
+			Sql += " Id=  '" + dPatientvisit.getPatientglobalid() + "'";
 		} else {
 			Sql += " patientId='" + patientId + "' and visitId='" + visitId + "'";
 		}
@@ -391,6 +402,7 @@ public class PanoramaController {
 					+ "         WHERE ROWNUM <= " + pageNum * pageSize + ") table_alias" + " WHERE table_alias.rowno > "
 					+ (pageNum - 1) * pageSize;
 		}
+		log.info("Sql --> " + Sql);
 		List<Map<String, Object>> contentData = JLpService.queryForSQL(Sql, new Object[] {});
 		if (totals == 0) {
 			totals = contentData.size();
@@ -450,7 +462,7 @@ public class PanoramaController {
 //
 	@ApiOperation(value = "检验结果信息获取")
 	@RequestMapping(value = "/api/Panorama/LabResult/{Id}", method = { RequestMethod.GET })
-	public String LabResult(long Id, int pageSize, int pageNum) {
+	public String LabResult(@PathVariable Long Id, Integer pageSize, Integer pageNum) {
 
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -458,7 +470,13 @@ public class PanoramaController {
 		List<JPageviewdetail> detailList = pageViewDetailService.getByPageCode("1002");
 		JShowView panoramashowview = null;
 		if (detailList != null && detailList.size() > 0) {
-			panoramashowview = showViewService.getByCode(detailList.get(0).getViewcode());
+			for(JPageviewdetail JPageviewdetail : detailList) {
+				JShowView showView = showViewService.getByCode(JPageviewdetail.getViewcode());
+				if(showView.getAccesscode().equals("labresult")) {
+					panoramashowview = showView;
+					break;
+				}
+			}
 		}
 
 		if (detailList.size() == 0 || (panoramashowview == null)
@@ -539,7 +557,7 @@ public class PanoramaController {
 		}
 
 		fieldSet.add("Id as \"_key\"");
-		String fieldStrs = fieldSet.toString().substring(1, fieldSet.toString().length() - 1);
+		String fieldStrs = fieldSet.toString().substring(1, fieldSet.toString().length() - 1).toLowerCase();
 		String tableName = tableNameSet.iterator().next();
 		int totals = 0;
 		String Sql = "select distinct " + fieldStrs + " from " + tableName + " where applyNo='"
@@ -567,7 +585,7 @@ public class PanoramaController {
 
 	@ApiOperation(value = "患者住院信息")
 	@RequestMapping(value = "/api/Panorama/Inpat/{Id}", method = { RequestMethod.GET })
-	public String Inpat(long Id) {
+	public String Inpat(@PathVariable Long Id) {
 
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -598,13 +616,15 @@ public class PanoramaController {
 		resultMap.put("response", baseResponse);
 
 		if (recordList != null && recordList.size() > 0) {
-			resultMap.put("caseHistory", recordList.get(0).getMedicalrecords());
+			String xml = recordList.get(0).getMedicalrecords();
+			
+			resultMap.put("caseHistory", XmlUtil.coventXml(xml));
 		}
-		if (summaryList != null) {
+		if (summaryList != null && summaryList.size() > 0) {
 			Map tempObj = new HashMap();
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日 HH时mm分ss秒");
 			tempObj.put("出院时间", sdf.format(summaryList.get(0).getCydate()));
-			tempObj.put("出院小结", sdf.format(summaryList.get(0).getLscontent()));
+			tempObj.put("出院小结", summaryList.get(0).getLscontent());
 			resultMap.put("outDept", tempObj);
 		}
 		String json = JSONObject.toJSONString(resultMap);

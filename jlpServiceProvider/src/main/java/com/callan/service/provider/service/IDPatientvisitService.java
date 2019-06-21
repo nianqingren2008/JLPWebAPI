@@ -13,5 +13,5 @@ public interface IDPatientvisitService {
 	
 	CacheResponse getAll();
 
-	List<DPatientvisit> getByPatientGlobalId(Long id);
+	List<DPatientvisit> getByPatientGlobalId(String id);
 }
