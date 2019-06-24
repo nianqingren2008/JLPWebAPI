@@ -1,62 +1,107 @@
 package com.callan.service.provider.dao.mapper;
 
-import java.util.List;
-
+import com.callan.service.provider.pojo.db.JProject;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.InsertProvider;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.UpdateProvider;
+import org.apache.ibatis.type.JdbcType;
 
-import com.callan.service.provider.config.JLPConts;
-import com.callan.service.provider.pojo.db.JProject;
-import com.callan.service.provider.pojo.db.JQueryrecordDetails;
-
-
-@Mapper
 public interface JProjectMapper {
-	/**
-	 * 
-	 * @return
-	 */
-	@Select("SELECT * FROM J_PROJECT")
-    public List<JProject> getAll();
-	
-	
-	@Select("SELECT * FROM J_PROJECT WHERE USERID = #{userId} and activeflag='"+JLPConts.ActiveFlag+"'")
-    public List<JProject> getByUserId(long userId);
-	
-	/**
-	 * 
-	 * @param id
-	 * @return
-	 */
-    @Select("SELECT * FROM J_PROJECT WHERE id = #{id}")
-//    @Results({
-//		@Result(property="id",column="id"),
-//		//users映射List<User> users，many=@Many是调用关联查询方法，"id"是关联查询条件，FetchType.LAZY是延迟加载
-//		@Result(property="itemList",column="qrId", 
-//			many=@Many(select="com.callan.service.provider.dao.mapper.JAdvancedqrItemMapper.getByQrId"))
-//    })
-    JProject getOne(Long id);
-    
+    @Delete({
+        "delete from J_PROJECT",
+        "where ID = #{id,jdbcType=DECIMAL}"
+    })
+    int deleteByPrimaryKey(Long id);
 
-    /**
-     * 
-     * @param id
-     */
-    @Delete("DELETE FROM J_PROJECT WHERE id =#{id}")
-    void delete(Long id);
-    
-    @Insert("insert into j_queryrecorddetails (ID, QUERYID, DETAILID, LEFTBRACKETS,"
-    		+ " FIELDNAME, RELATIONTYPE, FIELDVALUETYPE, FIELDVALUE, RIGHTBRACKETS, "
-    		+ "LOGICALTYPE, UPDATEDATE, CREATEDATE, ACTIVEFLAG) "
-    		+ "values (#{id,jdbcType=DECIMAL}, #{ queryid,jdbcType=DECIMAL}, #{ detailid,jdbcType=DECIMAL}, #{ leftbrackets,jdbcType=VARCHAR}, "
-    		+ "#{ fieldname,jdbcType=VARCHAR}, #{ relationtype,jdbcType=VARCHAR}, #{fieldvaluetype,jdbcType=DECIMAL}, #{ fieldvalue,jdbcType=VARCHAR}, "
-    		+ "#{ rightbrackets,jdbcType=VARCHAR}, #{logicaltype,jdbcType=VARCHAR}, #{ updatedate,jdbcType=TIMESTAMP}"
-    		+ ", #{ createdate,jdbcType=TIMESTAMP}, #{ activeflag,jdbcType=VARCHAR})")
-	public void save(JProject project);
+    @Insert({
+        "insert into J_PROJECT (ID, USERID, ",
+        "PROJECTNAME, PROJECTENNAME, ",
+        "PROJECTTYPE, PROJECTDESCRIBE, ",
+        "STARTDATE, ENDDATE, ",
+        "SPONSOR, PROJECTREGISTNO, ",
+        "ETHICALRECORDNO, PATIENTCOUNT, ",
+        "MEDICALRECORDCOUNT, STATUS, ",
+        "SHARETYPE, UPDATEDATE, ",
+        "CREATEDATE, ACTIVEFLAG, ",
+        "IMAGEURL, DATASTATUS)",
+        "values (#{id,jdbcType=DECIMAL}, #{userid,jdbcType=DECIMAL}, ",
+        "#{projectname,jdbcType=VARCHAR}, #{projectenname,jdbcType=VARCHAR}, ",
+        "#{projecttype,jdbcType=VARCHAR}, #{projectdescribe,jdbcType=VARCHAR}, ",
+        "#{startdate,jdbcType=TIMESTAMP}, #{enddate,jdbcType=TIMESTAMP}, ",
+        "#{sponsor,jdbcType=VARCHAR}, #{projectregistno,jdbcType=VARCHAR}, ",
+        "#{ethicalrecordno,jdbcType=VARCHAR}, #{patientcount,jdbcType=DECIMAL}, ",
+        "#{medicalrecordcount,jdbcType=DECIMAL}, #{status,jdbcType=VARCHAR}, ",
+        "#{sharetype,jdbcType=CHAR}, #{updatedate,jdbcType=TIMESTAMP}, ",
+        "#{createdate,jdbcType=TIMESTAMP}, #{activeflag,jdbcType=CHAR}, ",
+        "#{imageurl,jdbcType=VARCHAR}, #{datastatus,jdbcType=CHAR})"
+    })
+    int insert(JProject record);
 
+    @InsertProvider(type=JProjectSqlProvider.class, method="insertSelective")
+    int insertSelective(JProject record);
 
-	public void update(JProject project);
-    
+    @Select({
+        "select",
+        "ID, USERID, PROJECTNAME, PROJECTENNAME, PROJECTTYPE, PROJECTDESCRIBE, STARTDATE, ",
+        "ENDDATE, SPONSOR, PROJECTREGISTNO, ETHICALRECORDNO, PATIENTCOUNT, MEDICALRECORDCOUNT, ",
+        "STATUS, SHARETYPE, UPDATEDATE, CREATEDATE, ACTIVEFLAG, IMAGEURL, DATASTATUS",
+        "from J_PROJECT",
+        "where ID = #{id,jdbcType=DECIMAL}"
+    })
+    @Results({
+        @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
+        @Result(column="USERID", property="userid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="PROJECTNAME", property="projectname", jdbcType=JdbcType.VARCHAR),
+        @Result(column="PROJECTENNAME", property="projectenname", jdbcType=JdbcType.VARCHAR),
+        @Result(column="PROJECTTYPE", property="projecttype", jdbcType=JdbcType.VARCHAR),
+        @Result(column="PROJECTDESCRIBE", property="projectdescribe", jdbcType=JdbcType.VARCHAR),
+        @Result(column="STARTDATE", property="startdate", jdbcType=JdbcType.TIMESTAMP),
+        @Result(column="ENDDATE", property="enddate", jdbcType=JdbcType.TIMESTAMP),
+        @Result(column="SPONSOR", property="sponsor", jdbcType=JdbcType.VARCHAR),
+        @Result(column="PROJECTREGISTNO", property="projectregistno", jdbcType=JdbcType.VARCHAR),
+        @Result(column="ETHICALRECORDNO", property="ethicalrecordno", jdbcType=JdbcType.VARCHAR),
+        @Result(column="PATIENTCOUNT", property="patientcount", jdbcType=JdbcType.DECIMAL),
+        @Result(column="MEDICALRECORDCOUNT", property="medicalrecordcount", jdbcType=JdbcType.DECIMAL),
+        @Result(column="STATUS", property="status", jdbcType=JdbcType.VARCHAR),
+        @Result(column="SHARETYPE", property="sharetype", jdbcType=JdbcType.CHAR),
+        @Result(column="UPDATEDATE", property="updatedate", jdbcType=JdbcType.TIMESTAMP),
+        @Result(column="CREATEDATE", property="createdate", jdbcType=JdbcType.TIMESTAMP),
+        @Result(column="ACTIVEFLAG", property="activeflag", jdbcType=JdbcType.CHAR),
+        @Result(column="IMAGEURL", property="imageurl", jdbcType=JdbcType.VARCHAR),
+        @Result(column="DATASTATUS", property="datastatus", jdbcType=JdbcType.CHAR)
+    })
+    JProject selectByPrimaryKey(Long id);
+
+    @UpdateProvider(type=JProjectSqlProvider.class, method="updateByPrimaryKeySelective")
+    int updateByPrimaryKeySelective(JProject record);
+
+    @Update({
+        "update J_PROJECT",
+        "set USERID = #{userid,jdbcType=DECIMAL},",
+          "PROJECTNAME = #{projectname,jdbcType=VARCHAR},",
+          "PROJECTENNAME = #{projectenname,jdbcType=VARCHAR},",
+          "PROJECTTYPE = #{projecttype,jdbcType=VARCHAR},",
+          "PROJECTDESCRIBE = #{projectdescribe,jdbcType=VARCHAR},",
+          "STARTDATE = #{startdate,jdbcType=TIMESTAMP},",
+          "ENDDATE = #{enddate,jdbcType=TIMESTAMP},",
+          "SPONSOR = #{sponsor,jdbcType=VARCHAR},",
+          "PROJECTREGISTNO = #{projectregistno,jdbcType=VARCHAR},",
+          "ETHICALRECORDNO = #{ethicalrecordno,jdbcType=VARCHAR},",
+          "PATIENTCOUNT = #{patientcount,jdbcType=DECIMAL},",
+          "MEDICALRECORDCOUNT = #{medicalrecordcount,jdbcType=DECIMAL},",
+          "STATUS = #{status,jdbcType=VARCHAR},",
+          "SHARETYPE = #{sharetype,jdbcType=CHAR},",
+          "UPDATEDATE = #{updatedate,jdbcType=TIMESTAMP},",
+          "CREATEDATE = #{createdate,jdbcType=TIMESTAMP},",
+          "ACTIVEFLAG = #{activeflag,jdbcType=CHAR},",
+          "IMAGEURL = #{imageurl,jdbcType=VARCHAR},",
+          "DATASTATUS = #{datastatus,jdbcType=CHAR}",
+        "where ID = #{id,jdbcType=DECIMAL}"
+    })
+    int updateByPrimaryKey(JProject record);
 }
