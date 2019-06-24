@@ -181,5 +181,17 @@ public class JTableFieldDictServiceImpl implements IJTableFieldDictService {
 		response.setData(tablefieldList);
 		return response;
 	}
+
+	@Override
+	public JTableFieldDict getByFieldCode(String fieldName) {
+		IJTableFieldDictService base = (IJTableFieldDictService) AopContext.currentProxy();
+		List<JTableFieldDict> data = (List<JTableFieldDict>) base.getAll(false).getData();
+		for(JTableFieldDict tableFieldDict :data) {
+			if(fieldName.equalsIgnoreCase(tableFieldDict.getCode())) {
+				return tableFieldDict;
+			}
+		}
+		return null;
+	}
 	
 }

@@ -46,5 +46,15 @@ public class DPatientglobalServiceImpl implements IDPatientglobalService{
 		response.setData(list);
 		return response;
 	}
+
+	@Override
+	public void save(DPatientglobal patientglobal) {
+		patientglobalMapper.insert(patientglobal);
+	}
+
+	@Override
+	public void update(DPatientglobal patientglobal) {
+		patientglobalMapper.updateByPrimaryKey(patientglobal);
+	}
 	
 }

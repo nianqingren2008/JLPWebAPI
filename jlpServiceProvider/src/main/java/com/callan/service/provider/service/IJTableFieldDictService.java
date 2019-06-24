@@ -63,4 +63,7 @@ public interface IJTableFieldDictService {
 
 	CacheResponse getAll(boolean showFlag);
 
+
+	JTableFieldDict getByFieldCode(String fieldName);
+
 }

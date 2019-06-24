@@ -2,16 +2,15 @@ package com.callan.service.provider.service;
 
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.db.DPatientglobal;
+import com.callan.service.provider.pojo.db.DPatientgloballist;
 
-public interface IDPatientglobalService {
+public interface IDPatientgloballistService {
 
-	DPatientglobal getOne(long id);
+	DPatientgloballist getOne(long id);
 
 	CacheResponse getAll4Id();
 	
 	CacheResponse getAll();
 
-	void save(DPatientglobal patientglobal);
-
-	void update(DPatientglobal patientglobal);
+	void save(DPatientgloballist patientgloballist);
 }
