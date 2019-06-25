@@ -734,4 +734,9 @@ public class JLPServiceImpl implements IJLpService {
 		}
 		return new String(charr);
 	}
+
+	@Override
+	public void excuteSql(String sql, Object[] params) {
+		dao.excuteSql(sql,params);
+	}
 }

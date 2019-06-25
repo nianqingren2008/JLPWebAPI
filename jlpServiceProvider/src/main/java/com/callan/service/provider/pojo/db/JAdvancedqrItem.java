@@ -1,6 +1,7 @@
 package com.callan.service.provider.pojo.db;
 
 import java.util.Date;
+import java.util.List;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -60,6 +61,8 @@ public class JAdvancedqrItem {
 	private String activeflag;
 	
 	private JQueryrecord queryrecord;
+	
+	private List<JQueryrecordDetails> detailList;
 
 	public Long getId() {
 		return id;
@@ -163,6 +166,14 @@ public class JAdvancedqrItem {
 
 	public void setQueryrecord(JQueryrecord queryrecord) {
 		this.queryrecord = queryrecord;
+	}
+
+	public List<JQueryrecordDetails> getDetailList() {
+		return detailList;
+	}
+
+	public void setDetailList(List<JQueryrecordDetails> detailList) {
+		this.detailList = detailList;
 	}
 
 }

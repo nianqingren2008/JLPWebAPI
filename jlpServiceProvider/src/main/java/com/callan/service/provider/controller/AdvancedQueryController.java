@@ -429,7 +429,7 @@ public class AdvancedQueryController {
 //		String sortStr = PatientGlobalTable + "__Id";
 //
 		String finalSelectFields = fieldNames.toString().substring(1, fieldNames.toString().length() - 1);
-		String finalTables4Count = toTableString(tableNames, tempSql, tableWhere);
+		String finalTables4Count = toTableString(tableNames, tempSql);
 
 		String tableKeys = toTableKeys(showTableNames);
 
@@ -703,7 +703,7 @@ public class AdvancedQueryController {
 			tempSqlWhere += " and  " + sqlWhereMain;
 		}
 		tempSqlWhere += " and " + mainTable.getName() + ".Id is not null";
-		String finalTables4Count = toTableString(tableNames, tempSql, tableWhere);
+		String finalTables4Count = toTableString(tableNames, tempSql);
 
 		String tableKeys = toTableKeys(showTableNames);
 
@@ -809,8 +809,7 @@ public class AdvancedQueryController {
 //		return ret;
 //	}
 
-	private String toTableString(SortedSet<String> tableArray, String advancedQueryWhere,
-			Map<String, List<String>> tableWhere) {
+	private String toTableString(SortedSet<String> tableArray, String advancedQueryWhere) {
 		String ret = "";
 		tableArray.remove(JLPConts.PatientGlobalTable.toUpperCase());
 		if (tableArray != null) {
@@ -931,7 +930,7 @@ public class AdvancedQueryController {
 			return "";
 		}
 //	     #region 获取查询结果和数量
-		String tableWhere1 = toTableString(tableNameWheres, "", tableWhere);
+		String tableWhere1 = toTableString(tableNameWheres, "");
 		includeSql += tableWhere1 + " where 1=1 " + allSqlWhere;
 		return includeSql;
 	}

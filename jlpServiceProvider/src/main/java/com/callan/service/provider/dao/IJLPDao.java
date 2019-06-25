@@ -22,4 +22,6 @@ public interface IJLPDao  {
 
 	public long getNexSeq(String sql) throws Exception;
 
+	public void excuteSql(String sql, Object[] params);
+
 }

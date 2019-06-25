@@ -107,4 +107,9 @@ public class JLPDaoImpl implements IJLPDao {
 		return seq;
 	}
 
+	@Override
+	public void excuteSql(String sql, Object[] params) {
+		jdbcTemplate.update(sql,params);
+	}
+
 }

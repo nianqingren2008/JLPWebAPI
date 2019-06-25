@@ -1,6 +1,5 @@
 package com.callan.service.provider.dao.mapper;
 
-import com.callan.service.provider.pojo.db.JProjectdatastatusdict;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.InsertProvider;
@@ -10,6 +9,8 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
+
+import com.callan.service.provider.pojo.db.JProjectdatastatusdict;
 
 public interface JProjectdatastatusdictMapper {
     @Delete({
@@ -60,4 +61,5 @@ public interface JProjectdatastatusdictMapper {
         "where ID = #{id,jdbcType=DECIMAL}"
     })
     int updateByPrimaryKey(JProjectdatastatusdict record);
+
 }

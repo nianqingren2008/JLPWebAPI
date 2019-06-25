@@ -36,4 +36,11 @@ public interface IJLpService {
 			, String pathImageField, boolean isPathImageUrl,Long userRole);
 
 	public int queryForCount(String sqlCount);
+	
+	/**
+	 * 执行sql
+	 * @param sql
+	 * @param objects 
+	 */
+	public void excuteSql(String sql, Object[] params);
 }

@@ -2,204 +2,248 @@ package com.callan.service.provider.pojo.db;
 
 import java.util.Date;
 
+/**
+ * 课题主表
+ */
 public class JProject {
-    private Long id;
+	/*
+	 * 主键 J_PROJECT
+	 */
+	private Long id;
+	/*
+	 * 用户ID
+	 */
+	private Long userid;
+	/*
+	 * 项目名称
+	 */
+	private String projectname;
+	/*
+	 * 项目英文名称
+	 */
+	private String projectenname;
+	/*
+	 * 项目分类
+	 */
+	private String projecttype;
+	/*
+	 * 项目描述
+	 */
+	private String projectdescribe;
+	/*
+	 * 项目起始时间
+	 */
+	private Date startdate;
+	/*
+	 * 项目完结时间
+	 */
+	private Date enddate;
+	/*
+	 * 发起者
+	 */
+	private String sponsor;
+	/*
+	 * 项目注册号
+	 */
+	private String projectregistno;
+	/*
+	 * 伦理备案号
+	 */
+	private String ethicalrecordno;
+	/*
+	 * 患者总数
+	 */
+	private Long patientcount;
+	/*
+	 * 病例总数
+	 */
+	private Long medicalrecordcount;
+	/*
+	 * 课题状态
+	 */
+	private String status;
+	/*
+	 * 课题共享类型
+	 */
+	private String sharetype;
+	/*
+	 * 课题更新时间
+	 */
+	private Date updatedate;
+	/*
+	 * 课题创建时间
+	 */
+	private Date createdate;
+	/*
+	 * 启用标志
+	 */
+	private String activeflag;
+	/*
+	 * 课题图片
+	 */
+	private String imageurl;
+	/*
+	 * 暂时弃用--课题数据变更状态(1：正常 2：变更状态(当标签显示数量变更后))
+	 */
+	private String datastatus;
 
-    private Long userid;
+	public Long getId() {
+		return id;
+	}
 
-    private String projectname;
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    private String projectenname;
+	public Long getUserid() {
+		return userid;
+	}
 
-    private String projecttype;
+	public void setUserid(Long userid) {
+		this.userid = userid;
+	}
 
-    private String projectdescribe;
+	public String getProjectname() {
+		return projectname;
+	}
 
-    private Date startdate;
+	public void setProjectname(String projectname) {
+		this.projectname = projectname;
+	}
 
-    private Date enddate;
+	public String getProjectenname() {
+		return projectenname;
+	}
 
-    private String sponsor;
+	public void setProjectenname(String projectenname) {
+		this.projectenname = projectenname;
+	}
 
-    private String projectregistno;
+	public String getProjecttype() {
+		return projecttype;
+	}
 
-    private String ethicalrecordno;
+	public void setProjecttype(String projecttype) {
+		this.projecttype = projecttype;
+	}
 
-    private Long patientcount;
+	public String getProjectdescribe() {
+		return projectdescribe;
+	}
 
-    private Long medicalrecordcount;
+	public void setProjectdescribe(String projectdescribe) {
+		this.projectdescribe = projectdescribe;
+	}
 
-    private String status;
+	public Date getStartdate() {
+		return startdate;
+	}
 
-    private String sharetype;
+	public void setStartdate(Date startdate) {
+		this.startdate = startdate;
+	}
 
-    private Date updatedate;
+	public Date getEnddate() {
+		return enddate;
+	}
 
-    private Date createdate;
+	public void setEnddate(Date enddate) {
+		this.enddate = enddate;
+	}
 
-    private String activeflag;
+	public String getSponsor() {
+		return sponsor;
+	}
 
-    private String imageurl;
+	public void setSponsor(String sponsor) {
+		this.sponsor = sponsor;
+	}
 
-    private String datastatus;
+	public String getProjectregistno() {
+		return projectregistno;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public void setProjectregistno(String projectregistno) {
+		this.projectregistno = projectregistno;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public String getEthicalrecordno() {
+		return ethicalrecordno;
+	}
 
-    public Long getUserid() {
-        return userid;
-    }
+	public void setEthicalrecordno(String ethicalrecordno) {
+		this.ethicalrecordno = ethicalrecordno;
+	}
 
-    public void setUserid(Long userid) {
-        this.userid = userid;
-    }
+	public Long getPatientcount() {
+		return patientcount;
+	}
 
-    public String getProjectname() {
-        return projectname;
-    }
+	public void setPatientcount(Long patientcount) {
+		this.patientcount = patientcount;
+	}
 
-    public void setProjectname(String projectname) {
-        this.projectname = projectname == null ? null : projectname.trim();
-    }
+	public Long getMedicalrecordcount() {
+		return medicalrecordcount;
+	}
 
-    public String getProjectenname() {
-        return projectenname;
-    }
+	public void setMedicalrecordcount(Long medicalrecordcount) {
+		this.medicalrecordcount = medicalrecordcount;
+	}
 
-    public void setProjectenname(String projectenname) {
-        this.projectenname = projectenname == null ? null : projectenname.trim();
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public String getProjecttype() {
-        return projecttype;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public void setProjecttype(String projecttype) {
-        this.projecttype = projecttype == null ? null : projecttype.trim();
-    }
+	public String getSharetype() {
+		return sharetype;
+	}
 
-    public String getProjectdescribe() {
-        return projectdescribe;
-    }
+	public void setSharetype(String sharetype) {
+		this.sharetype = sharetype;
+	}
 
-    public void setProjectdescribe(String projectdescribe) {
-        this.projectdescribe = projectdescribe == null ? null : projectdescribe.trim();
-    }
+	public Date getUpdatedate() {
+		return updatedate;
+	}
 
-    public Date getStartdate() {
-        return startdate;
-    }
+	public void setUpdatedate(Date updatedate) {
+		this.updatedate = updatedate;
+	}
 
-    public void setStartdate(Date startdate) {
-        this.startdate = startdate;
-    }
+	public Date getCreatedate() {
+		return createdate;
+	}
 
-    public Date getEnddate() {
-        return enddate;
-    }
+	public void setCreatedate(Date createdate) {
+		this.createdate = createdate;
+	}
 
-    public void setEnddate(Date enddate) {
-        this.enddate = enddate;
-    }
+	public String getActiveflag() {
+		return activeflag;
+	}
 
-    public String getSponsor() {
-        return sponsor;
-    }
+	public void setActiveflag(String activeflag) {
+		this.activeflag = activeflag;
+	}
 
-    public void setSponsor(String sponsor) {
-        this.sponsor = sponsor == null ? null : sponsor.trim();
-    }
+	public String getImageurl() {
+		return imageurl;
+	}
 
-    public String getProjectregistno() {
-        return projectregistno;
-    }
+	public void setImageurl(String imageurl) {
+		this.imageurl = imageurl;
+	}
 
-    public void setProjectregistno(String projectregistno) {
-        this.projectregistno = projectregistno == null ? null : projectregistno.trim();
-    }
+	public String getDatastatus() {
+		return datastatus;
+	}
 
-    public String getEthicalrecordno() {
-        return ethicalrecordno;
-    }
-
-    public void setEthicalrecordno(String ethicalrecordno) {
-        this.ethicalrecordno = ethicalrecordno == null ? null : ethicalrecordno.trim();
-    }
-
-    public Long getPatientcount() {
-        return patientcount;
-    }
-
-    public void setPatientcount(Long patientcount) {
-        this.patientcount = patientcount;
-    }
-
-    public Long getMedicalrecordcount() {
-        return medicalrecordcount;
-    }
-
-    public void setMedicalrecordcount(Long medicalrecordcount) {
-        this.medicalrecordcount = medicalrecordcount;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status == null ? null : status.trim();
-    }
-
-    public String getSharetype() {
-        return sharetype;
-    }
-
-    public void setSharetype(String sharetype) {
-        this.sharetype = sharetype == null ? null : sharetype.trim();
-    }
-
-    public Date getUpdatedate() {
-        return updatedate;
-    }
-
-    public void setUpdatedate(Date updatedate) {
-        this.updatedate = updatedate;
-    }
-
-    public Date getCreatedate() {
-        return createdate;
-    }
-
-    public void setCreatedate(Date createdate) {
-        this.createdate = createdate;
-    }
-
-    public String getActiveflag() {
-        return activeflag;
-    }
-
-    public void setActiveflag(String activeflag) {
-        this.activeflag = activeflag == null ? null : activeflag.trim();
-    }
-
-    public String getImageurl() {
-        return imageurl;
-    }
-
-    public void setImageurl(String imageurl) {
-        this.imageurl = imageurl == null ? null : imageurl.trim();
-    }
-
-    public String getDatastatus() {
-        return datastatus;
-    }
-
-    public void setDatastatus(String datastatus) {
-        this.datastatus = datastatus == null ? null : datastatus.trim();
-    }
+	public void setDatastatus(String datastatus) {
+		this.datastatus = datastatus;
+	}
 }
