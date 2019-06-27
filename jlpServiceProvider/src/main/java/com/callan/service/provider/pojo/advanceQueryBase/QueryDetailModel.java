@@ -1,6 +1,6 @@
 package com.callan.service.provider.pojo.advanceQueryBase;
 
-public class QueryConds {
+public class QueryDetailModel {
 	
 	/*
 	 * 左括号

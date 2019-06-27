@@ -4,8 +4,8 @@ import java.util.List;
 
 public class QueryIncludesEX {
 	private String condType;
-	private List<QueryIncludesEXCondition> includes;
-	private List<QueryIncludesEXCondition> excludes;
+	private List<QueryCollectionModel> includes;
+	private List<QueryCollectionModel> excludes;
 	
 	public String getCondType() {
 		return condType;
@@ -13,16 +13,16 @@ public class QueryIncludesEX {
 	public void setCondType(String condType) {
 		this.condType = condType;
 	}
-	public List<QueryIncludesEXCondition> getIncludes() {
+	public List<QueryCollectionModel> getIncludes() {
 		return includes;
 	}
-	public void setIncludes(List<QueryIncludesEXCondition> includes) {
+	public void setIncludes(List<QueryCollectionModel> includes) {
 		this.includes = includes;
 	}
-	public List<QueryIncludesEXCondition> getExcludes() {
+	public List<QueryCollectionModel> getExcludes() {
 		return excludes;
 	}
-	public void setExcludes(List<QueryIncludesEXCondition> excludes) {
+	public void setExcludes(List<QueryCollectionModel> excludes) {
 		this.excludes = excludes;
 	}
 	

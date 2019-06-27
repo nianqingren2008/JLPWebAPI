@@ -29,9 +29,9 @@ import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.AdvanceQueryRequest;
 import com.callan.service.provider.pojo.advanceQueryBase.AdvancedQueryRecordModel;
 import com.callan.service.provider.pojo.advanceQueryBase.Queries;
-import com.callan.service.provider.pojo.advanceQueryBase.QueryConds;
+import com.callan.service.provider.pojo.advanceQueryBase.QueryDetailModel;
 import com.callan.service.provider.pojo.advanceQueryBase.QueryIncludesEX;
-import com.callan.service.provider.pojo.advanceQueryBase.QueryIncludesEXCondition;
+import com.callan.service.provider.pojo.advanceQueryBase.QueryCollectionModel;
 import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.db.JAdvancedqr;
 import com.callan.service.provider.pojo.db.JAdvancedqrItem;
@@ -181,10 +181,10 @@ public class AdvancedQueryRecordController {
 		advancedQueryRecord.setProjectId(ObjectUtil.objToLong(advancedqr.getProjectid()));
 		Queries queries = new Queries();
 		advancedQueryRecord.setQueries(queries);
-		List<QueryConds> queryConds = new ArrayList<QueryConds>();
+		List<QueryDetailModel> queryConds = new ArrayList<QueryDetailModel>();
 		queries.setQueryConds(queryConds);
 		for (JQueryrecordDetails detail : condsDetailList) {
-			QueryConds conds = new QueryConds();
+			QueryDetailModel conds = new QueryDetailModel();
 			conds.setCombinator(detail.getLogicaltype());
 			conds.setCondition(detail.getFieldname());
 			conds.setCondValue(detail.getFieldvalue());
@@ -204,19 +204,19 @@ public class AdvancedQueryRecordController {
 				return o1.getItemno().compareTo(o2.getItemno());
 			}
 		});
-		List<QueryIncludesEXCondition> includes = new ArrayList<QueryIncludesEXCondition>();
+		List<QueryCollectionModel> includes = new ArrayList<QueryCollectionModel>();
 		for (JAdvancedqrItem item : includeDetailList) {
-			QueryIncludesEXCondition queryIncludesEXCondition = new QueryIncludesEXCondition();
+			QueryCollectionModel queryIncludesEXCondition = new QueryCollectionModel();
 			queryIncludesEXCondition.setId(item.getModelid());
 			queryIncludesEXCondition.setLeftqueto(item.getLeftqueto());
 			queryIncludesEXCondition.setSetCombinator(item.getSetcombinatortype());
 			queryIncludesEXCondition.setType(item.getModeltype());
 
-			List<QueryConds> condsList = new ArrayList<QueryConds>();
+			List<QueryDetailModel> condsList = new ArrayList<QueryDetailModel>();
 
 			JQueryrecord record = item.getQueryrecord();
 			for (JQueryrecordDetails detail : record.getDetailList()) {
-				QueryConds conds = new QueryConds();
+				QueryDetailModel conds = new QueryDetailModel();
 				conds.setCombinator(detail.getLogicaltype());
 				conds.setCondition(detail.getFieldname());
 				conds.setCondValue(detail.getFieldvalue());
@@ -229,19 +229,19 @@ public class AdvancedQueryRecordController {
 			;
 			includes.add(queryIncludesEXCondition);
 		}
-		List<QueryIncludesEXCondition> excludes = new ArrayList<QueryIncludesEXCondition>();
+		List<QueryCollectionModel> excludes = new ArrayList<QueryCollectionModel>();
 		for (JAdvancedqrItem item : excludeDetailList) {
-			QueryIncludesEXCondition queryIncludesEXCondition = new QueryIncludesEXCondition();
+			QueryCollectionModel queryIncludesEXCondition = new QueryCollectionModel();
 			queryIncludesEXCondition.setId(item.getModelid());
 			queryIncludesEXCondition.setLeftqueto(item.getLeftqueto());
 			queryIncludesEXCondition.setSetCombinator(item.getSetcombinatortype());
 			queryIncludesEXCondition.setType(item.getModeltype());
 
-			List<QueryConds> condsList = new ArrayList<QueryConds>();
+			List<QueryDetailModel> condsList = new ArrayList<QueryDetailModel>();
 
 			JQueryrecord record = item.getQueryrecord();
 			for (JQueryrecordDetails detail : record.getDetailList()) {
-				QueryConds conds = new QueryConds();
+				QueryDetailModel conds = new QueryDetailModel();
 				conds.setCombinator(detail.getLogicaltype());
 				conds.setCondition(detail.getFieldname());
 				conds.setCondValue(detail.getFieldvalue());
@@ -397,7 +397,7 @@ public class AdvancedQueryRecordController {
 			queryrecord.setQueryname("");
 			queryrecord.setCount(0L);
 
-			List<QueryConds> condsList = advancedQueryRecordModel.getQueries().getQueryConds();
+			List<QueryDetailModel> condsList = advancedQueryRecordModel.getQueries().getQueryConds();
 			List<JQueryrecordDetails> detailList = toJqueryrecorddetailList(condsList, queryId);
 			queryrecordService.save(queryrecord);
 			advancedqrItemService.save(advancedqrItem);
@@ -409,10 +409,10 @@ public class AdvancedQueryRecordController {
 //        #region 纳入条件
 		if (advancedQueryRecordModel.getQueries().getQueryIncludesEX() != null) {
 
-			List<QueryIncludesEXCondition> includes = advancedQueryRecordModel.getQueries().getQueryIncludesEX()
+			List<QueryCollectionModel> includes = advancedQueryRecordModel.getQueries().getQueryIncludesEX()
 					.getIncludes();
 			if (includes != null) {
-				for (QueryIncludesEXCondition item : includes) {
+				for (QueryCollectionModel item : includes) {
 					try {
 						saveEx(advancedQueryRecordModel, userId, jAdvancedqr, itemNo, item);
 					} catch (Exception e) {
@@ -423,10 +423,10 @@ public class AdvancedQueryRecordController {
 			}
 
 //        #region 排除条件
-			List<QueryIncludesEXCondition> excludes = advancedQueryRecordModel.getQueries().getQueryIncludesEX()
+			List<QueryCollectionModel> excludes = advancedQueryRecordModel.getQueries().getQueryIncludesEX()
 					.getExcludes();
 			if (includes != null) {
-				for (QueryIncludesEXCondition item : excludes) {
+				for (QueryCollectionModel item : excludes) {
 					try {
 						saveEx(advancedQueryRecordModel, userId, jAdvancedqr, itemNo, item);
 					} catch (Exception e) {
@@ -451,7 +451,7 @@ public class AdvancedQueryRecordController {
 	}
 
 	private void saveEx(AdvancedQueryRecordModel advancedQueryRecord, Long userId, JAdvancedqr jAdvancedqr, int itemNo,
-			QueryIncludesEXCondition item) throws Exception {
+			QueryCollectionModel item) throws Exception {
 		JAdvancedqrItem advancedqrItem = new JAdvancedqrItem();
 		advancedqrItem.setActiveflag(JLPConts.ActiveFlag);
 		advancedqrItem.setCreatedate(new Date());
@@ -475,7 +475,7 @@ public class AdvancedQueryRecordController {
 		advancedqrItem.setQueryid(queryId);
 		long queryItemId = jlpService.getNextSeq("J_ADVANCEDQRITEM");
 		advancedqrItem.setId(queryItemId);
-		List<QueryConds> condsList = advancedQueryRecord.getQueries().getQueryConds();
+		List<QueryDetailModel> condsList = advancedQueryRecord.getQueries().getQueryConds();
 		List<JQueryrecordDetails> detailList = toJqueryrecorddetailList(condsList, queryId);
 		queryrecordService.save(queryrecord);
 		advancedqrItemService.save(advancedqrItem);
@@ -484,11 +484,11 @@ public class AdvancedQueryRecordController {
 		}
 	}
 
-	private List<JQueryrecordDetails> toJqueryrecorddetailList(List<QueryConds> queryDetails, long queryId) {
+	private List<JQueryrecordDetails> toJqueryrecorddetailList(List<QueryDetailModel> queryDetails, long queryId) {
 		List<JQueryrecordDetails> ret = new ArrayList<JQueryrecordDetails>();
 		if (queryDetails != null) {
 			int i = 0;
-			for (QueryConds conds : queryDetails) {
+			for (QueryDetailModel conds : queryDetails) {
 				JQueryrecordDetails detail = new JQueryrecordDetails();
 				detail.setActiveflag(JLPConts.ActiveFlag);
 				detail.setCreatedate(new Date());

@@ -3,13 +3,13 @@ package com.callan.service.provider.pojo.advanceQueryBase;
 import java.util.List;
 
 public class Queries {
-	private List<QueryConds> queryConds;
+	private List<QueryDetailModel> queryConds;
 	private QueryIncludesEX queryIncludesEX;
 	
-	public List<QueryConds> getQueryConds() {
+	public List<QueryDetailModel> getQueryConds() {
 		return queryConds;
 	}
-	public void setQueryConds(List<QueryConds> queryConds) {
+	public void setQueryConds(List<QueryDetailModel> queryConds) {
 		this.queryConds = queryConds;
 	}
 	public QueryIncludesEX getQueryIncludesEX() {

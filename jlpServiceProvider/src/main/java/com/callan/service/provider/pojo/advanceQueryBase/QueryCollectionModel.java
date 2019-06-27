@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
-public class QueryIncludesEXCondition {
+public class QueryCollectionModel {
 	/*
 	 * 左括号
 	 */
@@ -16,7 +16,7 @@ public class QueryIncludesEXCondition {
 	/*
 	 * 查询条件
 	 */
-	private List<QueryConds> conds;
+	private List<QueryDetailModel> conds;
 	/*
 	 * 右括号
 	 */
@@ -47,10 +47,10 @@ public class QueryIncludesEXCondition {
 	public void setAbstract1(String abstract1) {
 		this.abstract1 = abstract1;
 	}
-	public void setConds(List<QueryConds> conds) {
+	public void setConds(List<QueryDetailModel> conds) {
 		this.conds = conds;
 	}
-	public List<QueryConds> getConds() {
+	public List<QueryDetailModel> getConds() {
 		return conds;
 	}
 	public String getRightqueto() {

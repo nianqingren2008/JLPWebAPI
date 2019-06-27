@@ -5,7 +5,7 @@ import java.util.Date;
 public class JTableclassdict {
 	 
     // 流水号
-    public int Id;
+    public Integer Id;
      
     // 表名
     public String Code;
@@ -20,13 +20,13 @@ public class JTableclassdict {
     public Date Createdate;
      
     // 关联视图编号
-    public int Viewid;
+    public Integer Viewid;
 
-	public int getId() {
+	public Integer getId() {
 		return Id;
 	}
 
-	public void setId(int id) {
+	public void setId(Integer id) {
 		Id = id;
 	}
 
@@ -62,11 +62,11 @@ public class JTableclassdict {
 		Createdate = createdate;
 	}
 
-	public int getViewid() {
+	public Integer getViewid() {
 		return Viewid;
 	}
 
-	public void setViewid(int viewid) {
+	public void setViewid(Integer viewid) {
 		Viewid = viewid;
 	}
     

@@ -34,9 +34,9 @@ import com.callan.service.provider.dao.IPathologyDao;
 import com.callan.service.provider.pojo.AdvanceQueryRequest;
 import com.callan.service.provider.pojo.AdvanceQueryResponse;
 import com.callan.service.provider.pojo.advanceQueryBase.ColunmsModel;
-import com.callan.service.provider.pojo.advanceQueryBase.QueryConds;
+import com.callan.service.provider.pojo.advanceQueryBase.QueryDetailModel;
 import com.callan.service.provider.pojo.advanceQueryBase.QueryIncludesEX;
-import com.callan.service.provider.pojo.advanceQueryBase.QueryIncludesEXCondition;
+import com.callan.service.provider.pojo.advanceQueryBase.QueryCollectionModel;
 import com.callan.service.provider.pojo.advanceQueryBase.Sorted;
 import com.callan.service.provider.pojo.base.FieldName;
 import com.callan.service.provider.pojo.db.JRight;
@@ -192,7 +192,7 @@ public class AdvancedQueryController {
 		
 
 		// 获取查询所有表名
-		List<QueryConds> queryCondsList = advanceQueryRequest.getQueries().getQueryConds();
+		List<QueryDetailModel> queryCondsList = advanceQueryRequest.getQueries().getQueryConds();
 		SortedSet<String> tableNameMainWheres = new TreeSet<String>();
 		SortedSet<String> tableNameWhereMainValues = new TreeSet<String>();
 		// List<String> whereFieldsMain = new ArrayList<String>();
@@ -202,7 +202,7 @@ public class AdvancedQueryController {
 		Map<String, List<String>> tableWhere = new HashMap<String, List<String>>();
 		if (queryCondsList != null) {
 
-			for (QueryConds queryConds : queryCondsList) {
+			for (QueryDetailModel queryConds : queryCondsList) {
 				String tableName = queryConds.getCondition().split("\\.")[0].toUpperCase();
 				tableNameMainWheres.add(tableName);
 				String fieldName = queryConds.getCondition().split("\\.")[1].toUpperCase();
@@ -606,14 +606,14 @@ public class AdvancedQueryController {
 		}
 
 		// 获取查询所有表名
-		List<QueryConds> queryCondsList = advanceQueryRequest.getQueries().getQueryConds();
+		List<QueryDetailModel> queryCondsList = advanceQueryRequest.getQueries().getQueryConds();
 		SortedSet<String> tableNameMainWheres = new TreeSet<String>();
 		SortedSet<String> tableNameWhereMainValues = new TreeSet<String>();
 		String sqlWhereMain = "";
 		Map<String, List<String>> tableWhere = new HashMap<String, List<String>>();
 		if (queryCondsList != null) {
 
-			for (QueryConds queryConds : queryCondsList) {
+			for (QueryDetailModel queryConds : queryCondsList) {
 				String tableName = queryConds.getCondition().split("\\.")[0].toUpperCase();
 				tableNameMainWheres.add(tableName);
 				String fieldName = queryConds.getCondition().split("\\.")[1].toUpperCase();
@@ -878,17 +878,17 @@ public class AdvancedQueryController {
 		return tempSql;
 	}
 
-	private String cludeSqlExcutor(List<QueryIncludesEXCondition> queryIncludesEX, SortedSet<String> tableNameWheres,
+	private String cludeSqlExcutor(List<QueryCollectionModel> queryIncludesEX, SortedSet<String> tableNameWheres,
 			Map<String, List<String>> tableWhere) {
 		String includeSql = " select distinct " + JLPConts.PatientGlobalTable + ".Id   from ";
 		String allSqlWhere = "";
-		for (QueryIncludesEXCondition queryIncludesEXCondition : queryIncludesEX) {
+		for (QueryCollectionModel queryIncludesEXCondition : queryIncludesEX) {
 			if (queryIncludesEXCondition.getConds().isEmpty()) {
 				continue;
 			}
 
 			String SqlWhere = "";
-			for (QueryConds queryConds : queryIncludesEXCondition.getConds()) {
+			for (QueryDetailModel queryConds : queryIncludesEXCondition.getConds()) {
 				String tableName = queryConds.getCondition().split("\\.")[0].toUpperCase();
 				tableNameWheres.add(tableName);
 				String fieldName = queryConds.getCondition().split("\\.")[1].toUpperCase();
