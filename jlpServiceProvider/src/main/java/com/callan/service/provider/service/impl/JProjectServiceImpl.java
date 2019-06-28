@@ -13,9 +13,9 @@ import com.callan.service.provider.config.JLPException;
 import com.callan.service.provider.dao.mapper.JProjectMapper;
 import com.callan.service.provider.pojo.advanceQueryBase.AdvancedQueryRecordModel;
 import com.callan.service.provider.pojo.advanceQueryBase.Queries;
-import com.callan.service.provider.pojo.advanceQueryBase.QueryConds;
+import com.callan.service.provider.pojo.advanceQueryBase.QueryDetailModel;
 import com.callan.service.provider.pojo.advanceQueryBase.QueryIncludesEX;
-import com.callan.service.provider.pojo.advanceQueryBase.QueryIncludesEXCondition;
+import com.callan.service.provider.pojo.advanceQueryBase.QueryCollectionModel;
 import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.db.JAdvancedqr;
 import com.callan.service.provider.pojo.db.JAdvancedqrItem;
@@ -97,7 +97,7 @@ public class JProjectServiceImpl implements IJProjectService {
 			}
 		}
 		
-		List<QueryConds> queryConds = new ArrayList<QueryConds>();
+		List<QueryDetailModel> queryConds = new ArrayList<QueryDetailModel>();
 		List<JAdvancedqrItem> dqrItemListInclude = new ArrayList<JAdvancedqrItem>();
 		List<JAdvancedqrItem> dqrItemListExclude = new ArrayList<JAdvancedqrItem>();
 		for (JAdvancedqrItem advancedqrItem : dqrItemListNew) {
@@ -116,7 +116,7 @@ public class JProjectServiceImpl implements IJProjectService {
 				}
 			});
 			for(JQueryrecordDetails detail : detailList) {
-				QueryConds queryDetailModel = new QueryConds();
+				QueryDetailModel queryDetailModel = new QueryDetailModel();
 				queryDetailModel.setCombinator(detail.getLogicaltype());
 				queryDetailModel.setCondition(detail.getFieldname());
 				queryDetailModel.setCondValue(detail.getFieldvalue());
@@ -143,7 +143,7 @@ public class JProjectServiceImpl implements IJProjectService {
 		return advancedQueryRecord;
 	}
 	private void excueteEx(AdvancedQueryRecordModel advancedQueryRecord, List<JAdvancedqrItem> dqrItemListInclude) {
-		List<QueryIncludesEXCondition> include = new ArrayList<QueryIncludesEXCondition>();
+		List<QueryCollectionModel> include = new ArrayList<QueryCollectionModel>();
 		advancedQueryRecord.getQueries().getQueryIncludesEX().setIncludes(include);
 
 		Collections.sort(dqrItemListInclude, new Comparator<JAdvancedqrItem>() {
@@ -154,13 +154,13 @@ public class JProjectServiceImpl implements IJProjectService {
 		});
 
 		for (JAdvancedqrItem advancedqrItem : dqrItemListInclude) {
-			QueryIncludesEXCondition queryCollectionModel = new QueryIncludesEXCondition();
+			QueryCollectionModel queryCollectionModel = new QueryCollectionModel();
 			queryCollectionModel.setId(advancedqrItem.getModelid());
 			queryCollectionModel.setLeftqueto(advancedqrItem.getLeftqueto());
 			queryCollectionModel.setRightqueto(advancedqrItem.getRightqueto());
 			queryCollectionModel.setSetCombinator(advancedqrItem.getSetcombinatortype());
 			queryCollectionModel.setType(advancedqrItem.getModeltype());
-			List<QueryConds> condsList = new ArrayList<QueryConds>();
+			List<QueryDetailModel> condsList = new ArrayList<QueryDetailModel>();
 
 			List<JQueryrecordDetails> detailList = advancedqrItem.getDetailList();
 			Collections.sort(detailList, new Comparator<JQueryrecordDetails>() {
@@ -177,7 +177,7 @@ public class JProjectServiceImpl implements IJProjectService {
 				}
 			});
 			for (JQueryrecordDetails detail : detailList) {
-				QueryConds queryDetailModel = new QueryConds();
+				QueryDetailModel queryDetailModel = new QueryDetailModel();
 				queryDetailModel.setCombinator(detail.getLogicaltype());
 				queryDetailModel.setCondition(detail.getFieldname());
 				queryDetailModel.setCondValue(detail.getFieldvalue());

@@ -1,9 +1,14 @@
 package com.callan.service.provider.service;
 
-import com.callan.service.provider.pojo.db.JProjectdatastatusdict;
+import java.util.List;
+
+import com.callan.service.provider.pojo.db.JProjectdatastatus;
 
 public interface IJProjectDataStatusService {
 
-	void save(JProjectdatastatusdict projectDataStatus);
+	List<JProjectdatastatus> getByProjectIdAndPatientglobalid(Long projectid, Long patientGlobalId);
 
+	void save(JProjectdatastatus projectdatastatus);
+
+	void update(JProjectdatastatus projectDataStatus);
 }

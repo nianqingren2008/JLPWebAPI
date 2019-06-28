@@ -33,6 +33,6 @@
             <property name="enableSubPackages" value="true"/>  
         </javaClientGenerator>  
         <!--生成对应表及类名-->  
-        <table tableName="j_Exportdataclass" domainObjectName="JExportdataclass" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
+        <table tableName="j_Projectdatastatus1" domainObjectName="JProjectdatastatus" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false"></table>
     </context>  
 </generatorConfiguration>  

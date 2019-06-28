@@ -1,5 +1,7 @@
 package com.callan.service.provider.dao.mapper;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.InsertProvider;
@@ -10,6 +12,7 @@ import org.apache.ibatis.annotations.Update;
 import org.apache.ibatis.annotations.UpdateProvider;
 import org.apache.ibatis.type.JdbcType;
 
+import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.pojo.db.JProjectdatastatusdict;
 
 public interface JProjectdatastatusdictMapper {
@@ -36,7 +39,7 @@ public interface JProjectdatastatusdictMapper {
         "select",
         "ID, NAME, PROJECTID, ACTIVEFLAG, CREATEDATE, STATUSTYPE",
         "from J_PROJECTDATASTATUSDICT",
-        "where ID = #{id,jdbcType=DECIMAL}"
+        "where ID = #{id,jdbcType=DECIMAL} and ACTIVEFLAG='"+JLPConts.ActiveFlag+"'"
     })
     @Results({
         @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
@@ -61,5 +64,38 @@ public interface JProjectdatastatusdictMapper {
         "where ID = #{id,jdbcType=DECIMAL}"
     })
     int updateByPrimaryKey(JProjectdatastatusdict record);
+
+    @Select({
+        "select",
+        "ID, NAME, PROJECTID, ACTIVEFLAG, CREATEDATE, STATUSTYPE",
+        "from J_PROJECTDATASTATUSDICT",
+        "where projectId = #{id,jdbcType=DECIMAL} and id in(#{projectstatusIDStr}) "
+        + " and ACTIVEFLAG='"+JLPConts.ActiveFlag+"'"
+    })
+    @Results({
+        @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
+        @Result(column="NAME", property="name", jdbcType=JdbcType.VARCHAR),
+        @Result(column="PROJECTID", property="projectid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="ACTIVEFLAG", property="activeflag", jdbcType=JdbcType.CHAR),
+        @Result(column="CREATEDATE", property="createdate", jdbcType=JdbcType.TIMESTAMP),
+        @Result(column="STATUSTYPE", property="statustype", jdbcType=JdbcType.CHAR)
+    })
+	List<JProjectdatastatusdict> getByProjectIdAndProjectstatusIDs(Long projectId, String projectstatusIDStr);
+
+    @Select({
+        "select",
+        "ID, NAME, PROJECTID, ACTIVEFLAG, CREATEDATE, STATUSTYPE",
+        "from J_PROJECTDATASTATUSDICT",
+        "where projectId = #{projectId,jdbcType=DECIMAL} and ACTIVEFLAG='"+JLPConts.ActiveFlag+"'"
+    })
+    @Results({
+        @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
+        @Result(column="NAME", property="name", jdbcType=JdbcType.VARCHAR),
+        @Result(column="PROJECTID", property="projectid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="ACTIVEFLAG", property="activeflag", jdbcType=JdbcType.CHAR),
+        @Result(column="CREATEDATE", property="createdate", jdbcType=JdbcType.TIMESTAMP),
+        @Result(column="STATUSTYPE", property="statustype", jdbcType=JdbcType.CHAR)
+    })
+	List<JProjectdatastatusdict> getByProjectId(Long projectId);
 
 }

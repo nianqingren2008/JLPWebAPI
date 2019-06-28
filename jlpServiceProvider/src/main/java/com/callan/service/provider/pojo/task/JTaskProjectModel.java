@@ -2,7 +2,7 @@ package com.callan.service.provider.pojo.task;
 
 import java.util.List;
 
-import com.callan.service.provider.pojo.advanceQueryBase.QueryConds;
+import com.callan.service.provider.pojo.advanceQueryBase.QueryDetailModel;
 
 public class JTaskProjectModel {
 	
@@ -19,7 +19,7 @@ public class JTaskProjectModel {
     private long[] projectstatusIDs ;
 
     // 查询条件
-    private List<QueryConds> queryConds;
+    private List<QueryDetailModel> queryConds;
 
     // 导出字段ID
     private String[] queryShowFields ;
@@ -77,11 +77,11 @@ public class JTaskProjectModel {
 		this.projectstatusIDs = projectstatusIDs;
 	}
 
-	public List<QueryConds> getQueryConds() {
+	public List<QueryDetailModel> getQueryConds() {
 		return queryConds;
 	}
 
-	public void setQueryConds(List<QueryConds> queryConds) {
+	public void setQueryConds(List<QueryDetailModel> queryConds) {
 		this.queryConds = queryConds;
 	}
 

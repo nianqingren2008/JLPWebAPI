@@ -66,4 +66,5 @@ public interface IJTableFieldDictService {
 
 	JTableFieldDict getByFieldCode(String fieldName);
 
+
 }

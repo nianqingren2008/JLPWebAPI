@@ -30,8 +30,8 @@ import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ObjectUtil;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.advanceQueryBase.AdvancedQueryRecordModel;
-import com.callan.service.provider.pojo.advanceQueryBase.QueryConds;
-import com.callan.service.provider.pojo.advanceQueryBase.QueryIncludesEXCondition;
+import com.callan.service.provider.pojo.advanceQueryBase.QueryDetailModel;
+import com.callan.service.provider.pojo.advanceQueryBase.QueryCollectionModel;
 import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.db.JExportdataclass;
 import com.callan.service.provider.pojo.db.JFiletype;
@@ -43,6 +43,7 @@ import com.callan.service.provider.service.IJExportdataclassService;
 import com.callan.service.provider.service.IJFiletypeService;
 import com.callan.service.provider.service.IJLpService;
 import com.callan.service.provider.service.IJProjectDataStatusService;
+import com.callan.service.provider.service.IJProjectDataStatusdictService;
 import com.callan.service.provider.service.IJProjectService;
 import com.callan.service.provider.service.IJUserService;
 
@@ -62,7 +63,7 @@ public class ProjectController {
 	private IJUserService userService;
 
 	@Autowired
-	private IJProjectDataStatusService projectDataStatusService;
+	private IJProjectDataStatusdictService projectDataStatusdictService;
 
 	@Autowired
 	private IJExportdataclassService exportdataclassService;
@@ -196,7 +197,7 @@ public class ProjectController {
 				projectDataStatus.setStatustype("1");
 				long projectDataStatusSeqId = jLpService.getNextSeq("J_PROJECTDATASTATUSDICT");
 				projectDataStatus.setId(projectDataStatusSeqId);
-				projectDataStatusService.save(projectDataStatus);
+				projectDataStatusdictService.save(projectDataStatus);
 			}
 		} else {
 			projectService.update(jProject);
@@ -345,7 +346,7 @@ public class ProjectController {
 		List<String> includeSql = new ArrayList<String>();
 		List<String> excludeSql = new ArrayList<String>();
 
-		Map<String, List<QueryIncludesEXCondition>> queryList = new HashMap<String, List<QueryIncludesEXCondition>>();
+		Map<String, List<QueryCollectionModel>> queryList = new HashMap<String, List<QueryCollectionModel>>();
 
 		AdvancedQueryRecordModel projectQueryConds = null;
 
@@ -374,15 +375,15 @@ public class ProjectController {
 		}
 
 		if (projectQueryConds.getQueries() != null && projectQueryConds.getQueries().getQueryConds() != null) {
-			QueryIncludesEXCondition queryCollection = new QueryIncludesEXCondition();
+			QueryCollectionModel queryCollection = new QueryCollectionModel();
 			queryCollection.setConds(projectQueryConds.getQueries().getQueryConds());
 			queryCollection.setLeftqueto("(");
 			queryCollection.setRightqueto(")");
 			queryCollection.setSetCombinator("1");
 			if (!queryList.containsKey("include")) {
-				queryList.put("include", new ArrayList<QueryIncludesEXCondition>());
+				queryList.put("include", new ArrayList<QueryCollectionModel>());
 			}
-			List<QueryIncludesEXCondition> relQCL = queryList.get("include");
+			List<QueryCollectionModel> relQCL = queryList.get("include");
 			if (relQCL.size() > 0) {
 				relQCL.get(0).setLeftqueto("(");
 				relQCL.get(relQCL.size() - 1).setRightqueto(")");
@@ -392,14 +393,14 @@ public class ProjectController {
 
 		String tempadvancedQueryType = "";
 		for (String queryKey : queryList.keySet()) {
-			List<QueryIncludesEXCondition> list = queryList.get(queryKey);
-			for (QueryIncludesEXCondition subItem : list) {
+			List<QueryCollectionModel> list = queryList.get(queryKey);
+			for (QueryCollectionModel subItem : list) {
 				SortedSet<String> tempTableNames = new TreeSet<String>();
 				List<String> tempFieldNames = new ArrayList<String>();
 
 				tempFieldNames.add(JLPConts.PatientGlobalTable + ".Id");
 
-				List<QueryConds> queryDetails = new ArrayList<QueryConds>();
+				List<QueryDetailModel> queryDetails = new ArrayList<QueryDetailModel>();
 
 				if (subItem.getConds() == null) {
 					continue;
@@ -415,7 +416,7 @@ public class ProjectController {
 
 				Set<String> whereFieldTypes = new HashSet<String>();
 				String SqlWhere  = "";
-				for (QueryConds queryConds : queryDetails) {
+				for (QueryDetailModel queryConds : queryDetails) {
 					whereFields.add(queryConds.getCondition().toUpperCase());
 					String[] conditionArray = queryConds.getCondition().split(".");
 					if (conditionArray.length > 0) {

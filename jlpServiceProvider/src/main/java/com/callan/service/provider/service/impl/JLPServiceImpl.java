@@ -226,7 +226,7 @@ public class JLPServiceImpl implements IJLpService {
 									}
 									if (pageData.size() != pageSize) {
 										if (count == null || (count != null && pageData.size() != count.intValue())) {
-											String finalTables4Count = toTableString(tableNames, tempSql, tableWhere);
+											String finalTables4Count = toTableString(tableNames, tempSql);
 											String sqlAllData = "select distinct " + finalSelectFields + " from "
 													+ finalTables4Count + " " + tempSqlWhere + " order by "
 													+ JLPConts.PatientGlobalTable + ".Id";
@@ -427,7 +427,7 @@ public class JLPServiceImpl implements IJLpService {
 								sql = sqlMap.get("sqlPageData100000");
 								pageData = dao.queryForSQLStreaming(sql, pageNumPlus, pageSize);
 								if (pageData.size() != pageSize) {
-									String finalTables4Count = toTableString(tableNames, tempSql, tableWhere);
+									String finalTables4Count = toTableString(tableNames, tempSql);
 									String sqlAllData = "select distinct " + finalSelectFields + " from "
 											+ finalTables4Count + " " + tempSqlWhere + " order by "
 											+ JLPConts.PatientGlobalTable + ".Id";
@@ -519,8 +519,7 @@ public class JLPServiceImpl implements IJLpService {
 		return ret;
 	}
 
-	private String toTableString(SortedSet<String> tableArray, String advancedQueryWhere,
-			Map<String, List<String>> tableWhere) {
+	public static String toTableString(SortedSet<String> tableArray, String advancedQueryWhere) {
 		String ret = "";
 		if (tableArray != null) {
 
@@ -668,7 +667,7 @@ public class JLPServiceImpl implements IJLpService {
 		return ts;
 	}
 	
-	private List<Map<String, Object>> sensitiveWord(List<Map<String, Object>> retData,
+	public static List<Map<String, Object>> sensitiveWord(List<Map<String, Object>> retData,
 			Map<String, JSensitiveWord> sensitiveWordMap, JLPLog log) {
 		if (retData == null || retData.size() == 0) {
 			return retData;
@@ -696,7 +695,7 @@ public class JLPServiceImpl implements IJLpService {
 		return retData;
 	}
 
-	private String toSensitivewordEx(String str) {
+	private static String toSensitivewordEx(String str) {
 		if (StringUtils.isBlank(str)) {
 			return str;
 		}
@@ -721,7 +720,7 @@ public class JLPServiceImpl implements IJLpService {
 		return ret;
 	}
 	
-	private String padRight(String src, int len, char ch) {
+	private static String padRight(String src, int len, char ch) {
 		int diff = len - src.length();
 		if (diff <= 0) {
 			return src;
