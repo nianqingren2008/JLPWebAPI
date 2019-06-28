@@ -21,4 +21,8 @@ public interface IJTagdictService {
 
 	CacheResponse getAll4ProjectId();
 
+	void save(JTagdicts tagdcit);
+
+	void update(JTagdicts tagdict);
+
 }

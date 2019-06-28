@@ -76,5 +76,15 @@ public class JTagdictServiceImpl implements IJTagdictService {
 		response.setData(map);
 		return response;
 	}
+
+	@Override
+	public void save(JTagdicts tagdcit) {
+		tagdictsMapper.insert(tagdcit)	;	
+	}
+
+	@Override
+	public void update(JTagdicts tagdict) {
+		tagdictsMapper.updateByPrimaryKey(tagdict);
+	}
 	
 }

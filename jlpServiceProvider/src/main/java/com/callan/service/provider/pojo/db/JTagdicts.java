@@ -1,6 +1,7 @@
 package com.callan.service.provider.pojo.db;
 
 import java.util.Date;
+import java.util.List;
 
 public class JTagdicts {
     private Long id;
@@ -29,6 +30,7 @@ public class JTagdicts {
 
     private Long currentnum;
 
+    private List<JTagvaluedicts>  valueDictsList;
     public Long getId() {
         return id;
     }
@@ -132,4 +134,13 @@ public class JTagdicts {
     public void setCurrentnum(Long currentnum) {
         this.currentnum = currentnum;
     }
+
+	public List<JTagvaluedicts> getValueDictsList() {
+		return valueDictsList;
+	}
+
+	public void setValueDictsList(List<JTagvaluedicts> valueDictsList) {
+		this.valueDictsList = valueDictsList;
+	}
+    
 }

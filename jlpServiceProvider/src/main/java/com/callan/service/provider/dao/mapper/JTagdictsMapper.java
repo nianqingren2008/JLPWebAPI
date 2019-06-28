@@ -1,6 +1,10 @@
 package com.callan.service.provider.dao.mapper;
 
+import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.pojo.db.JTagdicts;
+
+import java.util.List;
+
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.InsertProvider;
@@ -44,7 +48,7 @@ public interface JTagdictsMapper {
         "ID, NAME, DESCRIPTION, TAGTYPE, VALUETYPE, USERID, PROJECTID, CREATEDATE, ACTIVEFLAG, ",
         "SHOWFLAG, TAGATTACHED, TOTALNUM, CURRENTNUM",
         "from J_TAGDICT",
-        "where ID = #{id,jdbcType=DECIMAL}"
+        "where ID = #{id,jdbcType=DECIMAL} and ACTIVEFLAG = '"+JLPConts.ActiveFlag+"'"
     })
     @Results({
         @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
@@ -83,4 +87,13 @@ public interface JTagdictsMapper {
         "where ID = #{id,jdbcType=DECIMAL}"
     })
     int updateByPrimaryKey(JTagdicts record);
+
+    @Select({
+        "select",
+        "ID, NAME, DESCRIPTION, TAGTYPE, VALUETYPE, USERID, PROJECTID, CREATEDATE, ACTIVEFLAG, ",
+        "SHOWFLAG, TAGATTACHED, TOTALNUM, CURRENTNUM",
+        "from J_TAGDICT",
+        "where ACTIVEFLAG = '"+JLPConts.ActiveFlag+"'"
+    })
+	List<JTagdicts> getAll();
 }

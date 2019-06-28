@@ -1,6 +1,10 @@
 package com.callan.service.provider.dao.mapper;
 
+import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.pojo.db.JProjecttags;
+
+import java.util.List;
+
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.InsertProvider;
@@ -73,4 +77,48 @@ public interface JProjecttagsMapper {
         "where ID = #{id,jdbcType=DECIMAL}"
     })
     int updateByPrimaryKey(JProjecttags record);
+
+    @Select({
+        "select",
+        "ID, USERID, PROJECTID, TABLEID, DATAID, TAGID, TAGVALUE, ACTIVEFLAG, CREATEDATE, ",
+        "PATIENTGLOBALID",
+        "from J_PROJECTTAGS",
+        "where ACTIVEFLAG = '"+JLPConts.ActiveFlag+"'"
+        		+ " and TAGID = #{tagId,jdbcType=DECIMAL}"
+    })
+    @Results({
+        @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
+        @Result(column="USERID", property="userid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="PROJECTID", property="projectid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="TABLEID", property="tableid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="DATAID", property="dataid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="TAGID", property="tagid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="TAGVALUE", property="tagvalue", jdbcType=JdbcType.VARCHAR),
+        @Result(column="ACTIVEFLAG", property="activeflag", jdbcType=JdbcType.CHAR),
+        @Result(column="CREATEDATE", property="createdate", jdbcType=JdbcType.TIMESTAMP),
+        @Result(column="PATIENTGLOBALID", property="patientglobalid", jdbcType=JdbcType.DECIMAL)
+    })
+	List<JProjecttags> getByTagId(Long tagId);
+
+    @Select({
+        "select",
+        "ID, USERID, PROJECTID, TABLEID, DATAID, TAGID, TAGVALUE, ACTIVEFLAG, CREATEDATE, ",
+        "PATIENTGLOBALID",
+        "from J_PROJECTTAGS",
+        "where ACTIVEFLAG = '"+JLPConts.ActiveFlag+"'"
+        		+ " and PROJECTID = #{projectId,jdbcType=DECIMAL}"
+    })
+    @Results({
+        @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
+        @Result(column="USERID", property="userid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="PROJECTID", property="projectid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="TABLEID", property="tableid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="DATAID", property="dataid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="TAGID", property="tagid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="TAGVALUE", property="tagvalue", jdbcType=JdbcType.VARCHAR),
+        @Result(column="ACTIVEFLAG", property="activeflag", jdbcType=JdbcType.CHAR),
+        @Result(column="CREATEDATE", property="createdate", jdbcType=JdbcType.TIMESTAMP),
+        @Result(column="PATIENTGLOBALID", property="patientglobalid", jdbcType=JdbcType.DECIMAL)
+    })
+	List<JProjecttags> getByProjectId(Long projectId);
 }

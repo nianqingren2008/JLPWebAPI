@@ -88,4 +88,23 @@ public interface JTagvaluedictsMapper {
         @Result(column="ACTIVEFLAG", property="activeflag", jdbcType=JdbcType.CHAR)
     })
 	List<JTagvaluedicts> getAll();
+
+    @Select({
+        "select",
+        " ID, TAGID, VALUETYPE, VALUE, MINVALUE, MAXVALUE, CREATEDATE, ACTIVEFLAG",
+        " from J_TAGVALUEDICT",
+        " where ACTIVEFLAG = '"+JLPConts.ActiveFlag+"'"
+    	+ " and TAGID =  #{tagId,jdbcType=DECIMAL}"
+    })
+    @Results({
+        @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
+        @Result(column="TAGID", property="tagid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="VALUETYPE", property="valuetype", jdbcType=JdbcType.CHAR),
+        @Result(column="VALUE", property="value", jdbcType=JdbcType.VARCHAR),
+        @Result(column="MINVALUE", property="minvalue", jdbcType=JdbcType.VARCHAR),
+        @Result(column="MAXVALUE", property="maxvalue", jdbcType=JdbcType.VARCHAR),
+        @Result(column="CREATEDATE", property="createdate", jdbcType=JdbcType.TIMESTAMP),
+        @Result(column="ACTIVEFLAG", property="activeflag", jdbcType=JdbcType.CHAR)
+    })
+	List<JTagvaluedicts> getByTagId(Long tagId);
 }

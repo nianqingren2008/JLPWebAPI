@@ -50,5 +50,15 @@ public class JTagvaluedictServiceImpl implements IJTagvaluedictService {
 		return response;
 	}
 
+	@Override
+	public List<JTagvaluedicts> getByTagId(Long tagId) {
+		return tagvaluedictsMapper.getByTagId(tagId);
+	}
+
+	@Override
+	public void save(JTagvaluedicts record) {
+		tagvaluedictsMapper.insert(record);
+	}
+
 
 }

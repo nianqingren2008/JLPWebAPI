@@ -17,5 +17,9 @@ public interface IJTagvaluedictService {
 
 	CacheResponse getAll4Id();
 
+	List<JTagvaluedicts> getByTagId(Long id);
+
+	void save(JTagvaluedicts tagvaluedcit);
+
 
 }

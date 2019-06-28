@@ -55,7 +55,7 @@ public interface JProjectMapper {
         "ENDDATE, SPONSOR, PROJECTREGISTNO, ETHICALRECORDNO, PATIENTCOUNT, MEDICALRECORDCOUNT, ",
         "STATUS, SHARETYPE, UPDATEDATE, CREATEDATE, ACTIVEFLAG, IMAGEURL, DATASTATUS",
         "from J_PROJECT",
-        "where ID = #{id,jdbcType=DECIMAL}"
+        "where ID = #{id,jdbcType=DECIMAL} and ACTIVEFLAG='"+JLPConts.ActiveFlag+"'"
     })
     @Results({
         @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
