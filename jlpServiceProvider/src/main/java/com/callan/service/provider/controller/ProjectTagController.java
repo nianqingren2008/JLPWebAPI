@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.tags.form.InputTag;
 
 import com.alibaba.fastjson.JSONObject;
 import com.callan.service.provider.config.JLPConts;
@@ -27,17 +26,10 @@ import com.callan.service.provider.config.ObjectUtil;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.db.JProject;
-import com.callan.service.provider.pojo.db.JProjectdatastatus;
-import com.callan.service.provider.pojo.db.JProjectdatastatusdict;
-import com.callan.service.provider.pojo.db.JProjectdefaultstatus;
 import com.callan.service.provider.pojo.db.JProjectstatistics;
 import com.callan.service.provider.pojo.db.JProjecttags;
 import com.callan.service.provider.pojo.db.JTagdicts;
 import com.callan.service.provider.pojo.db.JTagvaluedicts;
-import com.callan.service.provider.pojo.project.ProjectDataDefaultStatusModel;
-import com.callan.service.provider.pojo.project.ProjectDataStatusChangeModel;
-import com.callan.service.provider.pojo.project.ProjectDataStatusDictModel;
-import com.callan.service.provider.pojo.project.ProjectDataStatusModel;
 import com.callan.service.provider.pojo.project.ProjectTagCompleteModel;
 import com.callan.service.provider.pojo.project.ProjectTagModel;
 import com.callan.service.provider.pojo.project.ProjectTagShowModel;
@@ -51,13 +43,12 @@ import com.callan.service.provider.service.IJProjecttagsService;
 import com.callan.service.provider.service.IJTagdictService;
 import com.callan.service.provider.service.IJTagvaluedictService;
 import com.callan.service.provider.service.IJUserService;
-import com.callan.service.provider.service.impl.JProjectDataStatusServiceImpl;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-@Api(description = "课题数据操作")
+@Api(description = "课题标签")
 public class ProjectTagController {
 	@Autowired
 	private IJProjectdefaultstatusService projectdefaultstatusService;

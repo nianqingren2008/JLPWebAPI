@@ -10,4 +10,10 @@ public interface IJProjecttagsService {
 
 	List<JProjecttags> getByProjectId(Long id);
 
+	JProjecttags getByProIdAndDataIdAndTagId(Long projectId, Long dataId, Long tagId);
+
+	void save(JProjecttags jProjecttags);
+
+	void update(JProjecttags jProjecttags);
+
 }

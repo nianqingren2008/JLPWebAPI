@@ -121,4 +121,28 @@ public interface JProjecttagsMapper {
         @Result(column="PATIENTGLOBALID", property="patientglobalid", jdbcType=JdbcType.DECIMAL)
     })
 	List<JProjecttags> getByProjectId(Long projectId);
+
+    @Select({
+        "select",
+        "ID, USERID, PROJECTID, TABLEID, DATAID, TAGID, TAGVALUE, ACTIVEFLAG, CREATEDATE, ",
+        "PATIENTGLOBALID",
+        "from J_PROJECTTAGS",
+        "where ACTIVEFLAG = '"+JLPConts.ActiveFlag+"'"
+        		+ " and PROJECTID = #{projectId,jdbcType=DECIMAL}"
+        		+ " and DATAID = #{dataId,jdbcType=DECIMAL}"
+        		+ " and TAGID = #{tagId,jdbcType=DECIMAL}"
+    })
+    @Results({
+        @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
+        @Result(column="USERID", property="userid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="PROJECTID", property="projectid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="TABLEID", property="tableid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="DATAID", property="dataid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="TAGID", property="tagid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="TAGVALUE", property="tagvalue", jdbcType=JdbcType.VARCHAR),
+        @Result(column="ACTIVEFLAG", property="activeflag", jdbcType=JdbcType.CHAR),
+        @Result(column="CREATEDATE", property="createdate", jdbcType=JdbcType.TIMESTAMP),
+        @Result(column="PATIENTGLOBALID", property="patientglobalid", jdbcType=JdbcType.DECIMAL)
+    })
+    List<JProjecttags> getByProIdAndDataIdAndTagId(Long projectId, Long dataId, Long tagId);
 }

@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.callan.service.provider.dao.mapper.JQueryrecordDetailMapper;
-import com.callan.service.provider.dao.mapper.JQueryrecordMapper;
-import com.callan.service.provider.pojo.db.JQueryrecord;
 import com.callan.service.provider.pojo.db.JQueryrecordDetails;
 import com.callan.service.provider.service.IJQueryrecordDetailService;
 
