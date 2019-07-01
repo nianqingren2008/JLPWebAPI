@@ -18,10 +18,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
@@ -76,7 +78,7 @@ public class ProjectController {
 	 */
 	@ApiOperation(value = "获取课题列表")
 	@RequestMapping(value = "/api/Project", method = { RequestMethod.GET })
-	public String getProjects(Boolean simple, HttpServletRequest request, @RequestBody ProjectModel project) {
+	public String getProjects(HttpServletRequest request,String simple) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
@@ -89,7 +91,7 @@ public class ProjectController {
 				return o1.getCreatedate().compareTo(o2.getCreatedate());
 			}
 		});
-		if (simple != null && simple) {
+		if (simple != null && ObjectUtil.objToBool(simple, false)) {
 			List<Map<String, Object>> isdustries = new ArrayList<Map<String, Object>>();
 			for (JProject pro : list) {
 				Map<String, Object> map = new HashMap<String, Object>();
@@ -134,7 +136,7 @@ public class ProjectController {
 	 */
 	@ApiOperation(value = "新建或修改课题")
 	@RequestMapping(value = "/api/Project", method = { RequestMethod.POST })
-	public String getProjects(HttpServletRequest request, @RequestBody ProjectModel project) {
+	public String getProjectsModify(HttpServletRequest request, @RequestBody ProjectModel project) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
@@ -231,7 +233,7 @@ public class ProjectController {
 	 */
 	@ApiOperation(value = "获取课题详细信息")
 	@RequestMapping(value = "/api/Project/{Id}", method = { RequestMethod.GET })
-	public String GetProject(Long Id, HttpServletRequest request, HttpServletResponse response) {
+	public String GetProjectDetail(Long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
@@ -312,7 +314,7 @@ public class ProjectController {
 	}
 
 	@ApiOperation(value = "课题清除更改状态")
-	@RequestMapping(value = "/api/clearChangeStatus", method = { RequestMethod.DELETE })
+	@RequestMapping(value = "/api/clearChangeStatus", method = { RequestMethod.POST})
 	public String clearChangeStatus(@RequestBody ProjectChangeStatusModel projectChangeStatus,
 			HttpServletRequest request) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
@@ -334,7 +336,7 @@ public class ProjectController {
 
 	@ApiOperation(value = "获取课题导出信息")
 	@RequestMapping(value = "/api/ExportInfo/{Id}", method = { RequestMethod.GET })
-	public String Get(long Id, HttpServletRequest request, HttpServletResponse response) {
+	public String GetExportInfo(long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
