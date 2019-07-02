@@ -1,5 +1,6 @@
 package com.callan.service.provider.controller;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -9,11 +10,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -24,6 +28,7 @@ import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ObjectUtil;
 import com.callan.service.provider.config.ThreadPoolConfig;
+import com.callan.service.provider.pojo.advanceQueryBase.Sorted;
 import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.db.JProject;
 import com.callan.service.provider.pojo.db.JProjectstatistics;
@@ -78,15 +83,20 @@ public class ProjectTagController {
 
 	@ApiOperation(value = "获取标签列表")
 	@RequestMapping(value = "/api/ProjectTag/{Id}", method = { RequestMethod.GET })
-	public String Gets(Long Id, HttpServletRequest request, HttpServletResponse response) {
+	public String Gets(@PathVariable Long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null) {
-			userId = 0L;
-		}
-		List<Map> columns = new ArrayList<>();
+//		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+//		if (userId == null) {
+//			BaseResponse baseResponse = new BaseResponse();
+//			response.setStatus(400);
+//			baseResponse.setCode("400");
+//			baseResponse.setText("用户信息获取失败，请检查请求头");
+//			resultMap.put("response", baseResponse);
+//			return JSONObject.toJSONString(resultMap);
+//		}
+		List<Map<String, String>> columns = new ArrayList<>();
 		Map<String, String> mapId = new HashMap<>();
 		mapId.put("dataIndex", "_id");
 		mapId.put("title", "编号");
@@ -118,14 +128,6 @@ public class ProjectTagController {
 			tagdicts.setValueDictsList(valueDictList);
 		}
 
-//        var projectTagDBs = (from tag in orclJlpContext.JTagdicts
-//                             join tagDetail in orclJlpContext.JTagvaluedicts on tag.Id equals tagDetail.Tagid into tagDetails
-//                             from tagDetail in tagDetails
-//                             where tag.Activeflag == JLPStaticProperties.ActiveFlag && tagDetail.Activeflag == 
-//                             	JLPStaticProperties.ActiveFlag && tag.Projectid == Id
-//                             group tagDetail by tag into tagGroup
-//                             select tagGroup).ToList();
-
 		List<ProjectTagCompleteModel> projectTags = new ArrayList<ProjectTagCompleteModel>();
 		for (JTagdicts tagdicts : projectTagDBs) {
 			ProjectTagCompleteModel model = new ProjectTagCompleteModel();
@@ -135,48 +137,45 @@ public class ProjectTagController {
 			model.setFieldType(tagdicts.getValuetype());
 			model.setIsShow(true);
 			List<JTagvaluedicts> valueDictList = tagdicts.getValueDictsList();
-			String fieldValue = null;
+			List<String> fieldValue = new ArrayList<String>();
 			if (valueDictList != null && valueDictList.size() > 0) {
-				if (valueDictList.get(0).getValue() != null) {
-					fieldValue = valueDictList.get(0).getValue();
-				} else {
-					Collections.sort(valueDictList, new Comparator<JTagvaluedicts>() {
-						@Override
-						public int compare(JTagvaluedicts o1, JTagvaluedicts o2) {
-							return o1.getId().compareTo(o2.getId());
-						}
-					});
-					fieldValue = valueDictList.get(0).getMinvalue() + "/" + valueDictList.get(0).getMaxvalue();
+				Collections.sort(valueDictList, new Comparator<JTagvaluedicts>() {
+					@Override
+					public int compare(JTagvaluedicts o1, JTagvaluedicts o2) {
+						return o1.getId().compareTo(o2.getId());
+					}
+				});
+				for (JTagvaluedicts tagvaluedicts : valueDictList) {
+					if (tagvaluedicts.getValue() != null) {
+						fieldValue.add(tagvaluedicts.getValue());
+					} else {
+						fieldValue.add(tagvaluedicts.getMinvalue() + "" + tagvaluedicts.getMaxvalue());
+					}
 				}
 			}
-			model.setFieldValue(fieldValue);
+			String fieldValueStr = "";
+			for (String str : fieldValue) {
+				fieldValueStr += str + "/";
+			}
+			if (fieldValueStr.length() > 0) {
+				fieldValueStr = fieldValueStr.substring(0, fieldValueStr.length() - 1);
+			}
+			model.setFieldValue(fieldValueStr);
 			model.setTagComplete("0%");
 			projectTags.add(model);
 		}
-
-		List<JProjectstatistics> projectstatistics = projectstatisticsService.getByProjectIdAndStatisticstypedataid(Id,
-				1L);
-
+		List<JProjectstatistics> projectstatistics = projectstatisticsService
+				.getByProjectIdAndStatisticstypedataid(Id,1L);
 		if (projectstatistics == null || projectstatistics.size() == 0) {
 			projectService.staticAsync(Id, 1L, request, response);
 			projectstatistics = projectstatisticsService.getByProjectIdAndStatisticstypedataid(Id, 1L);
 		}
-
 		if (projectstatistics != null && projectstatistics.size() > 0) {
-
 			for (ProjectTagCompleteModel model : projectTags) {
 				List<JProjecttags> tagsList = projecttagsService.getByTagId(model.get_id());
-				Map<Long, List<JProjecttags>> map = new HashMap<>();
-				for (JProjecttags tags : tagsList) {
-					Long globalId = tags.getPatientglobalid();
-					List<JProjecttags> list = map.get(globalId);
-					if (map.get(globalId) == null) {
-						list = new ArrayList<>();
-						map.put(globalId, list);
-					}
-					list.add(tags);
-				}
-				model.setTagComplete(String.format("%2f", tagsList.size() * 100.00 / projectstatistics.size()) + "%");
+				double complete = tagsList.size() * 100.00 / projectstatistics.get(0).getCount();
+				double comp = new BigDecimal(complete).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+				model.setTagComplete(comp + "%");
 			}
 		}
 		BaseResponse baseResponse = new BaseResponse();
@@ -190,64 +189,26 @@ public class ProjectTagController {
 	}
 
 	@ApiOperation(value = "获取标签整体进度")
-	@RequestMapping(value = "/api/ProjectTag/Statistic/{Id}", method = { RequestMethod.GET })
+	@RequestMapping(value = "/api/ProjectTag/Statistic", method = { RequestMethod.GET })
 	public String GetStatistic(Long Id, HttpServletRequest request, HttpServletResponse response) {
-		List<JProjectstatistics> projectstatistics = projectstatisticsService.getByProjectIdAndStatisticstypedataid(Id,
-				1L);
-
+		List<JProjectstatistics> projectstatistics = projectstatisticsService
+				.getByProjectIdAndStatisticstypedataid(Id,1L);
 		if (projectstatistics == null || projectstatistics.size() == 0) {
 			projectService.staticAsync(Id, 1L, request, response);
 			projectstatistics = projectstatisticsService.getByProjectIdAndStatisticstypedataid(Id, 1L);
 		}
-
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-
 		if (projectstatistics != null && projectstatistics.size() > 0) {
-
-//            List<JTagdicts>  tagIds = tagdictService.getByProjectId(Id);
-
 			List<JProjecttags> tagsList = projecttagsService.getByProjectId(Id);
-//        	Map<Long,List<JProjecttags>> map = new HashMap<>();
-//        	for(JProjecttags tags: tagsList) {
-//        		Long globalId = tags.getPatientglobalid();
-//        		List<JProjecttags> list = map.get(globalId);
-//        		if(map.get(globalId) == null) {
-//        			list = new ArrayList<>();
-//        			map.put(globalId, list);
-//        		}
-//        		list.add(tags);
-//        	}
 			if (tagsList.size() > 0) {
-				String retComplete = String.format("%2f",
-						(tagsList.size() * 100.00) / (projectstatistics.size() * tagsList.size())) + "%";
-				resultMap.put("totalComplete", retComplete);
+				double complete = tagsList.size() * 100.00 / projectstatistics.get(0).getCount();
+				double comp = new BigDecimal(complete).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+				resultMap.put("totalComplete", comp + "%");
 			} else {
 				resultMap.put("totalComplete", "0.00%");
 			}
 
-//            var tempSql = (from tempTagInfo in (from projecttag in orclJlpContext.JProjecttags
-//            		.Where(x => x.Projectid == Id && x.Activeflag == JLPStaticProperties.ActiveFlag 
-//            		&& tagIds.Contains(x.Tagid))
-//                                                select new { projecttag.Tagid,
-//            	projecttag.Patientglobalid })
-//                           group new { tempTagInfo.Tagid, tempTagInfo.Patientglobalid } 
-//            by tempTagInfo.Tagid into projecttagGroups
-//                           select new
-//                           {
-//                               tagId = projecttagGroups.Key,
-//                               count = projecttagGroups.Count()
-//                           });
-//            var tagData = tempSql.ToList();
-//            if (tagData.Count() > 0)
-//            {
-//                var retComplete = ((tagData.Select(x => x.count).Sum() * 100.00) / (projectstatistics.Count.Value * tagData.Count())).ToString("f2") + "%";
-//                ret.Add("totalComplete", retComplete);
-//            }
-//            else
-//            {
-//                ret.Add("totalComplete", "0.00%");
-//            }
 		} else {
 			resultMap.put("totalComplete", "0.00%");
 		}
@@ -259,15 +220,23 @@ public class ProjectTagController {
 	}
 
 	@ApiOperation(value = "新增课题标签信息")
-	@RequestMapping(value = "/api/ProjectTag/", method = { RequestMethod.POST })
+	@RequestMapping(value = "/api/ProjectTag", method = { RequestMethod.POST })
 	public String Post(@RequestBody ProjectTagModel projectTagModel, HttpServletRequest request,
 			HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+		String authorization = request.getHeader("Authorization") == null ? "509c6c1834414deeddd6c485d5c22d0b"
+				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null) {
-			userId = 0L;
+			BaseResponse baseResponse = new BaseResponse();
+			response.setStatus(400);
+			baseResponse.setCode("400");
+			baseResponse.setText("用户信息获取失败，请检查请求头");
+			resultMap.put("response", baseResponse);
+			String json = JSONObject.toJSONString(resultMap);
+			log.error("response-->" + json);
+			return json;
 		}
 		JProject project = projectService.getOne(projectTagModel.getProjectId());
 		if (project == null || project.getUserid().longValue() != userId.longValue()) {
@@ -285,16 +254,17 @@ public class ProjectTagController {
 		tagdcit.setDescription("");
 		tagdcit.setName(projectTagModel.getName());
 		tagdcit.setProjectid(projectTagModel.getProjectId());
-		tagdcit.setShowflag(projectTagModel.getIsShow() == null ? "false" : projectTagModel.getIsShow() + "");
+		boolean showFlag = projectTagModel.getIsShow() == null ? false : projectTagModel.getIsShow();
+		tagdcit.setShowflag(showFlag ? "1" : "0");
 		tagdcit.setTagattached(projectTagModel.getTagLevel());
 		tagdcit.setTagtype("1");
 		tagdcit.setUserid(userId);
-		tagdcit.setValuetype(projectTagModel.getFieldValue());
+		tagdcit.setValuetype(projectTagModel.getFieldType());
 		long seqId = jlpService.getNextSeq("J_TAGDICT");
 		tagdcit.setId(seqId);
 		tagdictService.save(tagdcit);
 		if ("1".equals(projectTagModel.getFieldType())) {
-			String[] values = projectTagModel.getFieldType().split("/");
+			String[] values = projectTagModel.getFieldValue().split("/");
 			if (values == null || values.length == 0) {
 				BaseResponse baseResponse = new BaseResponse();
 				response.setStatus(404);
@@ -340,7 +310,7 @@ public class ProjectTagController {
 
 	@ApiOperation(value = "标签显示状态变化")
 	@RequestMapping(value = "/api/ProjectTag/TagShow", method = { RequestMethod.POST })
-	public String TagShow(ProjectTagShowModel[] projectTagShows, HttpServletRequest request,
+	public String TagShow(@RequestBody ProjectTagShowModel[] projectTagShows, HttpServletRequest request,
 			HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -363,7 +333,8 @@ public class ProjectTagController {
 				projectId = dicts.getProjectid();
 			}
 			if (ObjectUtil.objToBool(dicts.getShowflag(), false) != model.getIsShow()) {
-				dicts.setShowflag(model.getIsShow() == null ? "false" : model.getIsShow() + "");
+				boolean showFlag = model.getIsShow() == null ? false : model.getIsShow();
+				dicts.setShowflag(showFlag ? "1" : "0");
 				IsChange = true;
 				tagdictService.update(dicts);
 			}
@@ -389,7 +360,12 @@ public class ProjectTagController {
 		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null) {
-			userId = 0L;
+			BaseResponse baseResponse = new BaseResponse();
+			response.setStatus(400);
+			baseResponse.setCode("400");
+			baseResponse.setText("用户信息获取失败，请检查请求头");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
 		}
 		JTagdicts tagdict = tagdictService.getOne(Id);
 		if (tagdict == null || tagdict.getUserid().longValue() != userId.longValue()) {

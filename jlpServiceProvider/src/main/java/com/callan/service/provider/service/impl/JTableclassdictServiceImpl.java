@@ -33,7 +33,7 @@ public class JTableclassdictServiceImpl implements IJTableclassdictService{
 	@Override
 	public CacheResponse getAll4Id() {
 		List<JTableclassdict> all = jTableclassdictMapper.getAll();
-		Map<Integer, JTableclassdict> map = new HashMap<>();
+		Map<Long, JTableclassdict> map = new HashMap<>();
 		for (JTableclassdict entity : all) {
 			map.put(entity.getId(), entity);
 		}

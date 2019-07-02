@@ -65,22 +65,22 @@ public interface JProjectdatastatusdictMapper {
     })
     int updateByPrimaryKey(JProjectdatastatusdict record);
 
-    @Select({
-        "select",
-        "ID, NAME, PROJECTID, ACTIVEFLAG, CREATEDATE, STATUSTYPE",
-        "from J_PROJECTDATASTATUSDICT",
-        "where projectId = #{id,jdbcType=DECIMAL} and id in(#{projectstatusIDStr}) "
-        + " and ACTIVEFLAG='"+JLPConts.ActiveFlag+"'"
-    })
-    @Results({
-        @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
-        @Result(column="NAME", property="name", jdbcType=JdbcType.VARCHAR),
-        @Result(column="PROJECTID", property="projectid", jdbcType=JdbcType.DECIMAL),
-        @Result(column="ACTIVEFLAG", property="activeflag", jdbcType=JdbcType.CHAR),
-        @Result(column="CREATEDATE", property="createdate", jdbcType=JdbcType.TIMESTAMP),
-        @Result(column="STATUSTYPE", property="statustype", jdbcType=JdbcType.CHAR)
-    })
-	List<JProjectdatastatusdict> getByProjectIdAndProjectstatusIDs(Long projectId, String projectstatusIDStr);
+//    @Select({
+//        "select",
+//        "ID, NAME, PROJECTID, ACTIVEFLAG, CREATEDATE, STATUSTYPE",
+//        "from J_PROJECTDATASTATUSDICT",
+//        "where PROJECTID = #{id,jdbcType=DECIMAL} and ID in(#{projectstatusIDStr}) "
+//        + " and ACTIVEFLAG='"+JLPConts.ActiveFlag+"'"
+//    })
+//    @Results({
+//        @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
+//        @Result(column="NAME", property="name", jdbcType=JdbcType.VARCHAR),
+//        @Result(column="PROJECTID", property="projectid", jdbcType=JdbcType.DECIMAL),
+//        @Result(column="ACTIVEFLAG", property="activeflag", jdbcType=JdbcType.CHAR),
+//        @Result(column="CREATEDATE", property="createdate", jdbcType=JdbcType.TIMESTAMP),
+//        @Result(column="STATUSTYPE", property="statustype", jdbcType=JdbcType.CHAR)
+//    })
+//	List<JProjectdatastatusdict> getByProjectIdAndProjectstatusIDs(Long projectId, String projectstatusIDStr);
 
     @Select({
         "select",

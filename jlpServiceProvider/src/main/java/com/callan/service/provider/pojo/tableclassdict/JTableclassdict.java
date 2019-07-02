@@ -5,7 +5,7 @@ import java.util.Date;
 public class JTableclassdict {
 	 
     // 流水号
-    public Integer Id;
+    public Long Id;
      
     // 表名
     public String Code;
@@ -22,11 +22,11 @@ public class JTableclassdict {
     // 关联视图编号
     public Integer Viewid;
 
-	public Integer getId() {
+	public Long getId() {
 		return Id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		Id = id;
 	}
 

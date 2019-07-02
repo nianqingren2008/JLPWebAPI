@@ -73,12 +73,12 @@ public class AdvancedQueryRecordController {
 	private IJQueryrecordDetailService queryrecordDetailService;
 
 	@ApiOperation(value = "获取纳排条件列表")
-	@RequestMapping(value = "/api/AdvancedQueryRecord/list", method = { RequestMethod.GET })
+	@RequestMapping(value = "/api/AdvancedQueryRecord", method = { RequestMethod.GET })
 	public String getRecords(HttpServletRequest request,HttpServletResponse reponse) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "3fcf61f4ac8b6fd49377ecd947016184"
+		String authorization = request.getHeader("Authorization") == null ? "f27e72f619bc0f0d3f1b5966d40d9afd"
 				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null || userId == 0) {
@@ -117,12 +117,12 @@ public class AdvancedQueryRecordController {
 	}
 
 	@ApiOperation(value = "获取纳排详细条件")
-	@RequestMapping(value = "/api/AdvancedQueryRecord/detail/{id}", method = { RequestMethod.GET })
-	public String getRecordDetail(HttpServletRequest request, @PathVariable Long id,HttpServletResponse response) {
+	@RequestMapping(value = "/api/AdvancedQueryRecord/{Id}", method = { RequestMethod.GET })
+	public String getRecordDetail(HttpServletRequest request, @PathVariable Long Id,HttpServletResponse response) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 从前台header中获取token参数
 		JLPLog log = ThreadPoolConfig.getBaseContext();
-		String authorization = request.getHeader("Authorization") == null ? "3fcf61f4ac8b6fd49377ecd947016184"
+		String authorization = request.getHeader("Authorization") == null ? "f27e72f619bc0f0d3f1b5966d40d9afd"
 				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null || userId == 0) {
@@ -135,7 +135,7 @@ public class AdvancedQueryRecordController {
 			log.info("response : " + json);
 			return json;
 		}
-		JAdvancedqr advancedqr = advancedqrService.getOne(id);
+		JAdvancedqr advancedqr = advancedqrService.getOne(Id);
 
 		if (advancedqr == null || advancedqr.getUserid() != userId) {
 			BaseResponse baseResponse = new BaseResponse();
@@ -147,7 +147,7 @@ public class AdvancedQueryRecordController {
 			log.info("response : " + json);
 			return json;
 		}
-		List<JAdvancedqrItem> itemList = advancedqrItemService.getByQrId(id);
+		List<JAdvancedqrItem> itemList = advancedqrItemService.getByQrId(Id);
 		
 		List<JQueryrecordDetails> condsDetailList = new ArrayList<JQueryrecordDetails>();
 		List<JAdvancedqrItem> includeDetailList = new ArrayList<JAdvancedqrItem>();
@@ -271,7 +271,7 @@ public class AdvancedQueryRecordController {
 	 * @return
 	 */
 	@ApiOperation(value = "添加纳排记录")
-	@RequestMapping(value = "/api/AdvancedQueryRecord/add", method = { RequestMethod.POST })
+	@RequestMapping(value = "/api/AdvancedQueryRecord", method = { RequestMethod.POST })
 	@Transactional
 	public String addRecord(@RequestBody String advancedQueryRecord, HttpServletRequest request,HttpServletResponse response) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
@@ -299,7 +299,7 @@ public class AdvancedQueryRecordController {
 
 		// 纳排记录主表信息
 		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "3fcf61f4ac8b6fd49377ecd947016184"
+		String authorization = request.getHeader("Authorization") == null ? "cf79626db1bf9d55f5479509df0bae22"
 				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null || userId == 0) {
@@ -522,10 +522,10 @@ public class AdvancedQueryRecordController {
 	 * @return
 	 */
 	@ApiOperation(value = "删除纳排记录")
-	@RequestMapping(value = "/api/AdvancedQueryRecord/delete/{id}", method = { RequestMethod.GET })
-	public String delete(@PathVariable Long id, HttpServletRequest request,HttpServletResponse response) {
+	@RequestMapping(value = "/api/AdvancedQueryRecord/{Id}", method = { RequestMethod.DELETE })
+	public String delete(@PathVariable Long Id, HttpServletRequest request,HttpServletResponse response) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "3fcf61f4ac8b6fd49377ecd947016184"
+		String authorization = request.getHeader("Authorization") == null ? "cf79626db1bf9d55f5479509df0bae22"
 				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null || userId == 0) {
@@ -536,7 +536,7 @@ public class AdvancedQueryRecordController {
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
-		JAdvancedqr advancedqr = advancedqrService.getOne(id);
+		JAdvancedqr advancedqr = advancedqrService.getOne(Id);
 
 		if (advancedqr == null || advancedqr.getUserid() != userId) {
 			BaseResponse baseResponse = new BaseResponse();

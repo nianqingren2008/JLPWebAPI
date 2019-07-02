@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -54,8 +55,8 @@ public class ProjectDataStatusController {
 	private IJUserService userService;
 
 	@ApiOperation(value = "课题数据状态字典查询")
-	@RequestMapping(value = "/api/ProjectDataStatus", method = { RequestMethod.GET })
-	public String Gets(Long Id) {
+	@RequestMapping(value = "/api/ProjectDataStatus/{Id}", method = { RequestMethod.GET })
+	public String Gets(@PathVariable Long Id) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
@@ -240,7 +241,7 @@ public class ProjectDataStatusController {
 
 	@ApiOperation(value = "删除课题状态字典")
 	@RequestMapping(value = "/api/ProjectDataStatus/{Id}", method = { RequestMethod.DELETE })
-	public String Delete(Long Id) {
+	public String Delete(@PathVariable Long Id) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		JProjectdatastatusdict projectdatastatusdict = projectDataStatusdictService.getOne(Id.intValue());

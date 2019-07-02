@@ -49,6 +49,8 @@ import com.callan.service.provider.pojo.db.JShowView;
 import com.callan.service.provider.pojo.db.JTableDict;
 import com.callan.service.provider.pojo.db.JTableFieldDict;
 import com.callan.service.provider.pojo.db.JTagdicts;
+import com.callan.service.provider.pojo.db.JTagvaluedicts;
+//import com.callan.service.provider.pojo.db.JTagvaluedicts;
 import com.callan.service.provider.pojo.project.ProjectQueryModel;
 import com.callan.service.provider.pojo.project.ProjectTagModel;
 import com.callan.service.provider.pojo.tableclassdict.JTableclassdict;
@@ -65,6 +67,7 @@ import com.callan.service.provider.service.IJTableDictService;
 import com.callan.service.provider.service.IJTableFieldDictService;
 import com.callan.service.provider.service.IJTableclassdictService;
 import com.callan.service.provider.service.IJTagdictService;
+import com.callan.service.provider.service.IJTagvaluedictService;
 import com.callan.service.provider.service.IJUserService;
 import com.callan.service.provider.service.impl.JLPServiceImpl;
 import com.callan.service.provider.service.impl.JTableclassdictServiceImpl;
@@ -120,43 +123,64 @@ public class ProjectQueryController {
 	@Autowired
 	private IJProjectstatisticsService projectstatisticsService;
 
+	@Autowired
+	private IJTagvaluedictService tagvaluedictService;
+	
 	@ApiOperation(value = "获取课题查询条件")
 	@RequestMapping(value = "/api/ProjectQuery/{Id}", method = { RequestMethod.GET })
-	public String Get(Long Id, HttpServletRequest request, HttpServletResponse response) {
+	public String Get(@PathVariable Long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null) {
-			userId = 0L;
+			BaseResponse baseResponse = new BaseResponse();
+			response.setStatus(400);
+			baseResponse.setCode("400");
+			baseResponse.setText("用户信息获取失败，请检查请求头");
+			resultMap.put("response", baseResponse);
+			String json = JSONObject.toJSONString(resultMap);
+			log.error(json);
+			return json;
 		}
 		try {
 			AdvancedQueryRecordModel advancedQueryRecord = projectService.getQueryRecord(Id, userId);
 			BaseResponse baseResponse = new BaseResponse();
 			resultMap.put("response", baseResponse);
 			resultMap.put("queryRecord", advancedQueryRecord);
-			return JSONObject.toJSONString(resultMap);
+			String json = JSONObject.toJSONString(resultMap);
+			log.info(json);
+			return json;
 		} catch (Exception e) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(404);
 			baseResponse.setCode("404");
 			baseResponse.setText(e.getMessage());
 			resultMap.put("response", baseResponse);
-			return JSONObject.toJSONString(resultMap);
+			String json = JSONObject.toJSONString(resultMap);
+			log.error(json);
+			return json;
 		}
 	}
 
 	@ApiOperation(value = "课题数据查询")
-	@RequestMapping(value = "/api/ProjectQuery", method = { RequestMethod.GET })
+	@RequestMapping(value = "/api/ProjectQuery", method = { RequestMethod.POST })
 	public String Post(Integer pageSize, Integer pageNum, @RequestBody ProjectQueryModel projectQuery,
 			HttpServletRequest request, HttpServletResponse response) {
 
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null) {
-			userId = 0L;
+			BaseResponse baseResponse = new BaseResponse();
+			response.setStatus(400);
+			baseResponse.setCode("400");
+			baseResponse.setText("用户信息获取失败，请检查请求头");
+			resultMap.put("response", baseResponse);
+			String json = JSONObject.toJSONString(resultMap);
+			log.error(json);
+			return json;
 		}
 		if (pageSize == null || pageSize == 0) {
 			pageSize = 20;
@@ -168,17 +192,21 @@ public class ProjectQueryController {
 //        #region 传入参数空值验证
 		if (projectQuery == null) {
 			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
+			baseResponse.setCode("1001");
 			baseResponse.setText("传入参数为空");
 			resultMap.put("response", baseResponse);
-			return JSONObject.toJSONString(resultMap);
+			String json = JSONObject.toJSONString(resultMap);
+			log.error(json);
+			return json;
 		} else {
-			if (projectQuery.getProjectId().longValue() == 0L) {
+			if (projectQuery.getProjectId() == null || projectQuery.getProjectId().longValue() == 0L) {
 				BaseResponse baseResponse = new BaseResponse();
-				baseResponse.setCode("0000");
+				baseResponse.setCode("1001");
 				baseResponse.setText("课题ID错误");
 				resultMap.put("response", baseResponse);
-				return JSONObject.toJSONString(resultMap);
+				String json = JSONObject.toJSONString(resultMap);
+				log.error(json);
+				return json;
 			}
 		}
 
@@ -190,7 +218,9 @@ public class ProjectQueryController {
 			response.setStatus(404);
 			baseResponse.setText("数据分类信息错误");
 			resultMap.put("response", baseResponse);
-			return JSONObject.toJSONString(resultMap);
+			String json = JSONObject.toJSONString(resultMap);
+			log.error(json);
+			return json;
 		}
 		JShowView showview = showViewService.getOne(tableclassdict.getViewid().longValue());
 		if (showview == null) {
@@ -198,7 +228,9 @@ public class ProjectQueryController {
 			baseResponse.setCode("0000");
 			baseResponse.setText("视图编号错误");
 			resultMap.put("response", baseResponse);
-			return JSONObject.toJSONString(resultMap);
+			String json = JSONObject.toJSONString(resultMap);
+			log.error(json);
+			return json;
 		}
 
 //        #region 获取显示视图信息
@@ -251,7 +283,7 @@ public class ProjectQueryController {
 			baseResponse.setText("显示字段未配置");
 			resultMap.put("response", baseResponse);
 			String json = JSONObject.toJSONString(resultMap);
-			log.info("response --> " + json);
+			log.error("response --> " + json);
 			return json;
 		}
 
@@ -259,56 +291,59 @@ public class ProjectQueryController {
 		List<JTagdicts> list = tagdictService.getByProjectId(projectQuery.getProjectId());
 		List<JTagdicts> tagProjectDicts = new ArrayList<JTagdicts>();
 		for (JTagdicts tagdicts : list) {
-			if (tagdicts.getId().longValue() == userId.longValue()
+			if (tagdicts.getUserid().longValue() == userId.longValue()
 					&& JLPConts.ActiveFlag.equals(tagdicts.getShowflag())) {
 				tagProjectDicts.add(tagdicts);
 			}
 		}
 //        #region 获取标签信息
-//        var tagProjectDicts = (from tagdict in orclJlpContext.JTagdicts
-//                               join tagvaluedict in orclJlpContext.JTagvaluedicts on tagdict.Id
-//                                equals tagvaluedict.Tagid into taginfos
-//                               from tagvaluedict in taginfos
-//                               where tagdict.Activeflag == JLPStaticProperties.ActiveFlag
-//                                  && tagdict.Showflag == JLPStaticProperties.ActiveFlag
-//                                  && tagvaluedict.Activeflag == JLPStaticProperties.ActiveFlag
-//                                  && tagdict.Projectid == projectQuery.projectId
-//                                  && tagdict.Userid == userId
-//                               group tagvaluedict by tagdict into taggroup
-//                               select taggroup).ToList();
 		List<JTagdicts> tagShowDicts = new ArrayList<JTagdicts>();
 		for (JTagdicts tagdicts : tagProjectDicts) {
-			if (tagdicts.getTagattached().equals(projectQuery.getTableClassId())) {
+			if (tagdicts.getTagattached().equals(projectQuery.getTableClassId().longValue()+"")) {
 				tagShowDicts.add(tagdicts);
 			}
 		}
 		Map<String, ProjectTagModel> tagShowRets = new HashMap<>();
 		for (JTagdicts tagdicts : tagShowDicts) {
-			Long id = tagdicts.getId();
+//			Long id = tagdicts.getId();
 			ProjectTagModel projectTagModel = new ProjectTagModel();
 			projectTagModel.setId(tagdicts.getId());
 			projectTagModel.setName(tagdicts.getName());
 			projectTagModel.setFieldType(tagdicts.getValuetype());
-//			projectTagModel.setFieldValue(fieldValue);
-
+			
+			List<String> fieldValue = new ArrayList<String>();
+			
+			List<JTagvaluedicts> valueDictList = tagvaluedictService.getByTagId(tagdicts.getId());
+			
+			if (valueDictList != null && valueDictList.size() > 0) {
+				Collections.sort(valueDictList, new Comparator<JTagvaluedicts>() {
+					@Override
+					public int compare(JTagvaluedicts o1, JTagvaluedicts o2) {
+						return o1.getId().compareTo(o2.getId());
+					}
+				});
+				for(JTagvaluedicts tagvaluedicts : valueDictList) {
+					if (tagvaluedicts.getValue() != null) {
+						fieldValue.add(tagvaluedicts.getValue());
+					} else {
+						fieldValue.add(tagvaluedicts.getMinvalue() + "" + tagvaluedicts.getMaxvalue());
+					}
+				}
+			}
+			String fieldValueStr = "";
+			for(String str : fieldValue) {
+				fieldValueStr += str + "/";
+			}
+			if(fieldValueStr.length() > 0) {
+				fieldValueStr = fieldValueStr.substring(0,fieldValueStr.length()-1);
+			}
+			
+			projectTagModel.setFieldValue(fieldValueStr);
+			projectTagModel.setIsShow(false);
+			projectTagModel.setProjectId(0L);
+			projectTagModel.setTagLevel("");
 			tagShowRets.put("tag_" + tagdicts.getId(), projectTagModel);
 		}
-//        tagShowDicts.ForEach(x =>
-//        {
-//            tagShowRets.Add("tag_" + x.Key.Id.ToString(), new ProjectTagModel
-//            {
-//                id = x.Key.Id,
-//                name = x.Key.Name,
-//                fieldType = x.Key.Valuetype,
-//                fieldValue = x.OrderBy(y => y.Id).Select(y =>
-//               {
-//                   if (!string.IsNullOrEmpty(y.Value))
-//                   { return y.Value; }
-//                   else
-//                   { return y.Minvalue + "" + y.Maxvalue; }
-//               }).ToArray().ToStringEx("/")
-//            });
-//        });
 
 		List<QueryDetailModel> queryMainDetails = new ArrayList<>();
 		List<QueryDetailModel> queryOtherTableClassDetails = new ArrayList<>();
@@ -324,7 +359,7 @@ public class ProjectQueryController {
 			resultMap.put("response", baseResponse);
 			resultMap.put("initialization", true);
 			String json = JSONObject.toJSONString(resultMap);
-			log.info("response --> " + json);
+			log.error("response --> " + json);
 			return json;
 		}
 
@@ -340,7 +375,9 @@ public class ProjectQueryController {
 						.setRightqueto(tempmainQueryModels.get(tempmainQueryModels.size() - 1).getRightqueto() + ")");
 				tempmainQueryModels.get(tempmainQueryModels.size() - 1).setCombinator("AND");
 			}
-			tempmainQueryModels.addAll(Arrays.asList(projectQuery.getQueries().getQueryConds()));
+			if(projectQuery.getQueries().getQueryConds() != null) {
+				tempmainQueryModels.addAll(Arrays.asList(projectQuery.getQueries().getQueryConds()));
+			}
 		}
 		if (tempmainQueryModels.size() > 0) {
 			Map<String, JTagdicts> tagShowCondition = new HashMap<>();
@@ -370,15 +407,15 @@ public class ProjectQueryController {
 
 		String SqlWhereMain = "";
 		for (QueryDetailModel queryDetailModel : queryMainDetails) {
-			tableNameMainWheres.add(queryDetailModel.getCondition().split(".")[0]);
+			tableNameMainWheres.add(queryDetailModel.getCondition().split("\\.")[0]);
 			if (queryDetailModel.getFieldType() == 1) {
-				tableNameWhereMainValues.add(queryDetailModel.getCondValue().split(".")[0]);
+				tableNameWhereMainValues.add(queryDetailModel.getCondValue().split("\\.")[0]);
 			}
 			whereFieldsMain.add(queryDetailModel.getCondition().toUpperCase());
 
 			if (!queryDetailModel.getRelation().contains("null")) {
-				SqlWhereMain += queryDetailModel.getCondition() + " " + queryDetailModel.getRelation() + " "
-						+ queryDetailModel.getCondValue() + " and ";
+				SqlWhereMain += queryDetailModel.getCondition() + " " + queryDetailModel.getRelation() + " '"
+						+ queryDetailModel.getCondValue() + "' and ";
 			} else {
 				SqlWhereMain += queryDetailModel.getCondition() + " " + queryDetailModel.getRelation() + " " + " and ";
 			}
@@ -388,44 +425,7 @@ public class ProjectQueryController {
 		if (SqlWhereMain.length() > 4) {
 			SqlWhereMain = SqlWhereMain.substring(0, SqlWhereMain.length() - 4);
 		}
-//        var whereFieldTypesMain = (from a in orclJlpContext.JTabledicts
-//                                   join b in orclJlpContext.JTablefielddicts on a.Code equals b.Tablecode into tablefields
-//                                   from b in tablefields
-//                                   where a.Activeflag == "1" && whereFieldsMain.Contains(a.Name + "." + b.Name)
-//                                   select new { field = a.Name + "." + b.Name, type = b.Type }).Distinct().ToList();
-
-//        for(QueryDetailModel queryDetailModel : queryMainDetails) {
-//        	if(queryDetailModel.getCondition().toUpperCase().contains("TAG_")) {
-//        		if(queryDetailModel.getFieldType() != 1) {
-//        			queryDetailModel.setFieldType(fieldType);
-//        		}
-//        	}else {
-//        		queryDetailModel.setFieldType(fieldType);
-//        	}
-//        }
 		queryMainDetails.get(queryMainDetails.size() - 1).setCombinator("");
-		// TODO
-//        queryMainDetails.ForEach(x =>
-//        {
-//            x.ForEach(y =>
-//            {
-//                if (!y.condition.ToUpper().Contains("TAG_"))
-//                {
-//                    if (y.fieldType != FieldValueType.Field)
-//                    {
-//                        y.fieldType = (whereFieldTypesMain.FirstOrDefault(m => m.field == y.condition.ToUpper())?.type.toFieldValueType()) ?? FieldValueType.String;
-//                    }
-//                }
-//                else
-//                {
-//                    y.fieldType = (tagShowDicts.FirstOrDefault(m => ("projecttags.tag_" + m.Key.Id.ToString()).ToUpper() == y.condition.ToUpper())?.Key.Valuetype == "2") ? FieldValueType.Number : FieldValueType.String;
-//                }
-//            });
-//            if (x.LastOrDefault() != null)
-//            {
-//                x.LastOrDefault().combinator = "";
-//            }
-//        });
 		SortedSet<String> tableNames = new TreeSet<String>();
 		List<FieldName> fieldNames = new ArrayList<FieldName>();
 		SortedSet<String> fieldShowNames = new TreeSet<String>();
@@ -565,21 +565,6 @@ public class ProjectQueryController {
 					}
 
 				}
-				// TODO
-//                queryDetails.ForEach(x =>
-//                {
-//                    x.ForEach(y =>
-//                    {
-//                        if (y.fieldType != FieldValueType.Field)
-//                        {
-//                            y.fieldType = (whereFieldTypes.FirstOrDefault(m => m.field == y.condition.ToUpper())?.type.toFieldValueType()) ?? FieldValueType.String;
-//                        }
-//                    });
-//                    if (x.LastOrDefault() != null)
-//                    {
-//                        x.LastOrDefault().combinator = "";
-//                    }
-//                });
 
 				tempTableNames.addAll(tableNameWheres);
 				tempTableNames.addAll(tableNameWhereValues);
@@ -677,20 +662,25 @@ public class ProjectQueryController {
 					.getByProjectIdAndProjectstatusIDs(projectQuery.getProjectId(), projectQuery.getProjectstatusIDs());
 			Set<String> name = new HashSet<String>();
 			for (JProjectdatastatusdict projectdatastatusdict : jprojectDataStatusDicts) {
-				name.add(projectdatastatusdict.getName());
+				name.add("'"+projectdatastatusdict.getName()+"'");
 			}
-			projectDataStatusWhere = " projectdatastatus.tag_complete in" + " ('"
-					+ name.toString().substring(1, name.toString().length() - 1) + "')";
-			if (jprojectDataStatusDicts.contains("未开始")) {
-				projectDataStatusWhere = projectDataStatusWhere + "( or projectdatastatus.tag_complete is null)";
+			projectDataStatusWhere = " projectdatastatus.tag_complete in" + " ("
+					+ name.toString().substring(1, name.toString().length() - 1) + ")";
+			for(JProjectdatastatusdict projectdatastatusdict : jprojectDataStatusDicts) {
+				if (projectdatastatusdict.getName().contains("未开始")) {
+					projectDataStatusWhere = projectDataStatusWhere + "( or projectdatastatus.tag_complete is null)";
+					break;
+				}
 			}
+			
 		}
 		String projectDelData = "select dataid as datadel_id from j_projectdeldata t"
 				+ " where t.activeflag='1' and t.userid=" + userId + " and t.projectid=" + projectQuery.getProjectId()
 				+ " and t.tableid=" + projectQuery.getTableClassId();
 		String projectPatientDelData = "";
 		if (!viewTableName.equalsIgnoreCase(JLPConts.PatientGlobalTable)) {
-			projectPatientDelData = "select dataid as datadel_id from j_projectdeldata t where t.activeflag='1' and t.userid={userId} and t.projectid={projectQuery.projectId} and t.tableid=1 ";
+			projectPatientDelData = "select dataid as datadel_id from j_projectdeldata t where t.activeflag='1' and t.userid="+userId
+					+" and t.projectid="+projectQuery.getProjectId()+" and t.tableid=1 ";
 		}
 
 		String dataStatusSql = "select distinct j_projectdatastatus.patientglobalid"
@@ -702,12 +692,12 @@ public class ProjectQueryController {
 				+ " and j_projectdatastatus.projectid= " + projectQuery.getProjectId();
 		Set<String> dictsIds = new HashSet<String>();
 		for (JTagdicts dicts : tagShowDicts) {
-			dictsIds.add("TAG_" + dicts.getId());
+			dictsIds.add("'TAG_" + dicts.getId()+"' as TAG_"+dicts.getId());
 		}
 		String showTagSql = "select * from (select dataid,('TAG_'||tagid) as tagName,tagValue from j_projecttags"
 				+ " where activeflag=1 and userid = " + userId + " and projectid = " + projectQuery.getProjectId()
-				+ " and tableid = " + projectQuery.getTableClassId() + "pivot (max(tagvalue) for tagName " + "in ("
-				+ dictsIds.toString().substring(1, dictsIds.toString().length() - 1) + ")";
+				+ " and tableid = " + projectQuery.getTableClassId() + ") pivot (max(tagvalue) for tagName " + "in ("
+				+ dictsIds.toString().substring(1, dictsIds.toString().length() - 1) + "))";
 		Set<String> fieldNamesSet = new HashSet<String>();
 		for (FieldName name : fieldNames) {
 			fieldNamesSet.add(name.getFieldName());
@@ -724,16 +714,16 @@ public class ProjectQueryController {
 			tempSqlWhere += " and D_PATIENTGLOBAL.jlactiveflag='1'";
 		}
 
-		if (projectQuery.getPatientGlobalId() > 0) {
-			tempSqlWhere += " and D_PATIENTGLOBAL.Id={projectQuery.patientGlobalId}";
+		if (projectQuery.getPatientGlobalId() != null && projectQuery.getPatientGlobalId().longValue() > 0) {
+			tempSqlWhere += " and D_PATIENTGLOBAL.Id="+projectQuery.getPatientGlobalId();
 		}
 
 		if (SqlWhereMain.length() > 0) {
-			tempSqlWhere += " and {SqlWhereMain}";
+			tempSqlWhere += " and " + SqlWhereMain;
 		}
 
 		if (projectDataStatusWhere.length() > 0) {
-			tempSqlWhere += " and {projectDataStatusWhere}";
+			tempSqlWhere += " and " + projectDataStatusWhere;
 		}
 
 		if (projectDelData.length() > 0) {
@@ -744,7 +734,7 @@ public class ProjectQueryController {
 			tempSqlWhere += " and projectdelpat.datadel_id is null";
 		}
 
-		Sql += tempSqlWhere;
+		Sql += tempSqlWhere +" order by \"_key\"";
 
 //        #region 组装返回值
 		String sqlCount = " select count(1) count from (" + Sql + ") countsql";
@@ -798,7 +788,7 @@ public class ProjectQueryController {
 			ret = patientTable;
 
 			if (StringUtils.isNotBlank(advancedQueryWhere)) {
-				ret += " inner join (" + advancedQueryWhere + ") a on {patientTable}.Id=a.Id ";
+				ret += " inner join (" + advancedQueryWhere + ") a on "+patientTable+".Id=a.Id ";
 			}
 
 			boolean IsInner = tableArray.size() <= 1;
@@ -819,15 +809,15 @@ public class ProjectQueryController {
 				} else if (item.toLowerCase() == patientTable || item.toLowerCase() == "projecttags") {
 					continue;
 				}
-				ret += (IsInner ? "inner" : "left") + "  join " + item + " on " + patientTable + ".Id = " + item
+				ret += (IsInner ? " inner" : "left") + "  join " + item + " on " + patientTable + ".Id = " + item
 						+ ".patientglobalid ";
 			}
 			if (IsLabResult) {
 				if (!IsLabMaster) {
-					ret += (IsInner ? "inner" : "left") + "  join D_LABMASTERINFO on " + patientTable
+					ret += (IsInner ? " inner" : "left") + "  join D_LABMASTERINFO on " + patientTable
 							+ ".Id = D_LABMASTERINFO.patientglobalid ";
 				}
-				ret += (IsInner ? "inner" : "left") + " join D_LABRESULTS "
+				ret += (IsInner ? " inner" : "left") + " join D_LABRESULTS "
 						+ " on D_LABRESULTS.APPLYNO = D_LABMASTERINFO.APPLYNO ";
 			}
 			if (StringUtils.isNotBlank(tagSql)) {

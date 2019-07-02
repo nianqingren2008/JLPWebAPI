@@ -1,5 +1,6 @@
 package com.callan.service.provider.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,8 +24,14 @@ public class JProjectDataStatusdictServiceImpl implements IJProjectDataStatusdic
 
 	@Override
 	public List<JProjectdatastatusdict> getByProjectIdAndProjectstatusIDs(Long projectId, Long[] projectstatusIDs) {
-		String projectstatusIDStr = Arrays.deepToString(projectstatusIDs);
-		return projectdatastatusdictMapper.getByProjectIdAndProjectstatusIDs(projectId,projectstatusIDStr);
+		List<JProjectdatastatusdict> list = new ArrayList<JProjectdatastatusdict>();
+		for(Long id : projectstatusIDs) {
+			JProjectdatastatusdict dict = projectdatastatusdictMapper.selectByPrimaryKey(id);
+			if(projectId.longValue() == dict.getProjectid().longValue()) {
+				list.add(dict);
+			}
+		}
+		return list;
 	}
 
 	@Override

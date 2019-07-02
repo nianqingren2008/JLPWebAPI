@@ -27,20 +27,29 @@ public interface JTaskMapper {
 	 * 
 	 * @param taskdownload
 	 */
-	@Insert("INSERT J_TASKDOWNLOAD (id,taskid,projectid,queryid,dataexportclass,exportfields,"
+	@Insert("INSERT into J_TASKDOWNLOAD (id,taskid,projectid,queryid,dataexportclass,exportfields,"
 			+ "projectstatuses,tagdata,tagtranspose,filetypeid,imageexportclass,"
 			+ "imageclass,fileid,imagefileid,createdate,activeflag)"
-			+ " VALUES(#{id}, #{taskid}, #{projectid},#{queryid},#{dataexportclass},"
-			+ "#{exportfields},#{projectstatuses},#{tagdata},#{tagtranspose},#{imageexportclass}),"
-			+ "#{imageclass},#{imagefileid},#{createdate},#{activeflag})")
+			+ " VALUES(#{id,jdbcType=DECIMAL}, #{taskid,jdbcType=DECIMAL}, "
+			+ "#{projectid,jdbcType=DECIMAL},#{queryid,jdbcType=DECIMAL},"
+			+ "#{dataexportclass,jdbcType=DECIMAL}, #{exportfields,jdbcType=VARCHAR},"
+			+ "#{projectstatuses,jdbcType=VARCHAR},#{tagdata,jdbcType=VARCHAR},"
+			+ "#{tagtranspose,jdbcType=VARCHAR},#{filetypeid,jdbcType=DECIMAL},"
+			+ "#{imageexportclass,jdbcType=DECIMAL}, #{imageclass,jdbcType=VARCHAR},"
+			+ "#{fileid,jdbcType=DECIMAL}, #{imagefileid,jdbcType=DECIMAL},"
+			+ "#{createdate,jdbcType=TIMESTAMP},#{activeflag,jdbcType=VARCHAR})")
 	public void addTaskdownloads(JTaskdownload taskdownload);
 
 	 /**
 	  * 
 	  * @param task
 	  */
-		@Insert("INSERT J_TASK (id,userid,name,tasktype,status,progress,startdate,enddate,createdate,activeflag)"
-	 		+ " VALUES(#{id}, #{userid}, #{name},#{tasktype},#{status},#{progress},#{startdate},#{enddate},#{createdate},#{activeflag})")
+		@Insert("INSERT into J_TASK (id,userid,name,tasktype,status,progress,startdate,enddate,createdate,activeflag)"
+	 		+ " VALUES(#{id,jdbcType=DECIMAL}, #{userid,jdbcType=DECIMAL}"
+	 		+ ", #{name,jdbcType=VARCHAR},#{tasktype,jdbcType=VARCHAR}"
+	 		+ ",#{status,jdbcType=VARCHAR},#{progress,jdbcType=VARCHAR}"
+	 		+ ",#{startdate,jdbcType=TIMESTAMP},#{enddate,jdbcType=TIMESTAMP}"
+	 		+ ",#{createdate,jdbcType=TIMESTAMP},#{activeflag,jdbcType=VARCHAR})")
 		public void addTasktasktask(JTask task);
 
 		/**

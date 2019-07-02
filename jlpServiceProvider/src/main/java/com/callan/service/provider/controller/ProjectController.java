@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -78,12 +79,20 @@ public class ProjectController {
 	 */
 	@ApiOperation(value = "获取课题列表")
 	@RequestMapping(value = "/api/Project", method = { RequestMethod.GET })
-	public String getProjects(HttpServletRequest request,String simple) {
+	public String getProjects(HttpServletRequest request,String simple,HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+		String authorization = request.getHeader("Authorization") == null ? "20a3b08fe9503604f6eabaa357ad72aa" : request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
+		if (userId == null) {
+			BaseResponse baseResponse = new BaseResponse();
+			response.setStatus(400);
+			baseResponse.setCode("400");
+			baseResponse.setText("用户信息获取失败，请检查请求头");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
+		}
 		List<JProject> list = projectService.getByUserId(userId);
 		Collections.sort(list, new Comparator<JProject>() {
 			@Override
@@ -136,15 +145,20 @@ public class ProjectController {
 	 */
 	@ApiOperation(value = "新建或修改课题")
 	@RequestMapping(value = "/api/Project", method = { RequestMethod.POST })
-	public String getProjectsModify(HttpServletRequest request, @RequestBody ProjectModel project) {
+	public String getProjectsModify(HttpServletRequest request, @RequestBody ProjectModel project,HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
 		boolean IsNew = (project.getCourseID() == 0L);
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null) {
-			userId = 0L;
+			BaseResponse baseResponse = new BaseResponse();
+			response.setStatus(400);
+			baseResponse.setCode("400");
+			baseResponse.setText("用户信息获取失败，请检查请求头");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
 		}
 		JProject jProject = null;
 		if (!IsNew) {
@@ -178,7 +192,7 @@ public class ProjectController {
 		jProject.setProjectname(project.getCourseName());
 		jProject.setProjectregistno(project.getRegisterid());
 		jProject.setProjecttype(project.getCateroy());
-		jProject.setSharetype(project.getIsShared() + "");
+		jProject.setSharetype(project.getIsShared() ? "1" : "0");
 		jProject.setSponsor(project.getFounders());
 		jProject.setImageurl(project.getImageUrl());
 		jProject.setStatus("1");
@@ -233,13 +247,18 @@ public class ProjectController {
 	 */
 	@ApiOperation(value = "获取课题详细信息")
 	@RequestMapping(value = "/api/Project/{Id}", method = { RequestMethod.GET })
-	public String GetProjectDetail(Long Id, HttpServletRequest request, HttpServletResponse response) {
+	public String GetProjectDetail(@PathVariable Long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null) {
-			userId = 0L;
+			BaseResponse baseResponse = new BaseResponse();
+			response.setStatus(400);
+			baseResponse.setCode("400");
+			baseResponse.setText("用户信息获取失败，请检查请求头");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
 		}
 
 		JProject project = projectService.getOne(Id);
@@ -259,11 +278,11 @@ public class ProjectController {
 		ProjectModel pro = new ProjectModel();
 		pro.setCourseID(project.getId());
 		pro.setCateroy(project.getProjecttype());
-		pro.setCourseName(project.getProjectenname());
+		pro.setCourseName(project.getProjectname());
 		pro.setDescription(project.getProjectdescribe());
 		pro.setEnglishName(project.getProjectenname());
 		pro.setFounders(project.getSponsor());
-		pro.setIsShared(ObjectUtil.objToBool(project.getSharetype(), false));
+		pro.setIsShared("1".equals(project.getSharetype()) ? true : false);
 		pro.setRegisterid(project.getProjectregistno());
 		pro.setImageUrl(project.getImageurl());
 		if (project.getStartdate() != null && project.getEnddate() != null) {
@@ -287,7 +306,12 @@ public class ProjectController {
 		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null) {
-			userId = 0L;
+			BaseResponse baseResponse = new BaseResponse();
+			response.setStatus(400);
+			baseResponse.setCode("400");
+			baseResponse.setText("用户信息获取失败，请检查请求头");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
 		}
 
 		JProject project = projectService.getOne(Id);
@@ -316,13 +340,18 @@ public class ProjectController {
 	@ApiOperation(value = "课题清除更改状态")
 	@RequestMapping(value = "/api/clearChangeStatus", method = { RequestMethod.POST})
 	public String clearChangeStatus(@RequestBody ProjectChangeStatusModel projectChangeStatus,
-			HttpServletRequest request) {
+			HttpServletRequest request,HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null) {
-			userId = 0L;
+			BaseResponse baseResponse = new BaseResponse();
+			response.setStatus(400);
+			baseResponse.setCode("400");
+			baseResponse.setText("用户信息获取失败，请检查请求头");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
 		}
 		String sql = "update J_PROJECTDATASTATUS set CHANGESTATUS=? "
 				+ " where PROJECTID= ? and USERID=? and CHANGESTATUS= ?";
@@ -335,14 +364,19 @@ public class ProjectController {
 	}
 
 	@ApiOperation(value = "获取课题导出信息")
-	@RequestMapping(value = "/api/ExportInfo/{Id}", method = { RequestMethod.GET })
-	public String GetExportInfo(long Id, HttpServletRequest request, HttpServletResponse response) {
+	@RequestMapping(value = "/api/Project/ExportInfo/{Id}", method = { RequestMethod.GET })
+	public String GetExportInfo(@PathVariable Long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 		if (userId == null) {
-			userId = 0L;
+			BaseResponse baseResponse = new BaseResponse();
+			response.setStatus(400);
+			baseResponse.setCode("400");
+			baseResponse.setText("用户信息获取失败，请检查请求头");
+			resultMap.put("response", baseResponse);
+			return JSONObject.toJSONString(resultMap);
 		}
 //            #region 纳排条件处理
 		List<String> includeSql = new ArrayList<String>();
@@ -355,7 +389,7 @@ public class ProjectController {
 		try {
 			projectQueryConds = projectService.getQueryRecord(Id, userId);
 		}catch( Exception e) {
-			
+			log.error(e);
 		}
 		
 		if (projectQueryConds == null) {
@@ -417,21 +451,21 @@ public class ProjectController {
 				Set<String> whereFields = new HashSet<String>();
 
 				Set<String> whereFieldTypes = new HashSet<String>();
-				String SqlWhere  = "";
+				String SqlWhere  = "where 1=1 and ";
 				for (QueryDetailModel queryConds : queryDetails) {
 					whereFields.add(queryConds.getCondition().toUpperCase());
-					String[] conditionArray = queryConds.getCondition().split(".");
+					String[] conditionArray = queryConds.getCondition().split("\\.");
 					if (conditionArray.length > 0) {
 						tableNameWheres.add(conditionArray[0]);
 					}
-					String[] condValueArray = queryConds.getCondValue().split(".");
+					String[] condValueArray = queryConds.getCondValue().split("\\.");
 					if (condValueArray.length > 0) {
 						if (queryConds.getFieldType() == 1) {
 							tableNameWhereValues.add(condValueArray[0]);
 						}
 					}
 					if (!queryConds.getRelation().contains("null")) {
-						SqlWhere += queryConds.getCondition() + " " + queryConds.getRelation() + " " + queryConds.getCondValue() + " and ";
+						SqlWhere += queryConds.getCondition() + " " + queryConds.getRelation() + " '" + queryConds.getCondValue() + "' and ";
 					}else {
 						SqlWhere += queryConds.getCondition() + " " + queryConds.getRelation() + " " + " and ";
 					}
@@ -498,10 +532,15 @@ public class ProjectController {
 		}
 
 		Sql += tempSqlWhere;
-
-		List<Map<String, Object>> ImageClasses = jLpService.queryForSQL(Sql, new Object[] {});
-
-
+		log.info("Sql-->" + Sql);
+		List<Map<String, Object>> ImageClassesList = jLpService.queryForSQL(Sql, new Object[] {});
+		List<Object> ImageClasses = new ArrayList<Object>();
+		for(Map<String,Object> map : ImageClassesList) {
+			for(String key : map.keySet()) {
+				ImageClasses.add(map.get(key));
+			}
+		}
+		
 		List<JExportdataclass> AllExportClasses = exportdataclassService.getAll();
 		Collections.sort(AllExportClasses, new Comparator<JExportdataclass>() {
 			@Override
@@ -516,20 +555,38 @@ public class ProjectController {
 				return o1.getId().compareTo(o2.getId());
 			}
 		});
-		List<JExportdataclass> dataExportClasses = new ArrayList<JExportdataclass>();
-		List<JExportdataclass> imageExportClasses = new ArrayList<JExportdataclass>();
+		List<Map<String,Object>> dataExportClasses = new ArrayList<Map<String,Object>>();
+		List<Map<String,Object>> imageExportClasses = new ArrayList<Map<String,Object>>();
 		for (JExportdataclass exportdataclass : AllExportClasses) {
 			if ("1".equals(exportdataclass.getType())) {
-				imageExportClasses.add(exportdataclass);
+				dataExportClasses.add(new HashMap<String, Object>(){{
+					put("id", exportdataclass.getId());
+					put("title", exportdataclass.getTitle());
+					put("info", exportdataclass.getInfo());
+				}});
 			}
 
 			if ("2".equals(exportdataclass.getType())) {
-				imageExportClasses.add(exportdataclass);
+				imageExportClasses.add(new HashMap<String, Object>(){{
+					put("id", exportdataclass.getId());
+					put("title", exportdataclass.getTitle());
+					put("info", exportdataclass.getInfo());
+				}});
 			}
 		}
-		List<JFiletype> fileTypes = (List<JFiletype>) filetypeService.getAll().getData();
+		List<JFiletype> fileTypesList = (List<JFiletype>) filetypeService.getAll().getData();
+		List<Map<String,Object>> fileTypes = new ArrayList<Map<String,Object>>();
+		for(JFiletype filetype : fileTypesList) {
+			fileTypes.add(new HashMap<String, Object>(){{
+				put("id", filetype.getId());
+				put("name", filetype.getName());
+			}});
+		}
+		
 		Map<String, Object> image = new HashMap<String, Object>();
 		image.put("imageExportClasses", imageExportClasses);
+		resultMap.put("dataExportClasses", dataExportClasses);
+		
 		image.put("imageClasses", ImageClasses);
 
 		resultMap.put("filetypes", fileTypes);
@@ -539,14 +596,14 @@ public class ProjectController {
 		map1.put("title", "导出到文件");
 		map1.put("info", "生成可下载文件名");
 		exportTypes.add(map1);
-
-		map1.put("id", 2);
-		map1.put("title", "导出到统计分析");
-		map1.put("info", "生成在线统计分析数据库");
-		exportTypes.add(map1);
+		Map<String, Object> map2 = new HashMap<String, Object>();
+		map2.put("id", 2);
+		map2.put("title", "导出到统计分析");
+		map2.put("info", "生成在线统计分析数据库");
+		exportTypes.add(map2);
 
 		resultMap.put("exportTypes", exportTypes);
-		resultMap.put("resultMap.putdataExportClasses", dataExportClasses);
+		
 		resultMap.put("image", image);
 		BaseResponse baseResponse = new BaseResponse();
 		resultMap.put("response", baseResponse);

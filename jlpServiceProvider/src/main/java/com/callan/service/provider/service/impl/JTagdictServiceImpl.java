@@ -55,6 +55,9 @@ public class JTagdictServiceImpl implements IJTagdictService {
 		IJTagdictService base = (IJTagdictService) AopContext.currentProxy();
 		Map<Long, List<JTagdicts>> data = (Map<Long, List<JTagdicts>>) base.getAll4ProjectId().getData();
 		List<JTagdicts> entity = data.get(projectId);
+		if(entity == null) {
+			return new ArrayList<JTagdicts>();
+		}
 		return entity;
 	}
 
