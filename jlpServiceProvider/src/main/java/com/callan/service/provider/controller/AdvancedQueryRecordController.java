@@ -37,6 +37,7 @@ import com.callan.service.provider.pojo.db.JAdvancedqr;
 import com.callan.service.provider.pojo.db.JAdvancedqrItem;
 import com.callan.service.provider.pojo.db.JQueryrecord;
 import com.callan.service.provider.pojo.db.JQueryrecordDetails;
+import com.callan.service.provider.pojo.db.JUser;
 import com.callan.service.provider.service.IJAdvancedqrItemService;
 import com.callan.service.provider.service.IJAdvancedqrService;
 import com.callan.service.provider.service.IJLpService;
@@ -78,10 +79,13 @@ public class AdvancedQueryRecordController {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "f27e72f619bc0f0d3f1b5966d40d9afd"
-				: request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null || userId == 0) {
+//		String authorization = request.getHeader("Authorization") == null ? "f27e72f619bc0f0d3f1b5966d40d9afd"
+//				: request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+		
+		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
+		
+		if (user == null || user.getId() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			reponse.setStatus(400);
 			baseResponse.setCode("400");
@@ -89,8 +93,8 @@ public class AdvancedQueryRecordController {
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
-		log.info("userId : " + userId);
-		List<JAdvancedqr> list = advancedqrService.getByUserId(userId);
+		log.info("userId : " + user.getId());
+		List<JAdvancedqr> list = advancedqrService.getByUserId(user.getId());
 
 		Collections.sort(list, new Comparator<JAdvancedqr>() {
 			@Override
@@ -122,10 +126,13 @@ public class AdvancedQueryRecordController {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 从前台header中获取token参数
 		JLPLog log = ThreadPoolConfig.getBaseContext();
-		String authorization = request.getHeader("Authorization") == null ? "f27e72f619bc0f0d3f1b5966d40d9afd"
-				: request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null || userId == 0) {
+//		String authorization = request.getHeader("Authorization") == null ? "f27e72f619bc0f0d3f1b5966d40d9afd"
+//				: request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+		
+		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
+		
+		if (user == null || user.getId() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -137,7 +144,7 @@ public class AdvancedQueryRecordController {
 		}
 		JAdvancedqr advancedqr = advancedqrService.getOne(Id);
 
-		if (advancedqr == null || advancedqr.getUserid() != userId) {
+		if (advancedqr == null || advancedqr.getUserid().longValue() != user.getId().longValue()) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -299,10 +306,13 @@ public class AdvancedQueryRecordController {
 
 		// 纳排记录主表信息
 		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "cf79626db1bf9d55f5479509df0bae22"
-				: request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null || userId == 0) {
+//		String authorization = request.getHeader("Authorization") == null ? "cf79626db1bf9d55f5479509df0bae22"
+//				: request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+		
+		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
+		
+		if (user == null || user.getId() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -315,7 +325,7 @@ public class AdvancedQueryRecordController {
 		JAdvancedqr jAdvancedqr = advancedqrService.getOne(advancedQueryRecordModel.getId());
 
 		boolean IsNew = false;
-		if (jAdvancedqr == null || jAdvancedqr.getUserid() != userId) {
+		if (jAdvancedqr == null || jAdvancedqr.getUserid() != user.getId()) {
 			if (advancedQueryRecordModel.getId() != 0) {
 				BaseResponse baseResponse = new BaseResponse();
 				response.setStatus(400);
@@ -354,7 +364,7 @@ public class AdvancedQueryRecordController {
 
 		if (IsNew) {
 			jAdvancedqr.setActiveflag(JLPConts.ActiveFlag);
-			jAdvancedqr.setUserid(userId);
+			jAdvancedqr.setUserid(user.getId());
 			long seqId = jlpService.getNextSeq("J_ADVANCEDQR");
 			jAdvancedqr.setId(seqId);
 			if (jAdvancedqr.getProjectid() == null) {
@@ -388,7 +398,7 @@ public class AdvancedQueryRecordController {
 			queryrecord.setCreatedate(new Date());
 			queryrecord.setSortno(1);
 			queryrecord.setUpdatedate(new Date());
-			queryrecord.setUserid(userId);
+			queryrecord.setUserid(user.getId());
 			long queryId = jlpService.getNextSeq("J_QUERYRECORD");
 			queryrecord.setId(queryId);
 			advancedqrItem.setQueryid(queryId);
@@ -414,7 +424,7 @@ public class AdvancedQueryRecordController {
 			if (includes != null) {
 				for (QueryCollectionModel item : includes) {
 					try {
-						saveEx(advancedQueryRecordModel, userId, jAdvancedqr, itemNo, item);
+						saveEx(advancedQueryRecordModel, user.getId(), jAdvancedqr, itemNo, item);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -428,7 +438,7 @@ public class AdvancedQueryRecordController {
 			if (includes != null) {
 				for (QueryCollectionModel item : excludes) {
 					try {
-						saveEx(advancedQueryRecordModel, userId, jAdvancedqr, itemNo, item);
+						saveEx(advancedQueryRecordModel, user.getId(), jAdvancedqr, itemNo, item);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -525,10 +535,14 @@ public class AdvancedQueryRecordController {
 	@RequestMapping(value = "/api/AdvancedQueryRecord/{Id}", method = { RequestMethod.DELETE })
 	public String delete(@PathVariable Long Id, HttpServletRequest request,HttpServletResponse response) {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "cf79626db1bf9d55f5479509df0bae22"
-				: request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null || userId == 0) {
+//		String authorization = request.getHeader("Authorization") == null ? "cf79626db1bf9d55f5479509df0bae22"
+//				: request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+		
+		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
+		
+		
+		if (user == null || user.getId() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -538,7 +552,7 @@ public class AdvancedQueryRecordController {
 		}
 		JAdvancedqr advancedqr = advancedqrService.getOne(Id);
 
-		if (advancedqr == null || advancedqr.getUserid() != userId) {
+		if (advancedqr == null || advancedqr.getUserid().longValue() != user.getId().longValue()) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");

@@ -35,6 +35,7 @@ import com.callan.service.provider.pojo.db.JProjectstatistics;
 import com.callan.service.provider.pojo.db.JProjecttags;
 import com.callan.service.provider.pojo.db.JTagdicts;
 import com.callan.service.provider.pojo.db.JTagvaluedicts;
+import com.callan.service.provider.pojo.db.JUser;
 import com.callan.service.provider.pojo.project.ProjectTagCompleteModel;
 import com.callan.service.provider.pojo.project.ProjectTagModel;
 import com.callan.service.provider.pojo.project.ProjectTagShowModel;
@@ -225,10 +226,11 @@ public class ProjectTagController {
 			HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "509c6c1834414deeddd6c485d5c22d0b"
-				: request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null) {
+//		String authorization = request.getHeader("Authorization") == null ? "509c6c1834414deeddd6c485d5c22d0b"
+//				: request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+		JUser user = (JUser) request.getSession().getAttribute("user");
+		if (user == null || user.getId() == 0L) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -239,7 +241,7 @@ public class ProjectTagController {
 			return json;
 		}
 		JProject project = projectService.getOne(projectTagModel.getProjectId());
-		if (project == null || project.getUserid().longValue() != userId.longValue()) {
+		if (project == null || project.getUserid().longValue() != user.getId().longValue()) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(404);
 			baseResponse.setCode("404");
@@ -258,7 +260,7 @@ public class ProjectTagController {
 		tagdcit.setShowflag(showFlag ? "1" : "0");
 		tagdcit.setTagattached(projectTagModel.getTagLevel());
 		tagdcit.setTagtype("1");
-		tagdcit.setUserid(userId);
+		tagdcit.setUserid(user.getId());
 		tagdcit.setValuetype(projectTagModel.getFieldType());
 		long seqId = jlpService.getNextSeq("J_TAGDICT");
 		tagdcit.setId(seqId);
@@ -357,9 +359,10 @@ public class ProjectTagController {
 	public String Delete(Long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null) {
+//		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+		JUser user = (JUser) request.getSession().getAttribute("user");
+		if (user == null || user.getId() == 0L) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -368,7 +371,7 @@ public class ProjectTagController {
 			return JSONObject.toJSONString(resultMap);
 		}
 		JTagdicts tagdict = tagdictService.getOne(Id);
-		if (tagdict == null || tagdict.getUserid().longValue() != userId.longValue()) {
+		if (tagdict == null || tagdict.getUserid().longValue() != user.getId().longValue()) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(404);
 			baseResponse.setCode("404");

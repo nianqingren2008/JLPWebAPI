@@ -18,13 +18,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
@@ -33,19 +31,19 @@ import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ObjectUtil;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.advanceQueryBase.AdvancedQueryRecordModel;
-import com.callan.service.provider.pojo.advanceQueryBase.QueryDetailModel;
 import com.callan.service.provider.pojo.advanceQueryBase.QueryCollectionModel;
+import com.callan.service.provider.pojo.advanceQueryBase.QueryDetailModel;
 import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.db.JExportdataclass;
 import com.callan.service.provider.pojo.db.JFiletype;
 import com.callan.service.provider.pojo.db.JProject;
 import com.callan.service.provider.pojo.db.JProjectdatastatusdict;
+import com.callan.service.provider.pojo.db.JUser;
 import com.callan.service.provider.pojo.project.ProjectChangeStatusModel;
 import com.callan.service.provider.pojo.project.ProjectModel;
 import com.callan.service.provider.service.IJExportdataclassService;
 import com.callan.service.provider.service.IJFiletypeService;
 import com.callan.service.provider.service.IJLpService;
-import com.callan.service.provider.service.IJProjectDataStatusService;
 import com.callan.service.provider.service.IJProjectDataStatusdictService;
 import com.callan.service.provider.service.IJProjectService;
 import com.callan.service.provider.service.IJUserService;
@@ -79,13 +77,15 @@ public class ProjectController {
 	 */
 	@ApiOperation(value = "获取课题列表")
 	@RequestMapping(value = "/api/Project", method = { RequestMethod.GET })
-	public String getProjects(HttpServletRequest request,String simple,HttpServletResponse response) {
+	public String getProjects(HttpServletRequest request, String simple, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
-		String authorization = request.getHeader("Authorization") == null ? "20a3b08fe9503604f6eabaa357ad72aa" : request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null) {
+//		String authorization = request.getHeader("Authorization") == null ? "20a3b08fe9503604f6eabaa357ad72aa" : request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+
+		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
+		if (user == null || user.getId() == 0L) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -93,7 +93,7 @@ public class ProjectController {
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
-		List<JProject> list = projectService.getByUserId(userId);
+		List<JProject> list = projectService.getByUserId(user.getId());
 		Collections.sort(list, new Comparator<JProject>() {
 			@Override
 			public int compare(JProject o1, JProject o2) {
@@ -145,14 +145,18 @@ public class ProjectController {
 	 */
 	@ApiOperation(value = "新建或修改课题")
 	@RequestMapping(value = "/api/Project", method = { RequestMethod.POST })
-	public String getProjectsModify(HttpServletRequest request, @RequestBody ProjectModel project,HttpServletResponse response) {
+	public String getProjectsModify(HttpServletRequest request, @RequestBody ProjectModel project,
+			HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
 		boolean IsNew = (project.getCourseID() == 0L);
-		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null) {
+//		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+
+		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
+
+		if (user == null || user.getId() == 0L) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -165,7 +169,7 @@ public class ProjectController {
 			jProject = projectService.getOne(project.getCourseID());
 
 			if (!JLPConts.ActiveFlag.equals(jProject.getActiveflag())
-					|| userId.longValue() != jProject.getUserid().longValue()) {
+					|| user.getId().longValue() != jProject.getUserid().longValue()) {
 				jProject = null;
 			}
 			IsNew = (jProject == null);
@@ -174,7 +178,7 @@ public class ProjectController {
 			jProject = new JProject();
 			jProject.setActiveflag("1");
 			jProject.setCreatedate(new Date());
-			jProject.setUserid(userId);
+			jProject.setUserid(user.getId());
 			jProject.setDatastatus("0");
 		}
 		if (project.getTimeproject() != null && project.getTimeproject().length == 2) {
@@ -250,9 +254,12 @@ public class ProjectController {
 	public String GetProjectDetail(@PathVariable Long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null) {
+//		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+
+		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
+
+		if (user == null || user.getId() == 0L) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -264,7 +271,7 @@ public class ProjectController {
 		JProject project = projectService.getOne(Id);
 
 		if (!JLPConts.ActiveFlag.equals(project.getActiveflag())
-				|| userId.longValue() != project.getUserid().longValue()) {
+				|| user.getId().longValue() != project.getUserid().longValue()) {
 			project = null;
 		}
 		if (project == null) {
@@ -303,9 +310,11 @@ public class ProjectController {
 	public String Delete(Long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null) {
+//		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
+
+		if (user == null || user.getId() == 0L) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -317,7 +326,7 @@ public class ProjectController {
 		JProject project = projectService.getOne(Id);
 
 		if (!JLPConts.ActiveFlag.equals(project.getActiveflag())
-				|| userId.longValue() != project.getUserid().longValue()) {
+				|| user.getId().longValue() != project.getUserid().longValue()) {
 			project = null;
 		}
 		if (project == null) {
@@ -338,14 +347,15 @@ public class ProjectController {
 	}
 
 	@ApiOperation(value = "课题清除更改状态")
-	@RequestMapping(value = "/api/clearChangeStatus", method = { RequestMethod.POST})
+	@RequestMapping(value = "/api/clearChangeStatus", method = { RequestMethod.POST })
 	public String clearChangeStatus(@RequestBody ProjectChangeStatusModel projectChangeStatus,
-			HttpServletRequest request,HttpServletResponse response) {
+			HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null) {
+//		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
+		if (user == null || user.getId() == 0L) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -355,7 +365,7 @@ public class ProjectController {
 		}
 		String sql = "update J_PROJECTDATASTATUS set CHANGESTATUS=? "
 				+ " where PROJECTID= ? and USERID=? and CHANGESTATUS= ?";
-		jLpService.excuteSql(sql, new Object[] { "0", projectChangeStatus.getProjectId(), userId, "1" });
+		jLpService.excuteSql(sql, new Object[] { "0", projectChangeStatus.getProjectId(), user.getId(), "1" });
 		BaseResponse baseResponse = new BaseResponse();
 		resultMap.put("response", baseResponse);
 		String json = JSONObject.toJSONString(resultMap);
@@ -368,9 +378,10 @@ public class ProjectController {
 	public String GetExportInfo(@PathVariable Long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null) {
+//		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
+		if (user == null || user.getId() == 0L) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -387,11 +398,11 @@ public class ProjectController {
 		AdvancedQueryRecordModel projectQueryConds = null;
 
 		try {
-			projectQueryConds = projectService.getQueryRecord(Id, userId);
-		}catch( Exception e) {
+			projectQueryConds = projectService.getQueryRecord(Id, user.getId());
+		} catch (Exception e) {
 			log.error(e);
 		}
-		
+
 		if (projectQueryConds == null) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(404);
@@ -451,7 +462,7 @@ public class ProjectController {
 				Set<String> whereFields = new HashSet<String>();
 
 				Set<String> whereFieldTypes = new HashSet<String>();
-				String SqlWhere  = "where 1=1 and ";
+				String SqlWhere = "where 1=1 and ";
 				for (QueryDetailModel queryConds : queryDetails) {
 					whereFields.add(queryConds.getCondition().toUpperCase());
 					String[] conditionArray = queryConds.getCondition().split("\\.");
@@ -465,8 +476,9 @@ public class ProjectController {
 						}
 					}
 					if (!queryConds.getRelation().contains("null")) {
-						SqlWhere += queryConds.getCondition() + " " + queryConds.getRelation() + " '" + queryConds.getCondValue() + "' and ";
-					}else {
+						SqlWhere += queryConds.getCondition() + " " + queryConds.getRelation() + " '"
+								+ queryConds.getCondValue() + "' and ";
+					} else {
 						SqlWhere += queryConds.getCondition() + " " + queryConds.getRelation() + " " + " and ";
 					}
 				}
@@ -535,12 +547,12 @@ public class ProjectController {
 		log.info("Sql-->" + Sql);
 		List<Map<String, Object>> ImageClassesList = jLpService.queryForSQL(Sql, new Object[] {});
 		List<Object> ImageClasses = new ArrayList<Object>();
-		for(Map<String,Object> map : ImageClassesList) {
-			for(String key : map.keySet()) {
+		for (Map<String, Object> map : ImageClassesList) {
+			for (String key : map.keySet()) {
 				ImageClasses.add(map.get(key));
 			}
 		}
-		
+
 		List<JExportdataclass> AllExportClasses = exportdataclassService.getAll();
 		Collections.sort(AllExportClasses, new Comparator<JExportdataclass>() {
 			@Override
@@ -555,38 +567,44 @@ public class ProjectController {
 				return o1.getId().compareTo(o2.getId());
 			}
 		});
-		List<Map<String,Object>> dataExportClasses = new ArrayList<Map<String,Object>>();
-		List<Map<String,Object>> imageExportClasses = new ArrayList<Map<String,Object>>();
+		List<Map<String, Object>> dataExportClasses = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> imageExportClasses = new ArrayList<Map<String, Object>>();
 		for (JExportdataclass exportdataclass : AllExportClasses) {
 			if ("1".equals(exportdataclass.getType())) {
-				dataExportClasses.add(new HashMap<String, Object>(){{
-					put("id", exportdataclass.getId());
-					put("title", exportdataclass.getTitle());
-					put("info", exportdataclass.getInfo());
-				}});
+				dataExportClasses.add(new HashMap<String, Object>() {
+					{
+						put("id", exportdataclass.getId());
+						put("title", exportdataclass.getTitle());
+						put("info", exportdataclass.getInfo());
+					}
+				});
 			}
 
 			if ("2".equals(exportdataclass.getType())) {
-				imageExportClasses.add(new HashMap<String, Object>(){{
-					put("id", exportdataclass.getId());
-					put("title", exportdataclass.getTitle());
-					put("info", exportdataclass.getInfo());
-				}});
+				imageExportClasses.add(new HashMap<String, Object>() {
+					{
+						put("id", exportdataclass.getId());
+						put("title", exportdataclass.getTitle());
+						put("info", exportdataclass.getInfo());
+					}
+				});
 			}
 		}
 		List<JFiletype> fileTypesList = (List<JFiletype>) filetypeService.getAll().getData();
-		List<Map<String,Object>> fileTypes = new ArrayList<Map<String,Object>>();
-		for(JFiletype filetype : fileTypesList) {
-			fileTypes.add(new HashMap<String, Object>(){{
-				put("id", filetype.getId());
-				put("name", filetype.getName());
-			}});
+		List<Map<String, Object>> fileTypes = new ArrayList<Map<String, Object>>();
+		for (JFiletype filetype : fileTypesList) {
+			fileTypes.add(new HashMap<String, Object>() {
+				{
+					put("id", filetype.getId());
+					put("name", filetype.getName());
+				}
+			});
 		}
-		
+
 		Map<String, Object> image = new HashMap<String, Object>();
 		image.put("imageExportClasses", imageExportClasses);
 		resultMap.put("dataExportClasses", dataExportClasses);
-		
+
 		image.put("imageClasses", ImageClasses);
 
 		resultMap.put("filetypes", fileTypes);
@@ -603,7 +621,7 @@ public class ProjectController {
 		exportTypes.add(map2);
 
 		resultMap.put("exportTypes", exportTypes);
-		
+
 		resultMap.put("image", image);
 		BaseResponse baseResponse = new BaseResponse();
 		resultMap.put("response", baseResponse);

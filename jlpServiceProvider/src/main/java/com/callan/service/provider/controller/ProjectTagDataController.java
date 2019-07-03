@@ -21,6 +21,7 @@ import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.db.JProjecttags;
 import com.callan.service.provider.pojo.db.JTagdicts;
+import com.callan.service.provider.pojo.db.JUser;
 import com.callan.service.provider.pojo.project.ProjectTagDataModel;
 import com.callan.service.provider.service.IJLpService;
 import com.callan.service.provider.service.IJProjectService;
@@ -59,11 +60,14 @@ public class ProjectTagDataController {
 
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null) {
+//		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+		JUser user = (JUser) request.getSession().getAttribute("user");
+		Long userId = null;
+		if (user == null || user.getId() == 0L) {
 			userId = 0L;
 		}
+		userId = user.getId();
 		JTagdicts tagdict = tagdictService.getOne(projectTagData.getTagId());
 		
 		if (tagdict == null) {

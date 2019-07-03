@@ -77,7 +77,7 @@ public class LocalCacheLoader implements InitializingBean{
 					jTableFieldDictService.getAll4TableCode();
 					jTableFieldDictService.getAll4TableCode(false);
 					
-					userService.getAll4Id();
+//					userService.getAll4Id();
 					
 					roleRightService.getAll4RoleId();
 					

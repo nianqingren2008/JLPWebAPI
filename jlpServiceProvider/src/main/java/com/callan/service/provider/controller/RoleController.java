@@ -19,6 +19,7 @@ import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.db.JAdvancedqr;
 import com.callan.service.provider.pojo.db.JRole;
+import com.callan.service.provider.pojo.db.JUser;
 import com.callan.service.provider.pojo.task.JTask;
 import com.callan.service.provider.service.IJRoleService;
 import com.callan.service.provider.service.IJUserService;
@@ -41,16 +42,17 @@ public class RoleController {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		BaseResponse baseResponse = new BaseResponse();
 		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
-				: request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null || userId == 0) {
+//		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+//				: request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+		JUser user = (JUser) request.getSession().getAttribute("user");
+		if (user == null || user.getId() == 0) {
 			baseResponse.setCode("0000");
 			baseResponse.setText("用户信息获取失败，请检查请求头");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
-		log.info("userId : " + userId);
+		log.info("userId : " + user.getId());
 		List<JRole> list = jRoleService.getAll();
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
 		for (JRole jRole : list) {

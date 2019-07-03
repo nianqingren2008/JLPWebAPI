@@ -50,6 +50,7 @@ import com.callan.service.provider.pojo.db.JTableDict;
 import com.callan.service.provider.pojo.db.JTableFieldDict;
 import com.callan.service.provider.pojo.db.JTagdicts;
 import com.callan.service.provider.pojo.db.JTagvaluedicts;
+import com.callan.service.provider.pojo.db.JUser;
 //import com.callan.service.provider.pojo.db.JTagvaluedicts;
 import com.callan.service.provider.pojo.project.ProjectQueryModel;
 import com.callan.service.provider.pojo.project.ProjectTagModel;
@@ -131,9 +132,11 @@ public class ProjectQueryController {
 	public String Get(@PathVariable Long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null) {
+//		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
+		
+		if (user == null || user.getId() == 0L) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -144,7 +147,7 @@ public class ProjectQueryController {
 			return json;
 		}
 		try {
-			AdvancedQueryRecordModel advancedQueryRecord = projectService.getQueryRecord(Id, userId);
+			AdvancedQueryRecordModel advancedQueryRecord = projectService.getQueryRecord(Id, user.getId());
 			BaseResponse baseResponse = new BaseResponse();
 			resultMap.put("response", baseResponse);
 			resultMap.put("queryRecord", advancedQueryRecord);
@@ -170,9 +173,10 @@ public class ProjectQueryController {
 
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null) {
+//		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
+		if (user == null || user.getId() == 0L) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -291,7 +295,7 @@ public class ProjectQueryController {
 		List<JTagdicts> list = tagdictService.getByProjectId(projectQuery.getProjectId());
 		List<JTagdicts> tagProjectDicts = new ArrayList<JTagdicts>();
 		for (JTagdicts tagdicts : list) {
-			if (tagdicts.getUserid().longValue() == userId.longValue()
+			if (tagdicts.getUserid().longValue() == user.getId().longValue()
 					&& JLPConts.ActiveFlag.equals(tagdicts.getShowflag())) {
 				tagProjectDicts.add(tagdicts);
 			}
@@ -351,7 +355,7 @@ public class ProjectQueryController {
 		// queryRecord
 		AdvancedQueryRecordModel projectQueryConds = null;
 		try {
-			projectQueryConds = projectService.getQueryRecord(projectQuery.getProjectId(), userId);
+			projectQueryConds = projectService.getQueryRecord(projectQuery.getProjectId(), user.getId());
 		} catch (Exception e) {
 			BaseResponse baseResponse = new BaseResponse();
 			baseResponse.setCode("1001");
@@ -647,7 +651,7 @@ public class ProjectQueryController {
 				}
 				if (OtherTags != null && OtherTags.size() > 0 && OtherTagWhere.length() > 0) {
 					String SqlTagsStr = "select PatientGlobalId as Id from (select PatientGlobalId,('TAG_'||tagid) as tagName,"
-							+ " tagValue from j_projecttags where where t.userid = " + userId + " and t.projectid = "
+							+ " tagValue from j_projecttags where where t.userid = " + user.getId() + " and t.projectid = "
 							+ projectQuery.getProjectId() + " and t.tableid <> " + projectQuery.getTableClassId()
 							+ ") pivot (max(tagvalue) " + " for name in ("
 							+ OtherTags.toString().substring(1, OtherTags.size() - 1) + ")) projecttagsex where "
@@ -675,11 +679,11 @@ public class ProjectQueryController {
 			
 		}
 		String projectDelData = "select dataid as datadel_id from j_projectdeldata t"
-				+ " where t.activeflag='1' and t.userid=" + userId + " and t.projectid=" + projectQuery.getProjectId()
+				+ " where t.activeflag='1' and t.userid=" + user.getId() + " and t.projectid=" + projectQuery.getProjectId()
 				+ " and t.tableid=" + projectQuery.getTableClassId();
 		String projectPatientDelData = "";
 		if (!viewTableName.equalsIgnoreCase(JLPConts.PatientGlobalTable)) {
-			projectPatientDelData = "select dataid as datadel_id from j_projectdeldata t where t.activeflag='1' and t.userid="+userId
+			projectPatientDelData = "select dataid as datadel_id from j_projectdeldata t where t.activeflag='1' and t.userid="+user.getId()
 					+" and t.projectid="+projectQuery.getProjectId()+" and t.tableid=1 ";
 		}
 
@@ -688,14 +692,14 @@ public class ProjectQueryController {
 				+ ",j_projectdatastatus.changestatus as \"_tag_changestatus\""
 				+ "  from j_projectdatastatus left join j_projectdatastatusdict"
 				+ " on j_projectdatastatus.status=j_projectdatastatusdict.id"
-				+ " where j_projectdatastatus.activeflag='1' and j_projectdatastatus.userid= " + userId
+				+ " where j_projectdatastatus.activeflag='1' and j_projectdatastatus.userid= " + user.getId()
 				+ " and j_projectdatastatus.projectid= " + projectQuery.getProjectId();
 		Set<String> dictsIds = new HashSet<String>();
 		for (JTagdicts dicts : tagShowDicts) {
 			dictsIds.add("'TAG_" + dicts.getId()+"' as TAG_"+dicts.getId());
 		}
 		String showTagSql = "select * from (select dataid,('TAG_'||tagid) as tagName,tagValue from j_projecttags"
-				+ " where activeflag=1 and userid = " + userId + " and projectid = " + projectQuery.getProjectId()
+				+ " where activeflag=1 and userid = " + user.getId() + " and projectid = " + projectQuery.getProjectId()
 				+ " and tableid = " + projectQuery.getTableClassId() + ") pivot (max(tagvalue) for tagName " + "in ("
 				+ dictsIds.toString().substring(1, dictsIds.toString().length() - 1) + "))";
 		Set<String> fieldNamesSet = new HashSet<String>();
@@ -747,9 +751,10 @@ public class ProjectQueryController {
 		resultMap.put("totals", count);
 		resultMap.put("tagTypes", tagShowRets);
 		List<Map<String, Object>> retData = jlpService.queryForSQLStreaming(Sql, pageNum, pageSize);
-		Long userRole = userService.getUserRoleByToken(authorization);
-		if (userRole != null && userRole != 0L) {
-			List<JRoleRight> roleRightList = roleRightService.getByRoleId(userRole);
+//		Long userRole = userService.getUserRoleByToken(authorization);
+		JUser users = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
+		if (users != null && users.getUserrole() != 0L) {
+			List<JRoleRight> roleRightList = roleRightService.getByRoleId(users.getUserrole());
 			if (roleRightList != null && roleRightList.size() > 0) {
 				JRight jRight = roleRightList.get(0).getjRight();
 				if (jRight == null || jRight.getId() != 4L) {

@@ -23,6 +23,7 @@ import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ObjectUtil;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.base.BaseResponse;
+import com.callan.service.provider.pojo.db.JUser;
 import com.callan.service.provider.pojo.queryField.QueryFieldModel;
 import com.callan.service.provider.service.IJLpService;
 import com.callan.service.provider.service.IJUserService;
@@ -47,12 +48,14 @@ public class QueryFieldController {
     {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null) {
+//		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+		JUser user = (JUser) request.getSession().getAttribute("user");
+		Long userId = null;
+		if (user == null || user.getId() == 0L) {
 			userId = 0L;
 		}
-
+		userId = user.getId();
 		String sql = "SELECT Filter1.SORTNO1         AS SORTNO," + 
 				"       Filter1.ID1             AS ID," + 
 				"       Filter1.CODE1           AS CODE," + 

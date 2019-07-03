@@ -1,21 +1,14 @@
 package com.callan.service.provider.service.impl;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.dao.mapper.JUserMapper;
-import com.callan.service.provider.pojo.base.CacheResponse;
-import com.callan.service.provider.pojo.cache.LocalCacheable;
-import com.callan.service.provider.pojo.db.JShowView;
 import com.callan.service.provider.pojo.db.JUser;
-import com.callan.service.provider.service.IJShowViewService;
 import com.callan.service.provider.service.IJUserService;
 
 @Service
@@ -25,10 +18,10 @@ public class JUserServiceImpl implements IJUserService {
 	
 	@Override
 	public JUser getOne(Long id) {
-		IJUserService base = (IJUserService) AopContext.currentProxy();
-		Map<Long, JUser> data = (Map<Long, JUser>) base.getAll4Id().getData();
-		JUser user = data.get(id);
-		return user;
+//		IJUserService base = (IJUserService) AopContext.currentProxy();
+//		Map<Long, JUser> data = (Map<Long, JUser>) base.getAll4Id().getData();
+//		JUser user = data.get(id);
+		return jUserMapper.getOne(id);
 	}
 
 	@Override
@@ -45,38 +38,58 @@ public class JUserServiceImpl implements IJUserService {
 		return null;
 	}
 
-	@LocalCacheable
+//	@LocalCacheable
+//	@Override
+//	public CacheResponse getAll4Id() {
+//		List<JUser> list = jUserMapper.getAll();
+//		Map<Long, JUser> map = new HashMap<Long, JUser>();
+//		for (JUser user : list) {
+//			map.put(user.getId(), user);
+//		}
+//		CacheResponse response = new CacheResponse();
+//		response.setCode(0);
+//		response.setData(map);
+//		return response;
+//	}
+
+//	@Override
+//	public Long getUserRoleByToken(String authorization) {
+//		return jUserMapper.getUserRoleByToken(authorization);
+//	}
+//
+//	@Override
+//	public Long getIdByToken(String authorization) {
+//		try {
+//			return jUserMapper.getIdByToken(authorization);
+//		}catch(Exception e) {
+//			JLPLog log = ThreadPoolConfig.getBaseContext();
+//			log.error(e);
+//		}
+//		return null;
+//	}
+//
+//	@Override
+//	public JUser getUserByToken(String authorization) {
+//		return jUserMapper.getUserByToken(authorization);
+//	}
+
 	@Override
-	public CacheResponse getAll4Id() {
-		List<JUser> list = jUserMapper.getAll();
-		Map<Long, JUser> map = new HashMap<Long, JUser>();
-		for (JUser user : list) {
-			map.put(user.getId(), user);
-		}
-		CacheResponse response = new CacheResponse();
-		response.setCode(0);
-		response.setData(map);
-		return response;
+	public void update(JUser users) {
+		jUserMapper.update(users);
 	}
 
 	@Override
-	public Long getUserRoleByToken(String authorization) {
-		return jUserMapper.getUserRoleByToken(authorization);
+	public List<JUser> getAll() {
+		return jUserMapper.getAll();
 	}
 
 	@Override
-	public Long getIdByToken(String authorization) {
-		try {
-			return jUserMapper.getIdByToken(authorization);
-		}catch(Exception e) {
-			JLPLog log = ThreadPoolConfig.getBaseContext();
-			log.error(e);
-		}
-		return null;
+	public List<JUser> getByLogincode(String userLoginCode) {
+		return jUserMapper.getByLogincode(userLoginCode);
 	}
 
 	@Override
-	public JUser getUserByToken(String authorization) {
-		return jUserMapper.getUserByToken(authorization);
+	public void save(JUser user) {
+		jUserMapper.insert(user);
 	}
 }

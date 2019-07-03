@@ -1,15 +1,11 @@
 package com.callan.service.provider.controller;
 
-import java.sql.Connection;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 //import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -24,32 +20,24 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.alibaba.fastjson.JSONObject;
-import com.callan.service.provider.config.ConnPathologyDb;
 import com.callan.service.provider.config.JLPConts;
-import com.callan.service.provider.config.JLPException;
 import com.callan.service.provider.config.JLPLog;
-import com.callan.service.provider.config.ObjectUtil;
 import com.callan.service.provider.config.ThreadPoolConfig;
-import com.callan.service.provider.dao.IPathologyDao;
 import com.callan.service.provider.pojo.AdvanceQueryRequest;
 import com.callan.service.provider.pojo.AdvanceQueryResponse;
 import com.callan.service.provider.pojo.advanceQueryBase.ColunmsModel;
+import com.callan.service.provider.pojo.advanceQueryBase.QueryCollectionModel;
 import com.callan.service.provider.pojo.advanceQueryBase.QueryDetailModel;
 import com.callan.service.provider.pojo.advanceQueryBase.QueryIncludesEX;
-import com.callan.service.provider.pojo.advanceQueryBase.QueryCollectionModel;
 import com.callan.service.provider.pojo.advanceQueryBase.Sorted;
 import com.callan.service.provider.pojo.base.FieldName;
-import com.callan.service.provider.pojo.db.JRight;
-import com.callan.service.provider.pojo.db.JRoleRight;
-import com.callan.service.provider.pojo.db.JSensitiveWord;
 import com.callan.service.provider.pojo.db.JShowDetailView;
 import com.callan.service.provider.pojo.db.JShowView;
 import com.callan.service.provider.pojo.db.JSystemconfig;
 import com.callan.service.provider.pojo.db.JTableDict;
 import com.callan.service.provider.pojo.db.JTableFieldDict;
+import com.callan.service.provider.pojo.db.JUser;
 import com.callan.service.provider.service.IJLpService;
-import com.callan.service.provider.service.IJRoleRightService;
-import com.callan.service.provider.service.IJSensitiveWordService;
 import com.callan.service.provider.service.IJShowDetailViewService;
 import com.callan.service.provider.service.IJShowViewService;
 import com.callan.service.provider.service.IJSystemConfigService;
@@ -189,8 +177,6 @@ public class AdvancedQueryController {
 			return json;
 		}
 
-		
-
 		// 获取查询所有表名
 		List<QueryDetailModel> queryCondsList = advanceQueryRequest.getQueries().getQueryConds();
 		SortedSet<String> tableNameMainWheres = new TreeSet<String>();
@@ -271,10 +257,9 @@ public class AdvancedQueryController {
 		fieldNames.add(new FieldName(JLPConts.PatientGlobalTable + ".Id as \"_key\""));
 		SortedSet<String> fieldShowNames = new TreeSet<String>();
 		SortedSet<String> showTableNames = new TreeSet<String>();
-		
+
 		List<ColunmsModel> columns = new ArrayList<ColunmsModel>();
-		
-		
+
 		for (JShowDetailView showDetailView : jShowDetailViewListShow) {
 			tableNames.add(showDetailView.getjTableDict().getName());
 			showTableNames.add(showDetailView.getjTableDict().getName());
@@ -282,8 +267,8 @@ public class AdvancedQueryController {
 					(showDetailView.getjTableDict().getName() + "." + showDetailView.getjTableFieldDict().getName())
 							.toLowerCase()));
 			fieldShowNames.add(showDetailView.getjTableFieldDict().getName().toLowerCase());
-			
-			JTableFieldDict  jTableFieldDict = showDetailView.getjTableFieldDict();
+
+			JTableFieldDict jTableFieldDict = showDetailView.getjTableFieldDict();
 			ColunmsModel colunmsModel = new ColunmsModel();
 			colunmsModel.setDataIndex(jTableFieldDict.getName().toLowerCase());
 			colunmsModel.setKey(jTableFieldDict.getName().toLowerCase());
@@ -291,7 +276,7 @@ public class AdvancedQueryController {
 			colunmsModel.setIsLongStr("clob".equals(jTableFieldDict.getType()));
 			colunmsModel.setIsSearched(JLPConts.ActiveFlag.equals(jTableFieldDict.getQueryflag()));
 			columns.add(colunmsModel);
-			
+
 		}
 		tableNames.addAll(tableNameMainWheres);
 
@@ -332,15 +317,15 @@ public class AdvancedQueryController {
 		}
 
 		if (IsImageUrl) {
-			fieldNames.add(new FieldName(imageKey + "  as \""+imageField+"\""));
+			fieldNames.add(new FieldName(imageKey + "  as \"" + imageField + "\""));
 		} else {
-			fieldNames.add(new FieldName("'' as \""+imageField+"\""));
+			fieldNames.add(new FieldName("'' as \"" + imageField + "\""));
 		}
 
 		if (IsPathImageUrl) {
-			fieldNames.add(new FieldName(pathImageKey + " as \""+pathImageField+"\"" ));
+			fieldNames.add(new FieldName(pathImageKey + " as \"" + pathImageField + "\""));
 		} else {
-			fieldNames.add(new FieldName("'' as \""+pathImageField+"\"" ));
+			fieldNames.add(new FieldName("'' as \"" + pathImageField + "\""));
 		}
 
 //		for(String tableName : tableNames) {
@@ -472,18 +457,22 @@ public class AdvancedQueryController {
 //		
 //		retData = jlpService.queryForSQLStreaming(SqlPageData10,SqlPageData1000,SqlPageData100000,SqlAllData, pageNumInt, pageSizeInt);
 		StringBuffer preUrl = request.getRequestURL();
-		
-		// 从前台header中获取token参数
-				String authorization = request.getHeader("Authorization") == null ? "e1cb039e7adf7633a1de93e5f8da0dea"
-						: request.getHeader("Authorization");
 
-				Long userRole = jUserService.getUserRoleByToken(authorization);
+		// 从前台header中获取token参数
+//		String authorization = request.getHeader("Authorization") == null ? "e1cb039e7adf7633a1de93e5f8da0dea"
+//				: request.getHeader("Authorization");
+//
+//		Long userRole = jUserService.getUserRoleByToken(authorization);
 		
+		JUser user = (JUser) request.getSession().getAttribute("user"); 
+		//jUserService.getUserByToken(authorization);
+		
+
 		try {
 			retData = jlpService.queryForAdvanceQuery(tableNames, tempSql, patientTableWhere, tableWhere,
-					finalSelectFields, tempSqlWhere, pageNumInt, pageSizeInt, sqlCount,preUrl.toString(),
-					IsImageUrl,imageUrl,imageField,pathImageUrl,pathImageField,IsPathImageUrl,userRole);
-			
+					finalSelectFields, tempSqlWhere, pageNumInt, pageSizeInt, sqlCount, preUrl.toString(), IsImageUrl,
+					imageUrl, imageField, pathImageUrl, pathImageField, IsPathImageUrl, user.getUserrole());
+
 		} catch (Exception e) {
 			response.getResponse().setCode("0000");
 			response.getResponse().setText("获取数据错误，原因: " + e.getMessage());
@@ -491,10 +480,6 @@ public class AdvancedQueryController {
 			log.info("response --> " + json);
 			return json;
 		}
-		
-		
-		
-		
 
 //			}
 		response.setColumns(columns);
@@ -508,8 +493,6 @@ public class AdvancedQueryController {
 		// 清理上下文
 		return json;
 	}
-
-	
 
 	@ApiOperation(value = "病例检索模糊查询(仅数量)")
 	@RequestMapping(value = "/api/AdvanceQuery/count", method = { RequestMethod.POST })
@@ -720,9 +703,6 @@ public class AdvancedQueryController {
 		// 清理上下文
 		return json;
 	}
-
-
-	
 
 //	private String getKeysWhere(List<Map<String, Object>> dataGrid) {
 //		String ret = "";

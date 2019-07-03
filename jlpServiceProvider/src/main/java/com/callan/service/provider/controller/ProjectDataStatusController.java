@@ -3,10 +3,8 @@ package com.callan.service.provider.controller;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,7 +33,6 @@ import com.callan.service.provider.service.IJProjectDataStatusService;
 import com.callan.service.provider.service.IJProjectDataStatusdictService;
 import com.callan.service.provider.service.IJProjectdefaultstatusService;
 import com.callan.service.provider.service.IJUserService;
-import com.callan.service.provider.service.impl.JProjectDataStatusServiceImpl;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -262,11 +259,13 @@ public class ProjectDataStatusController {
 			HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-		Long userId = userService.getIdByToken(authorization);
-		if (userId == null) {
-			userId = 0L;
-		}
+//		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+//		Long userId = userService.getIdByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
+//		Long userId = null;
+//		if (user == null || user.getId() == 0L) {
+//			userId = 0L;
+//		}
 		List<JProjectdatastatus> projectDataStatuses = projectDataStatusService.getByProjectIdAndPatientglobalid(
 				projectDataStatusModel.getProjectid(), projectDataStatusModel.getPatientGlobalId());
 

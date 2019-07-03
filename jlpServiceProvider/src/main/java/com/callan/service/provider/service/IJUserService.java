@@ -1,5 +1,7 @@
 package com.callan.service.provider.service;
 
+import java.util.List;
+
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.db.JUser;
 
@@ -12,7 +14,7 @@ public interface IJUserService {
 	 */
 	JUser getOne(Long id);
 	
-	CacheResponse getAll4Id();
+//	CacheResponse getAll4Id();
 	/**
 	 * 修改密码
 	 * @param user
@@ -32,9 +34,17 @@ public interface IJUserService {
 	 * @param authorization
 	 * @return
 	 */
-	Long getUserRoleByToken(String authorization);
+//	Long getUserRoleByToken(String authorization);
+//
+//	Long getIdByToken(String authorization);
+//	
+//	JUser getUserByToken(String authorization);
 
-	Long getIdByToken(String authorization);
-	
-	JUser getUserByToken(String authorization);
+	void update(JUser users);
+
+	List<JUser> getAll();
+
+	List<JUser> getByLogincode(String userLoginCode);
+
+	void save(JUser user);
 }

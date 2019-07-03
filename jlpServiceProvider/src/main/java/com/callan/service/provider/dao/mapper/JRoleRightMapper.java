@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.mapping.FetchType;
 
+import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.pojo.db.JRoleRight;
 
 
@@ -19,7 +20,7 @@ public interface JRoleRightMapper {
 	 * 
 	 * @return
 	 */
-	@Select("SELECT * FROM J_ROLERIGHT")
+	@Select("SELECT * FROM J_ROLERIGHT where ACTIVEFLAG='"+JLPConts.ActiveFlag+"'")
     public List<JRoleRight> getAll();
 	
 	
@@ -39,7 +40,7 @@ public interface JRoleRightMapper {
     @Delete("DELETE FROM J_ROLERIGHT WHERE id =#{id}")
     void delete(Long id);
     
-    @Select("SELECT * FROM J_ROLERIGHT where roleId=#{roleId}")
+    @Select("SELECT * FROM J_ROLERIGHT where roleId=#{roleId} and ACTIVEFLAG='"+JLPConts.ActiveFlag+"'")
     @Results({
 		@Result(property="rightid",column="rightid"),
 		//users映射List<User> users，many=@Many是调用关联查询方法，"id"是关联查询条件，FetchType.LAZY是延迟加载
