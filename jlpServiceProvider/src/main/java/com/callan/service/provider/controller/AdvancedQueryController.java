@@ -83,7 +83,6 @@ public class AdvancedQueryController {
 		return query(advanceQuery, pageNum, pageSize, request);
 	}
 
-	@SuppressWarnings("unchecked")
 	@ApiOperation(value = "病例检索模糊查询(仅列表)")
 	@RequestMapping(value = "/api/AdvancedQuery", method = { RequestMethod.POST })
 	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpServletRequest request) {
@@ -466,7 +465,13 @@ public class AdvancedQueryController {
 		
 		JUser user = (JUser) request.getSession().getAttribute("user"); 
 		//jUserService.getUserByToken(authorization);
-		
+		if(user == null || user.getId()== 0L) {
+			response.getResponse().setCode("0000");
+			response.getResponse().setText("登录信息已过期，请重新登录");
+			String json = response.toJsonString();
+			log.info("response --> " + json);
+			return json;
+		}
 
 		try {
 			retData = jlpService.queryForAdvanceQuery(tableNames, tempSql, patientTableWhere, tableWhere,
