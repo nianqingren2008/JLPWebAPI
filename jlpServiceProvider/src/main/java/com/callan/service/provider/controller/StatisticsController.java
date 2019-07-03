@@ -121,18 +121,18 @@ public class StatisticsController {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 从前台header中获取token参数
-//		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
-//				: request.getHeader("Authorization");
-//		Long userId = userService.getIdByToken(authorization);
-		JUser user = (JUser) request.getSession().getAttribute("user");
-		if (user == null || user.getId() == 0) {
+		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+				: request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user");
+		if (userId == null || userId.longValue() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			baseResponse.setCode("0000");
 			baseResponse.setText("用户信息获取失败，请检查请求头");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
-		log.info("userId : " + user.getId());
+		log.info("userId : " + userId);
 		
 		
 		
@@ -145,18 +145,18 @@ public class StatisticsController {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		// 从前台header中获取token参数
-//		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
-//				: request.getHeader("Authorization");
-//		Long userId = userService.getIdByToken(authorization);
-		JUser user = (JUser) request.getSession().getAttribute("user");
-		if (user == null || user.getId() == 0) {
+		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+				: request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user");
+		if (userId == null || userId.longValue() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			baseResponse.setCode("0000");
 			baseResponse.setText("用户信息获取失败，请检查请求头");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
-		log.info("userId : " + user.getId());
+		log.info("userId : " + userId);
 		
 		
 		

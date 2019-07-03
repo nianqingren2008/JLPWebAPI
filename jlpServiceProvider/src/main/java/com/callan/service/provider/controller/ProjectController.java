@@ -81,11 +81,11 @@ public class ProjectController {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
-//		String authorization = request.getHeader("Authorization") == null ? "20a3b08fe9503604f6eabaa357ad72aa" : request.getHeader("Authorization");
-//		Long userId = userService.getIdByToken(authorization);
+		String authorization = request.getHeader("Authorization") == null ? "20a3b08fe9503604f6eabaa357ad72aa" : request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
 
-		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
-		if (user == null || user.getId() == 0L) {
+//		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
+		if (userId == null || userId.longValue() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -93,7 +93,7 @@ public class ProjectController {
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
-		List<JProject> list = projectService.getByUserId(user.getId());
+		List<JProject> list = projectService.getByUserId(userId);
 		Collections.sort(list, new Comparator<JProject>() {
 			@Override
 			public int compare(JProject o1, JProject o2) {
@@ -151,12 +151,12 @@ public class ProjectController {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
 		boolean IsNew = (project.getCourseID() == 0L);
-//		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
-//		Long userId = userService.getIdByToken(authorization);
+		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
 
-		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
 
-		if (user == null || user.getId() == 0L) {
+		if (userId == null || userId.longValue() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -169,7 +169,7 @@ public class ProjectController {
 			jProject = projectService.getOne(project.getCourseID());
 
 			if (!JLPConts.ActiveFlag.equals(jProject.getActiveflag())
-					|| user.getId().longValue() != jProject.getUserid().longValue()) {
+					|| userId.longValue() != jProject.getUserid().longValue()) {
 				jProject = null;
 			}
 			IsNew = (jProject == null);
@@ -178,7 +178,7 @@ public class ProjectController {
 			jProject = new JProject();
 			jProject.setActiveflag("1");
 			jProject.setCreatedate(new Date());
-			jProject.setUserid(user.getId());
+			jProject.setUserid(userId);
 			jProject.setDatastatus("0");
 		}
 		if (project.getTimeproject() != null && project.getTimeproject().length == 2) {
@@ -254,12 +254,12 @@ public class ProjectController {
 	public String GetProjectDetail(@PathVariable Long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-//		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
-//		Long userId = userService.getIdByToken(authorization);
+		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
 
-		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
 
-		if (user == null || user.getId() == 0L) {
+		if (userId == null || userId.longValue() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -271,7 +271,7 @@ public class ProjectController {
 		JProject project = projectService.getOne(Id);
 
 		if (!JLPConts.ActiveFlag.equals(project.getActiveflag())
-				|| user.getId().longValue() != project.getUserid().longValue()) {
+				|| userId.longValue() != project.getUserid().longValue()) {
 			project = null;
 		}
 		if (project == null) {
@@ -310,11 +310,11 @@ public class ProjectController {
 	public String Delete(Long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-//		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-//		Long userId = userService.getIdByToken(authorization);
-		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
+		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
 
-		if (user == null || user.getId() == 0L) {
+		if (userId == null || userId.longValue() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -326,7 +326,7 @@ public class ProjectController {
 		JProject project = projectService.getOne(Id);
 
 		if (!JLPConts.ActiveFlag.equals(project.getActiveflag())
-				|| user.getId().longValue() != project.getUserid().longValue()) {
+				|| userId.longValue() != project.getUserid().longValue()) {
 			project = null;
 		}
 		if (project == null) {
@@ -352,10 +352,10 @@ public class ProjectController {
 			HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-//		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-//		Long userId = userService.getIdByToken(authorization);
-		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
-		if (user == null || user.getId() == 0L) {
+		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
+		if (userId == null || userId.longValue() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -365,7 +365,7 @@ public class ProjectController {
 		}
 		String sql = "update J_PROJECTDATASTATUS set CHANGESTATUS=? "
 				+ " where PROJECTID= ? and USERID=? and CHANGESTATUS= ?";
-		jLpService.excuteSql(sql, new Object[] { "0", projectChangeStatus.getProjectId(), user.getId(), "1" });
+		jLpService.excuteSql(sql, new Object[] { "0", projectChangeStatus.getProjectId(), userId, "1" });
 		BaseResponse baseResponse = new BaseResponse();
 		resultMap.put("response", baseResponse);
 		String json = JSONObject.toJSONString(resultMap);
@@ -378,10 +378,10 @@ public class ProjectController {
 	public String GetExportInfo(@PathVariable Long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-//		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
-//		Long userId = userService.getIdByToken(authorization);
-		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
-		if (user == null || user.getId() == 0L) {
+		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user"); // jUserService.getUserByToken(authorization);
+		if (userId == null || userId.longValue() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -398,7 +398,7 @@ public class ProjectController {
 		AdvancedQueryRecordModel projectQueryConds = null;
 
 		try {
-			projectQueryConds = projectService.getQueryRecord(Id, user.getId());
+			projectQueryConds = projectService.getQueryRecord(Id, userId);
 		} catch (Exception e) {
 			log.error(e);
 		}

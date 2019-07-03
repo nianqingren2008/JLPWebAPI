@@ -52,26 +52,26 @@ public class JUserServiceImpl implements IJUserService {
 //		return response;
 //	}
 
-//	@Override
-//	public Long getUserRoleByToken(String authorization) {
-//		return jUserMapper.getUserRoleByToken(authorization);
-//	}
-//
-//	@Override
-//	public Long getIdByToken(String authorization) {
-//		try {
-//			return jUserMapper.getIdByToken(authorization);
-//		}catch(Exception e) {
-//			JLPLog log = ThreadPoolConfig.getBaseContext();
-//			log.error(e);
-//		}
-//		return null;
-//	}
-//
-//	@Override
-//	public JUser getUserByToken(String authorization) {
-//		return jUserMapper.getUserByToken(authorization);
-//	}
+	@Override
+	public Long getUserRoleByToken(String authorization) {
+		return jUserMapper.getUserRoleByToken(authorization);
+	}
+
+	@Override
+	public Long getIdByToken(String authorization) {
+		try {
+			return jUserMapper.getIdByToken(authorization);
+		}catch(Exception e) {
+			JLPLog log = ThreadPoolConfig.getBaseContext();
+			log.error(e);
+		}
+		return null;
+	}
+
+	@Override
+	public JUser getUserByToken(String authorization) {
+		return jUserMapper.getUserByToken(authorization);
+	}
 
 	@Override
 	public void update(JUser users) {

@@ -60,14 +60,12 @@ public class ProjectTagDataController {
 
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-//		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-//		Long userId = userService.getIdByToken(authorization);
-		JUser user = (JUser) request.getSession().getAttribute("user");
-		Long userId = null;
-		if (user == null || user.getId() == 0L) {
+		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user");
+		if (userId == null || userId.longValue() == 0) {
 			userId = 0L;
 		}
-		userId = user.getId();
 		JTagdicts tagdict = tagdictService.getOne(projectTagData.getTagId());
 		
 		if (tagdict == null) {

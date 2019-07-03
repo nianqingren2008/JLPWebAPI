@@ -199,13 +199,13 @@ public class PanoramaController {
 		}
 		}
 		// 从前台header中获取token参数
-//		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-//		Long userRole = jUserService.getUserRoleByToken(authorization);
+		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+		Long userRole = jUserService.getUserRoleByToken(authorization);
 //		
-		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
 		
-		if (user != null && user.getUserrole() != 0L) {
-			List<JRoleRight> roleRightList = roleRightService.getByRoleId(user.getUserrole());
+		if (userRole == null || userRole.longValue() == 0) {
+			List<JRoleRight> roleRightList = roleRightService.getByRoleId(userRole);
 			if (roleRightList != null && roleRightList.size() > 0) {
 				JRight jRight = roleRightList.get(0).getjRight();
 				if (jRight == null || jRight.getId() != 4L) {
@@ -422,13 +422,13 @@ public class PanoramaController {
 		}
 
 		// 从前台header中获取token参数
-//		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-//
-//		Long userRole = jUserService.getUserRoleByToken(authorization);
-		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
+		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+
+		Long userRole = jUserService.getUserRoleByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
 		
-		if (user != null && user.getUserrole() != 0L) {
-			List<JRoleRight> roleRightList = roleRightService.getByRoleId(user.getUserrole());
+		if (userRole != null && userRole.longValue() != 0L) {
+			List<JRoleRight> roleRightList = roleRightService.getByRoleId(userRole);
 			if (roleRightList != null && roleRightList.size() > 0) {
 				JRight jRight = roleRightList.get(0).getjRight();
 				if (jRight == null || jRight.getId() != 4L) {

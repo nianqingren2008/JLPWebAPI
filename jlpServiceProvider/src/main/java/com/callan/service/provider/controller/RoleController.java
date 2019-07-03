@@ -42,17 +42,17 @@ public class RoleController {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		BaseResponse baseResponse = new BaseResponse();
 		// 从前台header中获取token参数
-//		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
-//				: request.getHeader("Authorization");
-//		Long userId = userService.getIdByToken(authorization);
-		JUser user = (JUser) request.getSession().getAttribute("user");
-		if (user == null || user.getId() == 0) {
+		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+				: request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user");
+		if (userId == null || userId.longValue() == 0) {
 			baseResponse.setCode("0000");
 			baseResponse.setText("用户信息获取失败，请检查请求头");
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}
-		log.info("userId : " + user.getId());
+		log.info("userId : " + userId);
 		List<JRole> list = jRoleService.getAll();
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
 		for (JRole jRole : list) {

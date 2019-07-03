@@ -82,8 +82,11 @@ public class ShowFieldController {
 		}
 		List<Long> fieldIds = new ArrayList<Long>();
 		if (StringUtils.isNotBlank(pagename)) {
-			JUser user = (JUser) request.getSession().getAttribute("user");
-			if (user == null || user.getId() == 0L) {
+//			JUser user = (JUser) request.getSession().getAttribute("user");
+			String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+					: request.getHeader("Authorization");
+			Long userId = userService.getIdByToken(authorization);
+			if (userId == null || userId.longValue() == 0) {
 				ControllerBaseResponse response = new ControllerBaseResponse();
 				resq.setStatus(409);
 				response.getResponse().setCode("409");
@@ -92,7 +95,7 @@ public class ShowFieldController {
 				return response.toJsonString();
 			}
 			List<JUsershowviewfield> juserShowFields = usershowviewfieldService.getByPagenameAndUserId(pagename,
-					user.getId());
+					userId);
 			for (JUsershowviewfield usershowviewfield : juserShowFields) {
 				fieldIds.add(usershowviewfield.getFieldid());
 			}
@@ -150,9 +153,11 @@ public class ShowFieldController {
     {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		
-		JUser user = (JUser) request.getSession().getAttribute("user");
-		if (user == null || user.getId() == 0L) {
+		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+				: request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user");
+		if (userId == null || userId.longValue() == 0L) {
 			ControllerBaseResponse response = new ControllerBaseResponse();
 			resq.setStatus(409);
 			response.getResponse().setCode("409");
@@ -160,7 +165,8 @@ public class ShowFieldController {
 			log.error(response.toJsonString());
 			return response.toJsonString();
 		}
-		List<JUsershowviewfield> juserShowFields = usershowviewfieldService.getByPagenameAndUserId(showFields.getPageName(), user.getId());
+		List<JUsershowviewfield> juserShowFields = usershowviewfieldService
+				.getByPagenameAndUserId(showFields.getPageName(), userId);
 		
         List<Long> newId = new ArrayList<Long>();
         if (juserShowFields.size() > 0)
@@ -197,7 +203,7 @@ public class ShowFieldController {
             jUsershowviewfield.setActiveflag(JLPConts.ActiveFlag);
             jUsershowviewfield.setFieldid(item);
             jUsershowviewfield.setPagename(showFields.getPageName());
-            jUsershowviewfield.setUserid(user.getId());
+            jUsershowviewfield.setUserid(userId);
             long seqId = jLpService.getNextSeq("J_USERSHOWVIEWFIELD");
             jUsershowviewfield.setId(seqId);
             usershowviewfieldService.save(jUsershowviewfield);

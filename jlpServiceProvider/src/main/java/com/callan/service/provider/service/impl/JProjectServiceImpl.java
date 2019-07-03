@@ -275,15 +275,13 @@ public class JProjectServiceImpl implements IJProjectService {
 
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-//		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-//		Long userId = userService.getIdByToken(authorization);
+		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
 		
-		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
-		Long userId = null;
-		if (user == null || user.getId() == 0L) {
+//		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
+		if (userId == null || userId.longValue() == 0L) {
 			userId = 0L;
 		}
-		userId = user.getId();
 //        #region 验证视图编号
 		JTableclassdict tableclassdict = tableclassdictService.getOne(TableClassId);
 

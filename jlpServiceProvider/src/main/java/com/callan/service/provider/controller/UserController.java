@@ -152,10 +152,10 @@ public class UserController {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		ControllerBaseResponse response = new ControllerBaseResponse();
 		// 从前台header中获取token参数
-//		String authorization = request.getHeader("Authorization") == null ? "6995033dec41df257013eef145dded3f"
-//				: request.getHeader("Authorization");
-
-		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
+		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+				: request.getHeader("Authorization");
+		JUser user = jUserService.getUserByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user"); 
 		if (user == null) {
 			resq.setStatus(400);
 			response.getResponse().setCode("400");

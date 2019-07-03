@@ -70,12 +70,12 @@ public class TaskController {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
-//		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb"
-//				: request.getHeader("Authorization");
-//		Long userId = userService.getIdByToken(authorization);
-		JUser user = (JUser) request.getSession().getAttribute("user");
+		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb"
+				: request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user");
 		
-		if (user == null || user.getId() == 0L) {
+		if (userId == null || userId.longValue() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
 			baseResponse.setCode("400");
@@ -94,7 +94,7 @@ public class TaskController {
 		task.setProgress("0.00");
 		task.setStatus("1");
 		task.setTasktype(taskProject.getExportType() + "");
-		task.setUserid(user.getId());
+		task.setUserid(userId);
 
 		JTaskdownload taskdownload = new JTaskdownload();
 		taskdownload.setActiveflag(JLPConts.ActiveFlag);
@@ -115,7 +115,7 @@ public class TaskController {
 			queryrecord.setCount(0L);
 			queryrecord.setCreatedate(new Date());
 			queryrecord.setQueryname("");
-			queryrecord.setUserid(user.getId());
+			queryrecord.setUserid(userId);
 			queryrecord.setSortno(1);
 			for (int i = 0; i < taskProject.getQueryConds().size(); i++) {
 				JQueryrecordDetails queryrecorddetails = new JQueryrecordDetails();
@@ -226,11 +226,11 @@ public class TaskController {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		BaseResponse baseResponse = new BaseResponse();
 		// 从前台header中获取token参数
-//		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
-//				: request.getHeader("Authorization");
-//		Long userId = userService.getIdByToken(authorization);
-		JUser user = (JUser) request.getSession().getAttribute("user");
-		if (user == null || user.getId() == 0) {
+		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+				: request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user");
+		if (userId == null || userId.longValue() == 0) {
 			baseResponse.setCode("0000");
 			baseResponse.setText("用户信息获取失败，请检查请求头");
 			resultMap.put("response", baseResponse);
@@ -238,8 +238,8 @@ public class TaskController {
 			log.error("response --> " + json);
 			return json;
 		}
-		log.info("userId : " + user.getId());
-		List<JTask> list = jTaskService.getByUserId(user.getId());
+		log.info("userId : " + userId);
+		List<JTask> list = jTaskService.getByUserId(userId);
 		String urlHost = request.getRequestURL().toString();
 		urlHost = urlHost.substring(0, urlHost.indexOf("/api/")) + "/api/DownLoad/";
 		List<JTask> jtaskList = new ArrayList<JTask>();
@@ -291,11 +291,11 @@ public class TaskController {
 		BaseResponse baseResponse = new BaseResponse();
 		Map<String, Object> map = new HashMap<String, Object>();
 		// 从前台header中获取token参数
-//		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
-//				: request.getHeader("Authorization");
-//		Long userId = userService.getIdByToken(authorization);
-		JUser user = (JUser) request.getSession().getAttribute("user");
-		if (user == null || user.getId() == 0) {
+		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
+				: request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
+//		JUser user = (JUser) request.getSession().getAttribute("user");
+		if (userId == null || userId.longValue() == 0) {
 			baseResponse.setCode("0000");
 			baseResponse.setText("用户信息获取失败，请检查请求头");
 			resultMap.put("response", baseResponse);
@@ -303,8 +303,8 @@ public class TaskController {
 			log.error("response --> " + json);
 			return json;
 		}
-		log.info("  id :" + id + "   userId : " + user.getId());
-		JTask task = jTaskService.getByIdAndUserId(id, user.getId());
+		log.info("  id :" + id + "   userId : " + userId);
+		JTask task = jTaskService.getByIdAndUserId(id, userId);
 		if (task != null) {
 
 			if ("3".equals(task.getStatus())) {

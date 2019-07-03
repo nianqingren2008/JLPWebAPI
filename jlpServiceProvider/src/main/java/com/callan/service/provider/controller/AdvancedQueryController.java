@@ -260,21 +260,27 @@ public class AdvancedQueryController {
 		List<ColunmsModel> columns = new ArrayList<ColunmsModel>();
 
 		for (JShowDetailView showDetailView : jShowDetailViewListShow) {
-			tableNames.add(showDetailView.getjTableDict().getName());
-			showTableNames.add(showDetailView.getjTableDict().getName());
-			fieldNames.add(new FieldName(
-					(showDetailView.getjTableDict().getName() + "." + showDetailView.getjTableFieldDict().getName())
-							.toLowerCase()));
-			fieldShowNames.add(showDetailView.getjTableFieldDict().getName().toLowerCase());
-
+			if(showDetailView.getjTableDict()!= null) {
+				tableNames.add(showDetailView.getjTableDict().getName());
+				showTableNames.add(showDetailView.getjTableDict().getName());
+				fieldNames.add(new FieldName(
+						(showDetailView.getjTableDict().getName() + "." + showDetailView.getjTableFieldDict().getName())
+								.toLowerCase()));
+				
+			}
+			if(showDetailView.getjTableFieldDict()!= null) {
+				fieldShowNames.add(showDetailView.getjTableFieldDict().getName().toLowerCase());
+			}
 			JTableFieldDict jTableFieldDict = showDetailView.getjTableFieldDict();
-			ColunmsModel colunmsModel = new ColunmsModel();
-			colunmsModel.setDataIndex(jTableFieldDict.getName().toLowerCase());
-			colunmsModel.setKey(jTableFieldDict.getName().toLowerCase());
-			colunmsModel.setTitle(jTableFieldDict.getjShowDetailView().getFieldtitle());
-			colunmsModel.setIsLongStr("clob".equals(jTableFieldDict.getType()));
-			colunmsModel.setIsSearched(JLPConts.ActiveFlag.equals(jTableFieldDict.getQueryflag()));
-			columns.add(colunmsModel);
+			if(jTableFieldDict != null) {
+				ColunmsModel colunmsModel = new ColunmsModel();
+				colunmsModel.setDataIndex(jTableFieldDict.getName().toLowerCase());
+				colunmsModel.setKey(jTableFieldDict.getName().toLowerCase());
+				colunmsModel.setTitle(jTableFieldDict.getjShowDetailView().getFieldtitle());
+				colunmsModel.setIsLongStr("clob".equals(jTableFieldDict.getType()));
+				colunmsModel.setIsSearched(JLPConts.ActiveFlag.equals(jTableFieldDict.getQueryflag()));
+				columns.add(colunmsModel);
+			}
 
 		}
 		tableNames.addAll(tableNameMainWheres);
@@ -458,14 +464,14 @@ public class AdvancedQueryController {
 		StringBuffer preUrl = request.getRequestURL();
 
 		// 从前台header中获取token参数
-//		String authorization = request.getHeader("Authorization") == null ? "e1cb039e7adf7633a1de93e5f8da0dea"
-//				: request.getHeader("Authorization");
-//
-//		Long userRole = jUserService.getUserRoleByToken(authorization);
+		String authorization = request.getHeader("Authorization") == null ? "e1cb039e7adf7633a1de93e5f8da0dea"
+				: request.getHeader("Authorization");
+
+		Long userRole = jUserService.getUserRoleByToken(authorization);
 		
-		JUser user = (JUser) request.getSession().getAttribute("user"); 
+//		JUser user = (JUser) request.getSession().getAttribute("user"); 
 		//jUserService.getUserByToken(authorization);
-		if(user == null || user.getId()== 0L) {
+		if(userRole == null || userRole.longValue() == 0L) {
 			response.getResponse().setCode("0000");
 			response.getResponse().setText("登录信息已过期，请重新登录");
 			String json = response.toJsonString();
@@ -476,7 +482,7 @@ public class AdvancedQueryController {
 		try {
 			retData = jlpService.queryForAdvanceQuery(tableNames, tempSql, patientTableWhere, tableWhere,
 					finalSelectFields, tempSqlWhere, pageNumInt, pageSizeInt, sqlCount, preUrl.toString(), IsImageUrl,
-					imageUrl, imageField, pathImageUrl, pathImageField, IsPathImageUrl, user.getUserrole());
+					imageUrl, imageField, pathImageUrl, pathImageField, IsPathImageUrl, userRole);
 
 		} catch (Exception e) {
 			response.getResponse().setCode("0000");
