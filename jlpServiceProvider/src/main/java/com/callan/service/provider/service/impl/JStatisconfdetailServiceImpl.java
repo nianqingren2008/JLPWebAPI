@@ -41,5 +41,10 @@ public class JStatisconfdetailServiceImpl implements IJStatisconfdetailService {
 		return response;
 	}
 
+	@Override
+	public List<JStatisconfdetail> getByStatisconfid(Long statisconfId) {
+		return statisconfdetailMapper.getByStatisconfid(statisconfId);
+	}
+
 
 }

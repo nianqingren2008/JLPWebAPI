@@ -9,5 +9,9 @@ public interface IJRoleService {
 	JRole getOne(Long id);
 
 	List<JRole> getAll();
+
+	void save(JRole role);
+
+	void update(JRole role);
 	
 }

@@ -23,6 +23,16 @@ public class JRoleServiceImpl implements IJRoleService {
 	public List<JRole> getAll() {
 		return roleMapper.getAll();
 	}
+
+	@Override
+	public void save(JRole role) {
+		roleMapper.insert(role);
+	}
+
+	@Override
+	public void update(JRole role) {
+		roleMapper.updateByPrimaryKey(role);
+	}
 	
 	 
 }

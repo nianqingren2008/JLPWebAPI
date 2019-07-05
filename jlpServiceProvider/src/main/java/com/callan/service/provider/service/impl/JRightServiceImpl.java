@@ -59,4 +59,9 @@ public class JRightServiceImpl implements IJRightService {
 		}
 		return jRight;
 	}
+
+	@Override
+	public List<JRight> getAll() {
+		return jRightMapper.getAll();
+	}
 }

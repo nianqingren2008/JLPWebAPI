@@ -10,4 +10,8 @@ public interface IJRoleRightService {
 	List<JRoleRight> getByRoleId(Long roleId) ;
 	
 	CacheResponse getAll4RoleId();
+
+	void update(JRoleRight roleRight);
+
+	void save(JRoleRight roleright);
 }

@@ -1,5 +1,6 @@
 package com.callan.service.provider.dao.mapper;
 
+import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.pojo.db.JStatisconf;
 import com.callan.service.provider.pojo.db.JStatisconfdetail;
 
@@ -80,12 +81,35 @@ public interface JStatisconfdetailMapper {
 	 * 
 	 * @return
 	 */
-	@Select("SELECT * FROM J_STATISCONFDETAIL")
+	@Select("SELECT * FROM J_STATISCONFDETAIL where ACTIVEFLAG='"+JLPConts.ActiveFlag+"'")
     public List<JStatisconfdetail> getAll();
 
 	/*
 	 * @confId  statisconfiid
 	 */
-	@Select("SELECT * FROM J_STATISCONFDETAIL WHERE STATISCONFID= #{confId} AND DEFAULVALUE = '1' ")
+	@Select("SELECT * FROM J_STATISCONFDETAIL WHERE STATISCONFID= #{confId}"
+			+ " AND DEFAULVALUE = '1'"
+			+ " and ACTIVEFLAG='"+JLPConts.ActiveFlag+"'"
+		)
 	List<JStatisconfdetail> getAllByConfId(Long confId);
+
+	@Select({
+        "select",
+        "ID, STATISCONFID, DETAILTYPE, FIELDID, FIELDTYPETRANS, SORTNO, CREATEDATE, ACTIVEFLAG, ",
+        "DEFAULVALUE",
+        "from J_STATISCONFDETAIL",
+        "where STATISCONFID = #{statisconfId,jdbcType=DECIMAL} and ACTIVEFLAG='"+JLPConts.ActiveFlag+"'"
+    })
+    @Results({
+        @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
+        @Result(column="STATISCONFID", property="statisconfid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="DETAILTYPE", property="detailtype", jdbcType=JdbcType.CHAR),
+        @Result(column="FIELDID", property="fieldid", jdbcType=JdbcType.DECIMAL),
+        @Result(column="FIELDTYPETRANS", property="fieldtypetrans", jdbcType=JdbcType.VARCHAR),
+        @Result(column="SORTNO", property="sortno", jdbcType=JdbcType.DECIMAL),
+        @Result(column="CREATEDATE", property="createdate", jdbcType=JdbcType.TIMESTAMP),
+        @Result(column="ACTIVEFLAG", property="activeflag", jdbcType=JdbcType.CHAR),
+        @Result(column="DEFAULVALUE", property="defaulvalue", jdbcType=JdbcType.CHAR)
+    })
+	List<JStatisconfdetail> getByStatisconfid(Long statisconfId);
 }

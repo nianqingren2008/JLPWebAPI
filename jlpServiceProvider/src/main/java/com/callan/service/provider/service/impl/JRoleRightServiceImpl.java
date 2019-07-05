@@ -48,4 +48,14 @@ public class JRoleRightServiceImpl implements IJRoleRightService {
 		return response;
 	}
 
+	@Override
+	public void update(JRoleRight roleRight) {
+		roleRightMapper.insert(roleRight);
+	}
+
+	@Override
+	public void save(JRoleRight roleright) {
+		roleRightMapper.update(roleright);
+	}
+
 }
