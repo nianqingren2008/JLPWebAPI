@@ -260,19 +260,19 @@ public class AdvancedQueryController {
 		List<ColunmsModel> columns = new ArrayList<ColunmsModel>();
 
 		for (JShowDetailView showDetailView : jShowDetailViewListShow) {
-			if(showDetailView.getjTableDict()!= null) {
+			if (showDetailView.getjTableDict() != null) {
 				tableNames.add(showDetailView.getjTableDict().getName());
 				showTableNames.add(showDetailView.getjTableDict().getName());
 				fieldNames.add(new FieldName(
 						(showDetailView.getjTableDict().getName() + "." + showDetailView.getjTableFieldDict().getName())
 								.toLowerCase()));
-				
+
 			}
-			if(showDetailView.getjTableFieldDict()!= null) {
+			if (showDetailView.getjTableFieldDict() != null) {
 				fieldShowNames.add(showDetailView.getjTableFieldDict().getName().toLowerCase());
 			}
 			JTableFieldDict jTableFieldDict = showDetailView.getjTableFieldDict();
-			if(jTableFieldDict != null) {
+			if (jTableFieldDict != null) {
 				ColunmsModel colunmsModel = new ColunmsModel();
 				colunmsModel.setDataIndex(jTableFieldDict.getName().toLowerCase());
 				colunmsModel.setKey(jTableFieldDict.getName().toLowerCase());
@@ -468,10 +468,10 @@ public class AdvancedQueryController {
 				: request.getHeader("Authorization");
 
 		Long userRole = jUserService.getUserRoleByToken(authorization);
-		
+
 //		JUser user = (JUser) request.getSession().getAttribute("user"); 
-		//jUserService.getUserByToken(authorization);
-		if(userRole == null || userRole.longValue() == 0L) {
+		// jUserService.getUserByToken(authorization);
+		if (userRole == null || userRole.longValue() == 0L) {
 			response.getResponse().setCode("0000");
 			response.getResponse().setText("登录信息已过期，请重新登录");
 			String json = response.toJsonString();
@@ -658,12 +658,15 @@ public class AdvancedQueryController {
 		SortedSet<String> fieldShowNames = new TreeSet<String>();
 		SortedSet<String> showTableNames = new TreeSet<String>();
 		for (JShowDetailView JShowDetailView : jShowDetailViewListShow) {
-			tableNames.add(JShowDetailView.getjTableDict().getName());
-			showTableNames.add(JShowDetailView.getjTableDict().getName());
-			fieldNames.add(new FieldName(
-					(JShowDetailView.getjTableDict().getName() + "." + JShowDetailView.getjTableFieldDict().getName())
-							.toLowerCase()));
-			fieldShowNames.add(JShowDetailView.getjTableFieldDict().getName().toLowerCase());
+			if (JShowDetailView.getjTableDict() != null) {
+				tableNames.add(JShowDetailView.getjTableDict().getName());
+				showTableNames.add(JShowDetailView.getjTableDict().getName());
+				fieldNames.add(new FieldName((JShowDetailView.getjTableDict().getName() + "."
+						+ JShowDetailView.getjTableFieldDict().getName()).toLowerCase()));
+			}
+			if (JShowDetailView.getjTableFieldDict() != null) {
+				fieldShowNames.add(JShowDetailView.getjTableFieldDict().getName().toLowerCase());
+			}
 		}
 		tableNames.addAll(tableNameMainWheres);
 		List<Sorted> sortedList = advanceQueryRequest.getSorted();

@@ -1,9 +1,12 @@
 package com.callan.service.provider.pojo.project;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 public class ProjectTagCompleteModel {
 	/*
 	 * 标签ID
 	 */
+	@JSONField(name = "_id")
 	private Long _id;
 	/*
 	 * 标签名称

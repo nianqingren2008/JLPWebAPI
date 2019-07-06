@@ -82,8 +82,17 @@ public class RoleController {
 		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
 		for (JRole jRole : list) {
 			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("id", jRole.getId() + "");
+			map.put("id", jRole.getId());
 			map.put("name", jRole.getName() == null ? "" : jRole.getName());
+			List<JRoleRight> roleRightList = roleRightService.getByRoleId(jRole.getId());
+			if (roleRightList == null) {
+				roleRightList = new ArrayList<JRoleRight>();
+			}
+			Set<Long> rights = new HashSet<Long>();
+			for (JRoleRight roleRight : roleRightList) {
+				rights.add(roleRight.getRightid());
+			}
+			map.put("rights", rights);
 			resultList.add(map);
 		}
 
@@ -132,7 +141,7 @@ public class RoleController {
 
 	@SuppressWarnings("serial")
 	@ApiOperation(value = "获取权限列表")
-	@RequestMapping(value = "/api/Role/rights", method = { RequestMethod.GET })
+	@RequestMapping(value = "/api/role/rights", method = { RequestMethod.GET })
 	public String GetRights() {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();

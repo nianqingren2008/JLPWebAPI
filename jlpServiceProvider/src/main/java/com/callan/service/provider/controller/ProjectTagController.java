@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -165,8 +166,8 @@ public class ProjectTagController {
 			model.setTagComplete("0%");
 			projectTags.add(model);
 		}
-		List<JProjectstatistics> projectstatistics = projectstatisticsService
-				.getByProjectIdAndStatisticstypedataid(Id,1L);
+		List<JProjectstatistics> projectstatistics = projectstatisticsService.getByProjectIdAndStatisticstypedataid(Id,
+				1L);
 		if (projectstatistics == null || projectstatistics.size() == 0) {
 			projectService.staticAsync(Id, 1L, request, response);
 			projectstatistics = projectstatisticsService.getByProjectIdAndStatisticstypedataid(Id, 1L);
@@ -192,8 +193,8 @@ public class ProjectTagController {
 	@ApiOperation(value = "获取标签整体进度")
 	@RequestMapping(value = "/api/ProjectTag/Statistic", method = { RequestMethod.GET })
 	public String GetStatistic(Long Id, HttpServletRequest request, HttpServletResponse response) {
-		List<JProjectstatistics> projectstatistics = projectstatisticsService
-				.getByProjectIdAndStatisticstypedataid(Id,1L);
+		List<JProjectstatistics> projectstatistics = projectstatisticsService.getByProjectIdAndStatisticstypedataid(Id,
+				1L);
 		if (projectstatistics == null || projectstatistics.size() == 0) {
 			projectService.staticAsync(Id, 1L, request, response);
 			projectstatistics = projectstatisticsService.getByProjectIdAndStatisticstypedataid(Id, 1L);
@@ -310,6 +311,7 @@ public class ProjectTagController {
 		return json;
 	}
 
+	@Transactional
 	@ApiOperation(value = "标签显示状态变化")
 	@RequestMapping(value = "/api/ProjectTag/TagShow", method = { RequestMethod.POST })
 	public String TagShow(@RequestBody ProjectTagShowModel[] projectTagShows, HttpServletRequest request,
@@ -330,15 +332,16 @@ public class ProjectTagController {
 		for (ProjectTagShowModel model : projectTagShows) {
 			Ids.add(model.getId());
 			JTagdicts dicts = tagdictService.getOne(model.getId());
-
-			if (projectId == 0 && (dicts.getProjectid() != null)) {
-				projectId = dicts.getProjectid();
-			}
-			if (ObjectUtil.objToBool(dicts.getShowflag(), false) != model.getIsShow()) {
-				boolean showFlag = model.getIsShow() == null ? false : model.getIsShow();
-				dicts.setShowflag(showFlag ? "1" : "0");
-				IsChange = true;
-				tagdictService.update(dicts);
+			if (dicts != null) {
+				if (projectId == 0 && (dicts.getProjectid() != null)) {
+					projectId = dicts.getProjectid();
+				}
+				if (ObjectUtil.objToBool(dicts.getShowflag(), false) != model.getIsShow()) {
+					boolean showFlag = model.getIsShow() == null ? false : model.getIsShow();
+					dicts.setShowflag(showFlag ? "1" : "0");
+					IsChange = true;
+					tagdictService.update(dicts);
+				}
 			}
 		}
 
@@ -356,7 +359,7 @@ public class ProjectTagController {
 
 	@ApiOperation(value = "移除标签值信息")
 	@RequestMapping(value = "/api/ProjectTag/{Id}", method = { RequestMethod.DELETE })
-	public String Delete(Long Id, HttpServletRequest request, HttpServletResponse response) {
+	public String Delete(@PathVariable Long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");

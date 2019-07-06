@@ -13,14 +13,20 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.stereotype.Component;
+
+import com.callan.service.provider.pojo.db.JUser;
+import com.callan.service.provider.service.IJUserService;
 
 @Component
 @ServletComponentScan
 @WebFilter(urlPatterns = "/api/*",filterName = "jlpFilter")
 public class JLPFilter implements Filter{
-
+	@Autowired
+	private IJUserService userService;
 	@Override
     public void init(FilterConfig filterConfig) throws ServletException {
 
@@ -33,7 +39,25 @@ public class JLPFilter implements Filter{
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse resp = (HttpServletResponse) response;
 		String url = req.getRequestURI();
+		if("OPTIONS".equalsIgnoreCase(req.getMethod())) {
+			chain.doFilter(req, resp);
+		}else {
 		if(url.contains("/api/")) {
+			if(!"/api/User".equals(url) 
+				/* && !url.startsWith("/api/ShowField") */) {
+				String authorization = req.getHeader("Authorization") == null ? ""
+						: req.getHeader("Authorization");
+				if(StringUtils.isBlank(authorization)) {
+					resp.setStatus(999);
+					return;
+				}
+				JUser user = userService.getUserByToken(authorization);
+				if(user == null || user.getId().longValue() == 0) {
+					resp.setStatus(999);
+					return;
+				}
+			}
+			
 			String[] tmp = url.split("/api/");
 			String serviceName = null;
 			if(tmp.length > 0) {
@@ -47,6 +71,7 @@ public class JLPFilter implements Filter{
 		}
 		chain.doFilter(req, resp);
 		ThreadPoolConfig.clearBaseContext();
+		}
 	}
 
 	@Override

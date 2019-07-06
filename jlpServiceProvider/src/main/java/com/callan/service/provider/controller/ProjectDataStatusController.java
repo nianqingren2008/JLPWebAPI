@@ -24,6 +24,7 @@ import com.callan.service.provider.pojo.base.BaseResponse;
 import com.callan.service.provider.pojo.db.JProjectdatastatus;
 import com.callan.service.provider.pojo.db.JProjectdatastatusdict;
 import com.callan.service.provider.pojo.db.JProjectdefaultstatus;
+import com.callan.service.provider.pojo.db.JUser;
 import com.callan.service.provider.pojo.project.ProjectDataDefaultStatusModel;
 import com.callan.service.provider.pojo.project.ProjectDataStatusChangeModel;
 import com.callan.service.provider.pojo.project.ProjectDataStatusDictModel;
@@ -254,18 +255,13 @@ public class ProjectDataStatusController {
 	}
 
 	@ApiOperation(value = "课题数据状态提交")
-	@RequestMapping(value = "/api/ProjectDataStatus/Data/", method = { RequestMethod.POST })
+	@RequestMapping(value = "/api/ProjectDataStatus/Data", method = { RequestMethod.POST })
 	public String Post(@RequestBody ProjectDataStatusModel projectDataStatusModel, HttpServletRequest request,
 			HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-//		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
-//		Long userId = userService.getIdByToken(authorization);
-//		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
-//		Long userId = null;
-//		if (user == null || user.getId() == 0L) {
-//			userId = 0L;
-//		}
+		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
+		Long userId = userService.getIdByToken(authorization);
 		List<JProjectdatastatus> projectDataStatuses = projectDataStatusService.getByProjectIdAndPatientglobalid(
 				projectDataStatusModel.getProjectid(), projectDataStatusModel.getPatientGlobalId());
 
@@ -279,6 +275,7 @@ public class ProjectDataStatusController {
 			projectdatastatus.setChangestatus("0");
 			long seqId = jlpService.getNextSeq("J_PROJECTDATASTATUS");
 			projectdatastatus.setId(seqId);
+			projectdatastatus.setUserid(userId);
 			projectDataStatusService.save(projectdatastatus);
 		} else {
 			JProjectdatastatus projectDataStatus = projectDataStatuses.get(0);

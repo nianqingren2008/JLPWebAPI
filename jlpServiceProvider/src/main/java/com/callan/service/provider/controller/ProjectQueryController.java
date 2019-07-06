@@ -126,16 +126,17 @@ public class ProjectQueryController {
 
 	@Autowired
 	private IJTagvaluedictService tagvaluedictService;
-	
+
 	@ApiOperation(value = "获取课题查询条件")
 	@RequestMapping(value = "/api/ProjectQuery/{Id}", method = { RequestMethod.GET })
 	public String Get(@PathVariable Long Id, HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
+		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb"
+				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 //		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
-		
+
 		if (userId == null || userId.longValue() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
@@ -173,7 +174,8 @@ public class ProjectQueryController {
 
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-		String authorization = request.getHeader("Authorization") == null ? "bc6ef9c43a0e5b25da87ca2ba948d3eb" : request.getHeader("Authorization");
+		String authorization = request.getHeader("Authorization") == null ? ""
+				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 //		JUser user = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
 		if (userId == null || userId.longValue() == 0) {
@@ -303,7 +305,7 @@ public class ProjectQueryController {
 //        #region 获取标签信息
 		List<JTagdicts> tagShowDicts = new ArrayList<JTagdicts>();
 		for (JTagdicts tagdicts : tagProjectDicts) {
-			if (tagdicts.getTagattached().equals(projectQuery.getTableClassId().longValue()+"")) {
+			if (tagdicts.getTagattached().equals(projectQuery.getTableClassId().longValue() + "")) {
 				tagShowDicts.add(tagdicts);
 			}
 		}
@@ -314,11 +316,11 @@ public class ProjectQueryController {
 			projectTagModel.setId(tagdicts.getId());
 			projectTagModel.setName(tagdicts.getName());
 			projectTagModel.setFieldType(tagdicts.getValuetype());
-			
+
 			List<String> fieldValue = new ArrayList<String>();
-			
+
 			List<JTagvaluedicts> valueDictList = tagvaluedictService.getByTagId(tagdicts.getId());
-			
+
 			if (valueDictList != null && valueDictList.size() > 0) {
 				Collections.sort(valueDictList, new Comparator<JTagvaluedicts>() {
 					@Override
@@ -326,7 +328,7 @@ public class ProjectQueryController {
 						return o1.getId().compareTo(o2.getId());
 					}
 				});
-				for(JTagvaluedicts tagvaluedicts : valueDictList) {
+				for (JTagvaluedicts tagvaluedicts : valueDictList) {
 					if (tagvaluedicts.getValue() != null) {
 						fieldValue.add(tagvaluedicts.getValue());
 					} else {
@@ -335,13 +337,13 @@ public class ProjectQueryController {
 				}
 			}
 			String fieldValueStr = "";
-			for(String str : fieldValue) {
+			for (String str : fieldValue) {
 				fieldValueStr += str + "/";
 			}
-			if(fieldValueStr.length() > 0) {
-				fieldValueStr = fieldValueStr.substring(0,fieldValueStr.length()-1);
+			if (fieldValueStr.length() > 0) {
+				fieldValueStr = fieldValueStr.substring(0, fieldValueStr.length() - 1);
 			}
-			
+
 			projectTagModel.setFieldValue(fieldValueStr);
 			projectTagModel.setIsShow(false);
 			projectTagModel.setProjectId(0L);
@@ -379,7 +381,7 @@ public class ProjectQueryController {
 						.setRightqueto(tempmainQueryModels.get(tempmainQueryModels.size() - 1).getRightqueto() + ")");
 				tempmainQueryModels.get(tempmainQueryModels.size() - 1).setCombinator("AND");
 			}
-			if(projectQuery.getQueries().getQueryConds() != null) {
+			if (projectQuery.getQueries().getQueryConds() != null) {
 				tempmainQueryModels.addAll(Arrays.asList(projectQuery.getQueries().getQueryConds()));
 			}
 		}
@@ -438,22 +440,26 @@ public class ProjectQueryController {
 		List<ColunmsModel> columns = new ArrayList<ColunmsModel>();
 
 		for (JShowDetailView showDetailView : jShowDetailViewListShow) {
-			tableNames.add(showDetailView.getjTableDict().getName());
-			showTableNames.add(showDetailView.getjTableDict().getName());
-			fieldNames.add(new FieldName(
-					(showDetailView.getjTableDict().getName() + "." + showDetailView.getjTableFieldDict().getName())
-							.toLowerCase()));
-			fieldShowNames.add(showDetailView.getjTableFieldDict().getName().toLowerCase());
-
-			JTableFieldDict jTableFieldDict = showDetailView.getjTableFieldDict();
-			ColunmsModel colunmsModel = new ColunmsModel();
-			colunmsModel.setDataIndex(jTableFieldDict.getName().toLowerCase());
-			colunmsModel.setKey(jTableFieldDict.getName().toLowerCase());
-			colunmsModel.setTitle(jTableFieldDict.getjShowDetailView().getFieldtitle());
-			colunmsModel.setIsLongStr("clob".equals(jTableFieldDict.getType()));
-			colunmsModel.setIsSearched(JLPConts.ActiveFlag.equals(jTableFieldDict.getQueryflag()));
-			colunmsModel.setIsTag(false);
-			columns.add(colunmsModel);
+			if (showDetailView.getjTableDict() != null) {
+				tableNames.add(showDetailView.getjTableDict().getName());
+				showTableNames.add(showDetailView.getjTableDict().getName());
+				fieldNames.add(new FieldName(
+						(showDetailView.getjTableDict().getName() + "." + showDetailView.getjTableFieldDict().getName())
+								.toLowerCase()));
+			}
+			if (showDetailView.getjTableFieldDict() != null) {
+				fieldShowNames.add(showDetailView.getjTableFieldDict().getName().toLowerCase());
+				JTableFieldDict jTableFieldDict = showDetailView.getjTableFieldDict();
+				ColunmsModel colunmsModel = new ColunmsModel();
+				colunmsModel.setDataIndex(jTableFieldDict.getName().toLowerCase());
+				colunmsModel.setKey(jTableFieldDict.getName().toLowerCase());
+				colunmsModel.setTitle(jTableFieldDict.getjShowDetailView().getFieldtitle());
+				colunmsModel.setIsLongStr("clob".equals(jTableFieldDict.getType()));
+				colunmsModel.setIsSearched(JLPConts.ActiveFlag.equals(jTableFieldDict.getQueryflag()));
+				colunmsModel.setIsTag(false);
+				columns.add(colunmsModel);
+			}
+			
 
 		}
 		tableNames.addAll(tableNameMainWheres);
@@ -666,25 +672,25 @@ public class ProjectQueryController {
 					.getByProjectIdAndProjectstatusIDs(projectQuery.getProjectId(), projectQuery.getProjectstatusIDs());
 			Set<String> name = new HashSet<String>();
 			for (JProjectdatastatusdict projectdatastatusdict : jprojectDataStatusDicts) {
-				name.add("'"+projectdatastatusdict.getName()+"'");
+				name.add("'" + projectdatastatusdict.getName() + "'");
 			}
 			projectDataStatusWhere = " projectdatastatus.tag_complete in" + " ("
 					+ name.toString().substring(1, name.toString().length() - 1) + ")";
-			for(JProjectdatastatusdict projectdatastatusdict : jprojectDataStatusDicts) {
+			for (JProjectdatastatusdict projectdatastatusdict : jprojectDataStatusDicts) {
 				if (projectdatastatusdict.getName().contains("未开始")) {
-					projectDataStatusWhere = projectDataStatusWhere + "( or projectdatastatus.tag_complete is null)";
+					projectDataStatusWhere = "(" + projectDataStatusWhere + " or projectdatastatus.tag_complete is null)";
 					break;
 				}
 			}
-			
+
 		}
 		String projectDelData = "select dataid as datadel_id from j_projectdeldata t"
 				+ " where t.activeflag='1' and t.userid=" + userId + " and t.projectid=" + projectQuery.getProjectId()
 				+ " and t.tableid=" + projectQuery.getTableClassId();
 		String projectPatientDelData = "";
 		if (!viewTableName.equalsIgnoreCase(JLPConts.PatientGlobalTable)) {
-			projectPatientDelData = "select dataid as datadel_id from j_projectdeldata t where t.activeflag='1' and t.userid="+userId
-					+" and t.projectid="+projectQuery.getProjectId()+" and t.tableid=1 ";
+			projectPatientDelData = "select dataid as datadel_id from j_projectdeldata t where t.activeflag='1' and t.userid="
+					+ userId + " and t.projectid=" + projectQuery.getProjectId() + " and t.tableid=1 ";
 		}
 
 		String dataStatusSql = "select distinct j_projectdatastatus.patientglobalid"
@@ -696,7 +702,7 @@ public class ProjectQueryController {
 				+ " and j_projectdatastatus.projectid= " + projectQuery.getProjectId();
 		Set<String> dictsIds = new HashSet<String>();
 		for (JTagdicts dicts : tagShowDicts) {
-			dictsIds.add("'TAG_" + dicts.getId()+"' as TAG_"+dicts.getId());
+			dictsIds.add("'TAG_" + dicts.getId() + "' as TAG_" + dicts.getId());
 		}
 		String showTagSql = "select * from (select dataid,('TAG_'||tagid) as tagName,tagValue from j_projecttags"
 				+ " where activeflag=1 and userid = " + userId + " and projectid = " + projectQuery.getProjectId()
@@ -719,7 +725,7 @@ public class ProjectQueryController {
 		}
 
 		if (projectQuery.getPatientGlobalId() != null && projectQuery.getPatientGlobalId().longValue() > 0) {
-			tempSqlWhere += " and D_PATIENTGLOBAL.Id="+projectQuery.getPatientGlobalId();
+			tempSqlWhere += " and D_PATIENTGLOBAL.Id=" + projectQuery.getPatientGlobalId();
 		}
 
 		if (SqlWhereMain.length() > 0) {
@@ -738,7 +744,7 @@ public class ProjectQueryController {
 			tempSqlWhere += " and projectdelpat.datadel_id is null";
 		}
 
-		Sql += tempSqlWhere +" order by \"_key\"";
+		Sql += tempSqlWhere + " order by \"_key\"";
 
 //        #region 组装返回值
 		String sqlCount = " select count(1) count from (" + Sql + ") countsql";
@@ -750,7 +756,13 @@ public class ProjectQueryController {
 		resultMap.put("response", baseResponse);
 		resultMap.put("totals", count);
 		resultMap.put("tagTypes", tagShowRets);
+		Sql = getPageSql(Sql, pageNum, pageSize);
+		log.info("Sql -- > " + Sql);
 		List<Map<String, Object>> retData = jlpService.queryForSQLStreaming(Sql, pageNum, pageSize);
+		for(int i =0; i<retData.size(); i++) {
+			Map<String,Object> map = retData.get(i);
+			map.put("_id", i+1);
+		}
 		Long userRole = userService.getUserRoleByToken(authorization);
 //		JUser users = (JUser) request.getSession().getAttribute("user"); //jUserService.getUserByToken(authorization);
 		if (userRole != null && userRole.longValue() != 0L) {
@@ -793,7 +805,7 @@ public class ProjectQueryController {
 			ret = patientTable;
 
 			if (StringUtils.isNotBlank(advancedQueryWhere)) {
-				ret += " inner join (" + advancedQueryWhere + ") a on "+patientTable+".Id=a.Id ";
+				ret += " inner join (" + advancedQueryWhere + ") a on " + patientTable + ".Id=a.Id ";
 			}
 
 			boolean IsInner = tableArray.size() <= 1;
