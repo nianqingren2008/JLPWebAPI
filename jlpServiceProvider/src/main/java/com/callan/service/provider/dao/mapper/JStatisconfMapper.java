@@ -77,4 +77,21 @@ public interface JStatisconfMapper {
 	 */
 	@Select("SELECT * FROM J_STATISCONF WHERE ACTIVEFLAG='"+JLPConts.ActiveFlag+"' ")
     public List<JStatisconf> getAll();
+
+	@Select({
+        "select",
+        "ID, CODE, TITLE, CREATEDATE, ACTIVEFLAG, PAGECODE, PAGETITLE",
+        "from J_STATISCONF",
+        "where PAGECODE = #{pageCode,jdbcType=VARCHAR} and ACTIVEFLAG='"+JLPConts.ActiveFlag+"'"
+    })
+    @Results({
+        @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
+        @Result(column="CODE", property="code", jdbcType=JdbcType.VARCHAR),
+        @Result(column="TITLE", property="title", jdbcType=JdbcType.VARCHAR),
+        @Result(column="CREATEDATE", property="createdate", jdbcType=JdbcType.TIMESTAMP),
+        @Result(column="ACTIVEFLAG", property="activeflag", jdbcType=JdbcType.CHAR),
+        @Result(column="PAGECODE", property="pagecode", jdbcType=JdbcType.VARCHAR),
+        @Result(column="PAGETITLE", property="pagetitle", jdbcType=JdbcType.VARCHAR)
+    })
+	List<JStatisconf> getByPageCode(String pageCode);
 }

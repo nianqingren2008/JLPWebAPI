@@ -7,5 +7,8 @@ public interface IJQueryrecordService {
 	JQueryrecord getOne(Long id);
 
 	void save(JQueryrecord queryrecord);
+
+	void update(JQueryrecord queryrecord);
+
 	
 }

@@ -11,4 +11,6 @@ public interface IJQueryrecordDetailService {
 	void save(JQueryrecordDetails queryrecord);
 
 	List<JQueryrecordDetails> getByQueryId(long id);
+
+	void update(JQueryrecordDetails queryrecordDetails);
 }

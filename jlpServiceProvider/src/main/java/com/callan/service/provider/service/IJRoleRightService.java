@@ -14,4 +14,5 @@ public interface IJRoleRightService {
 	void update(JRoleRight roleRight);
 
 	void save(JRoleRight roleright);
+	
 }

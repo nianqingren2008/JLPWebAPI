@@ -347,7 +347,7 @@ public class ProjectController {
 	}
 
 	@ApiOperation(value = "课题清除更改状态")
-	@RequestMapping(value = "/api/clearChangeStatus", method = { RequestMethod.POST })
+	@RequestMapping(value = "/api/Project/clearChangeStatus", method = { RequestMethod.POST })
 	public String clearChangeStatus(@RequestBody ProjectChangeStatusModel projectChangeStatus,
 			HttpServletRequest request, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();

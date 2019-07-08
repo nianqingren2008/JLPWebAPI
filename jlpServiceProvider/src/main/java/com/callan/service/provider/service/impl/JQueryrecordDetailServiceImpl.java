@@ -31,6 +31,12 @@ public class JQueryrecordDetailServiceImpl implements IJQueryrecordDetailService
 	public List<JQueryrecordDetails> getByQueryId(long queryId) {
 		return queryrecordDetailMapper.getByQueryId(queryId);
 	}
+
+
+	@Override
+	public void update(JQueryrecordDetails queryrecordDetails) {
+		queryrecordDetailMapper.update(queryrecordDetails);
+	}
 	
 
 }

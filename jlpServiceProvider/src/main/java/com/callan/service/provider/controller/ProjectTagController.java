@@ -221,6 +221,7 @@ public class ProjectTagController {
 		return json;
 	}
 
+	@Transactional
 	@ApiOperation(value = "新增课题标签信息")
 	@RequestMapping(value = "/api/ProjectTag", method = { RequestMethod.POST })
 	public String Post(@RequestBody ProjectTagModel projectTagModel, HttpServletRequest request,
@@ -357,6 +358,7 @@ public class ProjectTagController {
 
 	}
 
+	@Transactional
 	@ApiOperation(value = "移除标签值信息")
 	@RequestMapping(value = "/api/ProjectTag/{Id}", method = { RequestMethod.DELETE })
 	public String Delete(@PathVariable Long Id, HttpServletRequest request, HttpServletResponse response) {
@@ -378,7 +380,7 @@ public class ProjectTagController {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(404);
 			baseResponse.setCode("404");
-			baseResponse.setText("未找到有效的标签信息");
+			baseResponse.setText("未找到有效的标签信息 Id:" + Id);
 			resultMap.put("response", baseResponse);
 			return JSONObject.toJSONString(resultMap);
 		}

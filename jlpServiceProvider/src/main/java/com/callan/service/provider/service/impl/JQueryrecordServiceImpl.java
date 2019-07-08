@@ -1,5 +1,7 @@
 package com.callan.service.provider.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,14 @@ public class JQueryrecordServiceImpl implements IJQueryrecordService {
 	public void save(JQueryrecord queryrecord) {
 		queryrecordMapper.save(queryrecord);
 	}
+
+
+	@Override
+	public void update(JQueryrecord queryrecord) {
+		queryrecordMapper.update(queryrecord);
+	}
+
+
 	
 
 }

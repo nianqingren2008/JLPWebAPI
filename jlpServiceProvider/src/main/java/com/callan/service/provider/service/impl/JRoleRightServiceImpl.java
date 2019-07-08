@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.callan.service.provider.dao.mapper.JRoleRightMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.cache.LocalCacheable;
+import com.callan.service.provider.pojo.cache.LocalData;
 import com.callan.service.provider.pojo.db.JRoleRight;
 import com.callan.service.provider.service.IJRoleRightService;
 
@@ -50,12 +51,12 @@ public class JRoleRightServiceImpl implements IJRoleRightService {
 
 	@Override
 	public void update(JRoleRight roleRight) {
-		roleRightMapper.insert(roleRight);
+		roleRightMapper.update(roleRight);
 	}
 
 	@Override
 	public void save(JRoleRight roleright) {
-		roleRightMapper.update(roleright);
+		roleRightMapper.insert(roleright);
 	}
 
 }

@@ -413,19 +413,40 @@ public class ProjectQueryController {
 
 		String SqlWhereMain = "";
 		for (QueryDetailModel queryDetailModel : queryMainDetails) {
-			tableNameMainWheres.add(queryDetailModel.getCondition().split("\\.")[0]);
-			if (queryDetailModel.getFieldType() == 1) {
-				tableNameWhereMainValues.add(queryDetailModel.getCondValue().split("\\.")[0]);
-			}
+			
+			String tableName = queryDetailModel.getCondition().split("\\.")[0].toUpperCase();
+			tableNameMainWheres.add(tableName);
+			String fieldName = queryDetailModel.getCondition().split("\\.")[1].toUpperCase();
 			whereFieldsMain.add(queryDetailModel.getCondition().toUpperCase());
-
-			if (!queryDetailModel.getRelation().contains("null")) {
-				SqlWhereMain += queryDetailModel.getCondition() + " " + queryDetailModel.getRelation() + " '"
-						+ queryDetailModel.getCondValue() + "' and ";
+			
+			JTableDict jTableDict = jTableDictService.getByName(tableName, true);
+			JTableFieldDict jTableFieldDict = jTableFieldDictService.getByTableCodeAndName(jTableDict.getCode(),
+					fieldName);
+			String relation = queryDetailModel.getRelation();
+			// 如果是is not null 则不拼装value
+			String condValue = "";
+			if (!relation.contains("null")) {
+				condValue = queryDetailModel.getCondValue() == null ? "" : queryDetailModel.getCondValue();
+				if ("like".equalsIgnoreCase(relation)) {
+					condValue = "%" + condValue + "%";
+				}
+				if ("VARCHAR2".equalsIgnoreCase(jTableFieldDict.getType())
+						|| "CHAR".equalsIgnoreCase(jTableFieldDict.getType())) {
+					condValue = "'" + condValue + "'";
+				}
+				if ("DATE".equalsIgnoreCase(jTableFieldDict.getType())) {
+					condValue = "to_date('" + condValue + "','yyyy/mm/dd')";
+				}
+				SqlWhereMain += queryDetailModel.getCondition() + " " + relation + " "
+						+ condValue + " and ";
 			} else {
-				SqlWhereMain += queryDetailModel.getCondition() + " " + queryDetailModel.getRelation() + " " + " and ";
+				SqlWhereMain += queryDetailModel.getCondition() + " " + relation + " " + " and ";
 			}
-
+			
+			if (queryDetailModel.getFieldType() == 1) {
+				tableNameWhereMainValues.add(condValue);
+			}
+			
 		}
 		// 去掉最后的and
 		if (SqlWhereMain.length() > 4) {
@@ -756,7 +777,7 @@ public class ProjectQueryController {
 		resultMap.put("response", baseResponse);
 		resultMap.put("totals", count);
 		resultMap.put("tagTypes", tagShowRets);
-		Sql = getPageSql(Sql, pageNum, pageSize);
+//		Sql = getPageSql(Sql, pageNum, pageSize);
 		log.info("Sql -- > " + Sql);
 		List<Map<String, Object>> retData = jlpService.queryForSQLStreaming(Sql, pageNum, pageSize);
 		for(int i =0; i<retData.size(); i++) {

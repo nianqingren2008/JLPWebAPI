@@ -52,6 +52,11 @@ public class JStatisconfServiceImpl implements IJStatisconfService{
 		return statisconfMapper.selectByPrimaryKey(id);
 	}
 
+	@Override
+	public List<JStatisconf> getByPageCode(String pageCode) {
+		return statisconfMapper.getByPageCode(pageCode);
+	}
+
 
 	
 

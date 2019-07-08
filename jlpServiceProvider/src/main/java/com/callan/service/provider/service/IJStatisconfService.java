@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.callan.service.provider.pojo.base.CacheResponse;
 import com.callan.service.provider.pojo.db.JStatisconf;
-import com.callan.service.provider.pojo.db.JStatisconfdetail;
 
 public interface IJStatisconfService  {
 
@@ -15,5 +14,7 @@ public interface IJStatisconfService  {
 	CacheResponse getAll();
 
 	JStatisconf getOne(Long id);
+
+	List<JStatisconf> getByPageCode(String pageCode);
 
 }

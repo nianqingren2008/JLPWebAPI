@@ -68,53 +68,69 @@ public class StatisticsController {
 	private IJTableDictService tableDictService;
 
 	@ApiOperation(value = "获取统计项列表")
-	@RequestMapping(value = "/api/Statistics/pageCode", method = { RequestMethod.GET })
-	public String geStatistics(String pageCode, HttpServletRequest request) {
+	@RequestMapping(value = "/api/Statistics/{pageCode}", method = { RequestMethod.GET })
+	public String geStatistics(@PathVariable String pageCode, HttpServletRequest request,HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		pageCode = StringUtils.isBlank(pageCode) ? "main" : pageCode;
-		String sql = " select distinct k1.code,k1.title,k1.id  from ( " + " select n1.id, " + "    n1.code,  "
-				+ "    n1.title,   " + "    n1.createdate, " + "       n1.pagecode, " + "       n1.pagetitle from (  "
-				+ " select w1.id,  " + "       w1.code,  " + "       w1.title, " + "       w1.createdate, "
-				+ "       w1.pagecode, " + "       w1.pagetitle, " + "       w1.fieldid, " + "       w2.name,    "
-				+ "       w2.description " + "  from (select t.id, " + "               t.code, "
-				+ "               t.title, " + "               t.createdate, " + "               t.pagecode, "
-				+ "               t.pagetitle, " + "               m.fieldid " + "          from j_statisconf t "
-				+ "          left join j_statisconfdetail m " + "            on t.id = m.statisconfid "
-				+ "         where t.activeflag = '1' and t.pagecode = '" + pageCode + "') w1 "
-				+ "  left join j_tablefielddict w2 " + "    on w1.fieldid = w2.id) n1  group  by   n1.id, "
-				+ "       n1.code, " + "       n1.title, " + "       n1.createdate, " + "       n1.pagecode, "
-				+ "       n1.pagetitle " + " ) k1  order by k1.id ";
-		log.info("geStatistics-->>sql : " + sql);
-		int pageNum = 1, pageSize = 20;
-		List<Map<String, Object>> resultList = jlpService.queryForSQLStreaming(sql, pageNum, pageSize);
-		List<JStatisconf> jStatisconfList = new ArrayList<JStatisconf>();
+//		String sql = " select distinct k1.code,k1.title,k1.id  from ( " + " select n1.id, " + "    n1.code,  "
+//				+ "    n1.title,   " + "    n1.createdate, " + "       n1.pagecode, " + "       n1.pagetitle from (  "
+//				+ " select w1.id,  " + "       w1.code,  " + "       w1.title, " + "       w1.createdate, "
+//				+ "       w1.pagecode, " + "       w1.pagetitle, " + "       w1.fieldid, " + "       w2.name,    "
+//				+ "       w2.description " + "  from (select t.id, " + "               t.code, "
+//				+ "               t.title, " + "               t.createdate, " + "               t.pagecode, "
+//				+ "               t.pagetitle, " + "               m.fieldid " + "          from j_statisconf t "
+//				+ "          left join j_statisconfdetail m " + "            on t.id = m.statisconfid "
+//				+ "         where t.activeflag = '1' and t.pagecode = '" + pageCode + "') w1 "
+//				+ "  left join j_tablefielddict w2 " + "    on w1.fieldid = w2.id) n1  group  by   n1.id, "
+//				+ "       n1.code, " + "       n1.title, " + "       n1.createdate, " + "       n1.pagecode, "
+//				+ "       n1.pagetitle " + " ) k1  order by k1.id ";
+//		log.info("geStatistics-->>sql : " + sql);
+		
+		List<JStatisconf> statisconfList = statisconfService.getByPageCode(pageCode);
+		
+		Set<Map<String,Object>> statistics = new HashSet<>();
 		List<JStatisconfdetail> jStatisconfdetails = null;
-		Map<String, List<JStatisconfdetail>> detailsMap = new HashMap<String, List<JStatisconfdetail>>();
-		if (resultList != null && resultList.size() > 0) {
-			for (Map<String, Object> map : resultList) {
-				JStatisconf jStatisconf = new JStatisconf();
-				jStatisconf.setId((Long.valueOf(map.get("id") + "")));
-				jStatisconf.setCode(map.get("code") + "");
-				jStatisconf.setTitle(map.get("title") + "");
-				jStatisconfList.add(jStatisconf);
-
-				jStatisconfdetails = statisconfdetailService.getByStatisconfid(Long.valueOf(map.get("id") + ""));
-				detailsMap.put(map.get("code") + "", jStatisconfdetails);
+		
+		Map<String,List<Map<String,Object>>> statisticDetails = new HashMap<>();
+		for(JStatisconf statisconf : statisconfList) {
+			Map<String,Object> confMap = new HashMap<String, Object>();
+			confMap.put("Id", statisconf.getId());
+			confMap.put("key", statisconf.getCode());
+			confMap.put("title", statisconf.getTitle());
+			statistics.add(confMap);
+			List<JStatisconfdetail> detailList =  statisconfdetailService.getByStatisconfid(statisconf.getId());
+			
+			if(detailList == null || detailList.size() == 0	) {
+				BaseResponse baseResponse = new BaseResponse();
+				response.setStatus(404);
+				baseResponse.setCode("404");
+				baseResponse.setText("错误的页面编号");
+				resultMap.put("response", baseResponse);
+				String json = JSONObject.toJSONString(resultMap);
+				log.error(json);
+				return json;
 			}
-		} else {
-			BaseResponse baseResponse = new BaseResponse();
-			baseResponse.setCode("0000");
-			baseResponse.setText("错误的页面编号");
-			resultMap.put("response", baseResponse);
-			String json = JSONObject.toJSONString(resultMap);
-			log.error(json);
-			return json;
+			
+			for(JStatisconfdetail statisconfdetail : detailList) {
+				long fieldId = statisconfdetail.getFieldid();
+				JTableFieldDict dict = tableFieldDictService.getOne(fieldId);
+				List<Map<String,Object>> map = statisticDetails.get(statisconf.getCode());
+				if(map == null) {
+					map = new ArrayList<>();
+					statisticDetails.put(statisconf.getCode(), map);
+				}
+				map.add(new HashMap<String,Object>(){{
+					put("dataIndex", dict.getName().toLowerCase());
+					put("key", dict.getName().toLowerCase());
+					put("title", dict.getDescription());
+				}});
+			}
 		}
-
+		
 		resultMap.put("response", new BaseResponse());
-		resultMap.put("statistics", jStatisconfList);
-		resultMap.put("statisticDetails", detailsMap);
+		resultMap.put("statistics", statistics);
+		resultMap.put("statisticDetails", statisticDetails);
 		String json = JSONObject.toJSONString(resultMap);
 		log.info("response : " + json);
 		return json;

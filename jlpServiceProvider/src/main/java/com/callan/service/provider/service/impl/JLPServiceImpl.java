@@ -132,8 +132,7 @@ public class JLPServiceImpl implements IJLpService {
 		return new ArrayList<Map<String, Object>>();
 	}
 
-	@SuppressWarnings("unused")
-	private String getPageSql(String sql, int pageNum, int pageSize) {
+	public static String getPageSql(String sql, int pageNum, int pageSize) {
 		String pageSql = "SELECT *" + "  FROM (SELECT tt.*, ROWNUM AS rowno" + "          FROM (  " + sql + ") tt"
 				+ "         WHERE ROWNUM <= " + pageNum * pageSize + ") table_alias" + " WHERE table_alias.rowno > "
 				+ (pageNum - 1) * pageSize;

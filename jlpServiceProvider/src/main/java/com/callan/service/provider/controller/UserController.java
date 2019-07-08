@@ -30,6 +30,7 @@ import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.ControllerBaseResponse;
 import com.callan.service.provider.pojo.advanceQueryBase.ColunmsModel;
 import com.callan.service.provider.pojo.base.BaseResponse;
+import com.callan.service.provider.pojo.cache.LocalData;
 import com.callan.service.provider.pojo.db.JRole;
 import com.callan.service.provider.pojo.db.JRoleRight;
 import com.callan.service.provider.pojo.db.JSystemconfig;
@@ -137,7 +138,7 @@ public class UserController {
 		response.setText("登录成功");
 
 		request.getSession().setAttribute("user", users);
-		
+
 		resultMap.put("userInfo", userInfo);
 		resultMap.put("response", response);
 		String json = JSONObject.toJSONString(resultMap);
@@ -265,13 +266,15 @@ public class UserController {
 		}
 
 		List<JRoleRight> roleRightList = roleRightService.getByRoleId(userNewModel.getUserRole());
-		role.setList(roleRightList);
+//		role.setList(roleRightList);
 		Map<String, Object> roleRet = new HashMap<String, Object>();
 		roleRet.put("roleId", role.getId());
 		roleRet.put("roleName", role.getName());
 		List<Long> rightIdList = new ArrayList<Long>();
-		for (JRoleRight roleRight : roleRightList) {
-			rightIdList.add(roleRight.getRightid());
+		if (roleRightList != null) {
+			for (JRoleRight roleRight : roleRightList) {
+				rightIdList.add(roleRight.getRightid());
+			}
 		}
 		roleRet.put("roleRights", rightIdList);
 
@@ -299,6 +302,10 @@ public class UserController {
 		resultMap.put("response", baseResponse);
 		String json = JSONObject.toJSONString(resultMap);
 		log.info("response--> " + json);
+		
+		//清理本地内存
+		
+		
 		return json;
 	}
 

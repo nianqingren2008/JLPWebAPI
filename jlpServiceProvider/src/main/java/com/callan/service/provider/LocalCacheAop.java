@@ -100,7 +100,7 @@ public class LocalCacheAop {
 		try {
 			log.info(methonName + ",[GET FAIL] , will proceed");
 			value = pjp.proceed(); // 跳过缓存,到后端查询数据
-
+			
 			if (value instanceof CacheResponse) {
 				CacheResponse vo = (CacheResponse) value;
 				if (vo.getCode() == 0) {

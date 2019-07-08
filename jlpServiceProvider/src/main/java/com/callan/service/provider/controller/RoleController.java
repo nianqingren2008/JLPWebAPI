@@ -60,7 +60,7 @@ public class RoleController {
 
 	@ApiOperation(value = "获取角色列表")
 	@RequestMapping(value = "/api/Role", method = { RequestMethod.GET })
-	public String getRoleList(HttpServletRequest request) {
+	public String getRoleList(HttpServletRequest request,HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		BaseResponse baseResponse = new BaseResponse();
@@ -70,7 +70,8 @@ public class RoleController {
 		Long userId = userService.getIdByToken(authorization);
 //		JUser user = (JUser) request.getSession().getAttribute("user");
 		if (userId == null || userId.longValue() == 0) {
-			baseResponse.setCode("0000");
+			response.setStatus(404);
+			baseResponse.setCode("404");
 			baseResponse.setText("用户信息获取失败，请检查请求头");
 			resultMap.put("response", baseResponse);
 			String json = JSONObject.toJSONString(resultMap);
@@ -215,13 +216,15 @@ public class RoleController {
 			List<JRoleRight> rolerights = roleRightService.getByRoleId(role.getId());
 			Set<Long> rolerightsIdList = new HashSet<Long>();
 			List<Long> rolerightsDel = new ArrayList<Long>();
-			for (JRoleRight roleRight : rolerights) {
-				if (!rightIdList.contains(roleRight.getRightid())) {
-					rolerightsDel.add(roleRight.getRightid());
-					roleRight.setActiveflag(JLPConts.Inactive);
-					roleRightService.update(roleRight);
+			if(rolerights != null) {
+				for (JRoleRight roleRight : rolerights) {
+					if (!rightIdList.contains(roleRight.getRightid())) {
+						rolerightsDel.add(roleRight.getRightid());
+						roleRight.setActiveflag(JLPConts.Inactive);
+						roleRightService.update(roleRight);
+					}
+					rolerightsIdList.add(roleRight.getRightid());
 				}
-				rolerightsIdList.add(roleRight.getRightid());
 			}
 			List<Long> rolerightsNew = new ArrayList<Long>();
 			for (JRight right : rights) {
@@ -271,9 +274,11 @@ public class RoleController {
 		role.setActiveflag(JLPConts.Inactive);
 		roleService.update(role);
 		List<JRoleRight> rolerights = roleRightService.getByRoleId(role.getId());
-		for (JRoleRight roleRight : rolerights) {
-			roleRight.setActiveflag(JLPConts.Inactive);
-			roleRightService.update(roleRight);
+		if(rolerights != null) {
+			for (JRoleRight roleRight : rolerights) {
+				roleRight.setActiveflag(JLPConts.Inactive);
+				roleRightService.update(roleRight);
+			}
 		}
 		resultMap.put("response", new BaseResponse());
 		String json = JSONObject.toJSONString(resultMap);

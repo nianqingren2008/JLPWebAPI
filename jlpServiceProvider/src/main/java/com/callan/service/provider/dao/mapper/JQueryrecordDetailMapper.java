@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.pojo.db.JQueryrecordDetails;
@@ -41,4 +42,11 @@ public interface JQueryrecordDetailMapper {
     		+ "#{ rightbrackets,jdbcType=VARCHAR}, #{logicaltype,jdbcType=VARCHAR}, #{ updatedate,jdbcType=TIMESTAMP}"
     		+ ", #{ createdate,jdbcType=TIMESTAMP}, #{ activeflag,jdbcType=VARCHAR})")
 	public void save(JQueryrecordDetails queryrecord);
+    
+    @Update("update  j_queryrecorddetails set  queryid= #{ queryid,jdbcType=DECIMAL}, detailid=#{ detailid,jdbcType=DECIMAL}, leftbrackets=#{ leftbrackets,jdbcType=VARCHAR}, "
+    		+ "fieldname=#{ fieldname,jdbcType=VARCHAR}, relationtype=#{ relationtype,jdbcType=VARCHAR}, fieldvaluetype=#{fieldvaluetype,jdbcType=DECIMAL}, fieldvalue=#{ fieldvalue,jdbcType=VARCHAR}, "
+    		+ "rightbrackets=#{ rightbrackets,jdbcType=VARCHAR}, logicaltype=#{logicaltype,jdbcType=VARCHAR}, updatedate=#{ updatedate,jdbcType=TIMESTAMP}"
+    		+ ", createdate=#{ createdate,jdbcType=TIMESTAMP},activeflag= #{ activeflag,jdbcType=VARCHAR}"
+    		+ " where id = #{id,jdbcType=DECIMAL}")
+	public void update(JQueryrecordDetails queryrecordDetails);
 }
