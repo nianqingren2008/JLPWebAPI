@@ -1,6 +1,8 @@
 package com.callan.service.provider.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.alibaba.fastjson.JSONObject;
 import com.callan.service.provider.config.JLPConts;
 import com.callan.service.provider.config.JLPLog;
+import com.callan.service.provider.config.ObjectUtil;
 import com.callan.service.provider.config.ThreadPoolConfig;
 import com.callan.service.provider.pojo.ControllerBaseResponse;
 import com.callan.service.provider.pojo.base.BaseRequest;
@@ -108,7 +111,7 @@ public class ShowFieldController {
 		for (JPageviewdetail detail : detailList) {
 			JShowView showView = showViewService.getByCode(detail.getViewcode());
 			List<JShowDetailView> detailViewList = showDetailViewService.getByViewId(showView.getId());
-
+			
 			Map<String, Object> showField = new HashMap<>();
 			showField.put("viewId", showView.getId());
 			showField.put("title", showView.getName());
@@ -139,6 +142,13 @@ public class ShowFieldController {
 				}
 			}
 		}
+		Collections.sort(showFields,new Comparator<Map<String, Object>>() {
+
+			@Override
+			public int compare(Map<String, Object> o1, Map<String, Object> o2) {
+				return ObjectUtil.objToLong(o1.get("viewId")).compareTo(ObjectUtil.objToLong(o2.get("viewId")));
+			}
+		});
 		resultMap.put("response", new BaseResponse());
 		resultMap.put("showFields", showFields);
 		resultMap.put("defaultFields", fieldIds);

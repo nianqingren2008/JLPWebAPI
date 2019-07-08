@@ -58,7 +58,7 @@ public class QueryRecordController {
 	private IJQueryrecordDetailService queryrecordDetailService;
 
 	@ApiOperation(value = "获取查询条件列表(默认按照时间倒序)")
-	@RequestMapping(value = "/api/QueryRecord", method = { RequestMethod.POST })
+	@RequestMapping(value = "/api/QueryRecord", method = { RequestMethod.GET })
 	public String GetQueryRecords(Integer pageNum, Integer pageSize, HttpServletRequest request,
 			HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();

@@ -78,14 +78,14 @@ public class AdvancedQueryController {
 
 	@ApiOperation(value = "病例检索模糊查询(仅列表)")
 	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST })
-	public String query1(@RequestBody String advanceQuery, String pageNum, String pageSize,
+	public String query1(@RequestBody String advanceQuery, String pageNum, String pageSize,String totals,
 			HttpServletRequest request) {
-		return query(advanceQuery, pageNum, pageSize, request);
+		return query(advanceQuery, pageNum, pageSize,totals, request);
 	}
 
 	@ApiOperation(value = "病例检索模糊查询(仅列表)")
 	@RequestMapping(value = "/api/AdvancedQuery", method = { RequestMethod.POST })
-	public String query(@RequestBody String advanceQuery, String pageNum, String pageSize, HttpServletRequest request) {
+	public String query(@RequestBody String advanceQuery, String pageNum, String totals,String pageSize, HttpServletRequest request) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		long start = System.currentTimeMillis();
 		log.info("request --> " + advanceQuery);
@@ -348,10 +348,12 @@ public class AdvancedQueryController {
 		List<Sorted> sortedList = advanceQueryRequest.getSorted();
 		// 排序字段
 		String sorts = "";
-		for (String showField : fieldShowNames) {
-			for (Sorted sorted : sortedList) {
-				if (showField.equalsIgnoreCase(sorted.getId())) {
-					sorts += showField + ",";
+		if(sortedList != null) {
+			for (String showField : fieldShowNames) {
+				for (Sorted sorted : sortedList) {
+					if (showField.equalsIgnoreCase(sorted.getId())) {
+						sorts += showField + ",";
+					}
 				}
 			}
 		}
