@@ -137,7 +137,7 @@ public class ProjectTagController {
 			model.setName(tagdicts.getName());
 			model.setTagLevel(tagdicts.getTagattached());
 			model.setFieldType(tagdicts.getValuetype());
-			model.setIsShow(true);
+			model.setIsShow("1".equals(tagdicts.getShowflag()) ? true : false);
 			List<JTagvaluedicts> valueDictList = tagdicts.getValueDictsList();
 			List<String> fieldValue = new ArrayList<String>();
 			if (valueDictList != null && valueDictList.size() > 0) {
@@ -337,7 +337,7 @@ public class ProjectTagController {
 				if (projectId == 0 && (dicts.getProjectid() != null)) {
 					projectId = dicts.getProjectid();
 				}
-				if (ObjectUtil.objToBool(dicts.getShowflag(), false) != model.getIsShow()) {
+				if (("1".equals(dicts.getShowflag()) ? true : false)  != model.getIsShow()) {
 					boolean showFlag = model.getIsShow() == null ? false : model.getIsShow();
 					dicts.setShowflag(showFlag ? "1" : "0");
 					IsChange = true;

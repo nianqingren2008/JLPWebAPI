@@ -78,14 +78,14 @@ public class AdvancedQueryController {
 
 	@ApiOperation(value = "病例检索模糊查询(仅列表)")
 	@RequestMapping(value = "/api/AdvanceQuery", method = { RequestMethod.POST })
-	public String query1(@RequestBody String advanceQuery, String pageNum, String pageSize,String totals,
+	public String query1(@RequestBody String advanceQuery, String pageNum, String pageSize,Boolean totals,Boolean includeTotals,
 			HttpServletRequest request) {
-		return query(advanceQuery, pageNum, pageSize,totals, request);
+		return query(advanceQuery, pageNum, pageSize,totals,includeTotals, request);
 	}
 
 	@ApiOperation(value = "病例检索模糊查询(仅列表)")
 	@RequestMapping(value = "/api/AdvancedQuery", method = { RequestMethod.POST })
-	public String query(@RequestBody String advanceQuery, String pageNum, String totals,String pageSize, HttpServletRequest request) {
+	public String query(@RequestBody String advanceQuery, String pageNum,String pageSize,Boolean totals,Boolean includeTotals, HttpServletRequest request) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		long start = System.currentTimeMillis();
 		log.info("request --> " + advanceQuery);
@@ -427,11 +427,13 @@ public class AdvancedQueryController {
 
 		String sql = "select distinct " + tableKeys + " from " + finalTables4Count + " " + tempSqlWhere;
 		String sqlCount = " select count(1) count from (" + sql + ") countsql";
-//		log.info("sql : " + sql);
-//		log.info("sqlCount : " + sqlCount);
-////		if (isTotals) {
-//		int count = jlpService.queryForCount(sqlCount);
-//		response.setTotals(count);
+		log.info("sql : " + sql);
+		log.info("sqlCount : " + sqlCount);
+		int total = 0;
+		if ((totals != null  && totals) || (includeTotals!= null && includeTotals)) {
+			total = jlpService.queryForCount(sqlCount);
+		}
+	
 //		} else {
 //			String SqlKeys = getPageSql(sql,pageNumInt,pageSizeInt);
 //			log.info("SqlKeys : " + SqlKeys);
@@ -497,7 +499,10 @@ public class AdvancedQueryController {
 //			}
 		response.setColumns(columns);
 		response.setContent(retData);
-		response.setTotals(retData.size());
+		if(total == 0) {
+			total = retData.size();
+		}
+		response.setTotals(total);
 //		}
 		String json = response.toJsonString();
 		log.info("response --> " + json);

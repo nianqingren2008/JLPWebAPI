@@ -55,13 +55,14 @@ public interface JRoleRightMapper {
     @Insert({
         "insert into J_ROLERIGHT (ID,ROLEID ,RIGHTID ,ACTIVEFLAG ,CREATEDATE)",
         "values (#{id,jdbcType=DECIMAL}, #{roleid,jdbcType=DECIMAL}, ",
-        "#{rightid,jdbcType=DECIMAL}, #{activeflag,jdbcType=VARCHAR}, #{createdate,jdbcType=TIMESTAMP})"
+        "#{rightid,jdbcType=DECIMAL}, #{activeflag,jdbcType=VARCHAR}"
+        + ", #{createdate,jdbcType=TIMESTAMP})"
     })
 	public void insert(JRoleRight roleRight);
 
     @Update({
         "update J_ROLERIGHT",
-        "set NAME = #{roleid,jdbcType=DECIMAL},",
+        "set roleid = #{roleid,jdbcType=DECIMAL},",
           "RIGHTID = #{rightid,jdbcType=DECIMAL},",
           "activeflag = #{activeflag,jdbcType=VARCHAR},",
           "CREATEDATE = #{createdate,jdbcType=TIMESTAMP}",

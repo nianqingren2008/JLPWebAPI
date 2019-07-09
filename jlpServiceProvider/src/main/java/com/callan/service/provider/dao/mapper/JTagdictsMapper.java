@@ -96,4 +96,14 @@ public interface JTagdictsMapper {
         "where ACTIVEFLAG = '"+JLPConts.ActiveFlag+"'"
     })
 	List<JTagdicts> getAll();
+
+    @Select({
+        "select",
+        "ID, NAME, DESCRIPTION, TAGTYPE, VALUETYPE, USERID, PROJECTID, CREATEDATE, ACTIVEFLAG, ",
+        "SHOWFLAG, TAGATTACHED, TOTALNUM, CURRENTNUM",
+        "from J_TAGDICT",
+        "where ACTIVEFLAG = '"+JLPConts.ActiveFlag+"'"
+      	+ " and PROJECTID=#{projectId,jdbcType=DECIMAL}"
+    })
+	List<JTagdicts> getByProjectId(Long projectId);
 }

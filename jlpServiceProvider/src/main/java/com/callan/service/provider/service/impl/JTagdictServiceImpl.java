@@ -52,16 +52,16 @@ public class JTagdictServiceImpl implements IJTagdictService {
 
 	@Override
 	public List<JTagdicts> getByProjectId(Long projectId) {
-		IJTagdictService base = (IJTagdictService) AopContext.currentProxy();
-		Map<Long, List<JTagdicts>> data = (Map<Long, List<JTagdicts>>) base.getAll4ProjectId().getData();
-		List<JTagdicts> entity = data.get(projectId);
-		if(entity == null) {
-			return new ArrayList<JTagdicts>();
-		}
-		return entity;
+//		IJTagdictService base = (IJTagdictService) AopContext.currentProxy();
+//		Map<Long, List<JTagdicts>> data = (Map<Long, List<JTagdicts>>) base.getAll4ProjectId().getData();
+//		List<JTagdicts> entity = data.get(projectId);
+//		if(entity == null) {
+//			return new ArrayList<JTagdicts>();
+//		}
+		return tagdictsMapper.getByProjectId(projectId);
 	}
 
-	@LocalCacheable
+//	@LocalCacheable
 	@Override
 	public CacheResponse getAll4ProjectId() {
 		Map<Long, List<JTagdicts>> map = new HashMap<>();

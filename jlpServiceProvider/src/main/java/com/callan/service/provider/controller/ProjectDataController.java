@@ -56,7 +56,7 @@ public class ProjectDataController {
 	private IJProjectDeldataService projectDeldataService;
 	
 	@ApiOperation(value = "删除课题数据")
-	@RequestMapping(value = "/api/ProjectData", method = { RequestMethod.POST })
+	@RequestMapping(value = "/api/ProjectData", method = { RequestMethod.DELETE })
 	 /// <summary>
     public String Delete(@RequestBody ProjectDataModel projectData
     		,HttpServletRequest request
@@ -112,7 +112,9 @@ public class ProjectDataController {
         
         List<JProjectdeldata> projectdeldatas = new ArrayList<JProjectdeldata>();
         for(Long dataId : dataids) {
-        	List<JProjectdeldata> list = projectDeldataService.getByProjectIdAndTableId(projectData.getProjectId(),projectData.getTableClassId(),dataId);
+        	List<JProjectdeldata> list = projectDeldataService
+        			.getByProjectIdAndTableId(projectData.getProjectId()
+        					,projectData.getTableClassId(),dataId);
         	if(list != null) {
         		projectdeldatas.addAll(list);
         	}
@@ -156,7 +158,7 @@ public class ProjectDataController {
             projectdeldata.setUserid(userId);
             projectdeldata.setCreatedate(new Date());
             projectdeldata.setActiveflag(JLPConts.ActiveFlag);
-            long seqId = jlpService.getNextSeq("");
+            long seqId = jlpService.getNextSeq("J_PROJECTDELDATA");
             projectdeldata.setId(seqId);
             projectDeldataService.save(projectdeldata);
         }

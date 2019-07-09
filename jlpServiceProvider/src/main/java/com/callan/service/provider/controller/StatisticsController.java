@@ -191,6 +191,16 @@ public class StatisticsController {
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
 		JStatisconf statistics = statisconfService.getOne(statisticModel.getId());
+		if (statistics == null) {
+			BaseResponse baseResponse = new BaseResponse();
+			response.setStatus(404);
+			baseResponse.setCode("404");
+			baseResponse.setText("统计ID错误");
+			resultMap.put("response", baseResponse);
+			String json = JSONObject.toJSONString(resultMap);
+			log.error(json);
+			return json;
+		}
 		List<JStatisconfdetail> statisticDetails = statisconfdetailService.getByStatisconfid(statistics.getId());
 
 		if (statisticDetails.size() == 0) {
@@ -239,8 +249,8 @@ public class StatisticsController {
 
 		}
 
-		if (statisticModel.getKey() != null && statisticModel.getKey().size() > 0) {
-			keys.addAll(statisticModel.getKey());
+		if (statisticModel.getKeys() != null && statisticModel.getKeys().size() > 0) {
+			keys.addAll(statisticModel.getKeys());
 		}
 		boolean IsCount = false;
 		List<StatisticFieldModel> selectFields = new ArrayList<StatisticFieldModel>();

@@ -4,22 +4,24 @@ import java.util.List;
 
 public class StatisticModel {
 	// 统计视图ID
-	private Long id;
+	private Long Id;
 	// 字段值
-	private List<String> Key;
+	private List<String> keys;
+
 	public Long getId() {
-		return id;
+		return Id;
 	}
+
 	public void setId(Long id) {
-		this.id = id;
+		Id = id;
 	}
-	public List<String> getKey() {
-		return Key;
+
+	public List<String> getKeys() {
+		return keys;
 	}
-	public void setKey(List<String> key) {
-		Key = key;
+
+	public void setKeys(List<String> keys) {
+		this.keys = keys;
 	}
-	
-	
-	
+
 }
