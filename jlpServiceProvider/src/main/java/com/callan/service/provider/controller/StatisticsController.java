@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +24,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.callan.service.provider.config.JLPLog;
 import com.callan.service.provider.config.ObjectUtil;
 import com.callan.service.provider.config.ThreadPoolConfig;
+import com.callan.service.provider.pojo.AdvanceQueryRequest;
 import com.callan.service.provider.pojo.advanceQueryBase.AdvancedQueryRecordModel;
 import com.callan.service.provider.pojo.advanceQueryBase.Sorted;
 import com.callan.service.provider.pojo.base.BaseResponse;
@@ -69,7 +71,8 @@ public class StatisticsController {
 
 	@ApiOperation(value = "获取统计项列表")
 	@RequestMapping(value = "/api/Statistics/{pageCode}", method = { RequestMethod.GET })
-	public String geStatistics(@PathVariable String pageCode, HttpServletRequest request,HttpServletResponse response) {
+	public String geStatistics(@PathVariable String pageCode, HttpServletRequest request,
+			HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		pageCode = StringUtils.isBlank(pageCode) ? "main" : pageCode;
@@ -86,22 +89,22 @@ public class StatisticsController {
 //				+ "       n1.code, " + "       n1.title, " + "       n1.createdate, " + "       n1.pagecode, "
 //				+ "       n1.pagetitle " + " ) k1  order by k1.id ";
 //		log.info("geStatistics-->>sql : " + sql);
-		
+
 		List<JStatisconf> statisconfList = statisconfService.getByPageCode(pageCode);
-		
-		Set<Map<String,Object>> statistics = new HashSet<>();
+
+		Set<Map<String, Object>> statistics = new HashSet<>();
 		List<JStatisconfdetail> jStatisconfdetails = null;
-		
-		Map<String,List<Map<String,Object>>> statisticDetails = new HashMap<>();
-		for(JStatisconf statisconf : statisconfList) {
-			Map<String,Object> confMap = new HashMap<String, Object>();
+
+		Map<String, List<Map<String, Object>>> statisticDetails = new HashMap<>();
+		for (JStatisconf statisconf : statisconfList) {
+			Map<String, Object> confMap = new HashMap<String, Object>();
 			confMap.put("Id", statisconf.getId());
 			confMap.put("key", statisconf.getCode());
 			confMap.put("title", statisconf.getTitle());
 			statistics.add(confMap);
-			List<JStatisconfdetail> detailList =  statisconfdetailService.getByStatisconfid(statisconf.getId());
-			
-			if(detailList == null || detailList.size() == 0	) {
+			List<JStatisconfdetail> detailList = statisconfdetailService.getByStatisconfid(statisconf.getId());
+
+			if (detailList == null || detailList.size() == 0) {
 				BaseResponse baseResponse = new BaseResponse();
 				response.setStatus(404);
 				baseResponse.setCode("404");
@@ -111,23 +114,25 @@ public class StatisticsController {
 				log.error(json);
 				return json;
 			}
-			
-			for(JStatisconfdetail statisconfdetail : detailList) {
+
+			for (JStatisconfdetail statisconfdetail : detailList) {
 				long fieldId = statisconfdetail.getFieldid();
 				JTableFieldDict dict = tableFieldDictService.getOne(fieldId);
-				List<Map<String,Object>> map = statisticDetails.get(statisconf.getCode());
-				if(map == null) {
+				List<Map<String, Object>> map = statisticDetails.get(statisconf.getCode());
+				if (map == null) {
 					map = new ArrayList<>();
 					statisticDetails.put(statisconf.getCode(), map);
 				}
-				map.add(new HashMap<String,Object>(){{
-					put("dataIndex", dict.getName().toLowerCase());
-					put("key", dict.getName().toLowerCase());
-					put("title", dict.getDescription());
-				}});
+				map.add(new HashMap<String, Object>() {
+					{
+						put("dataIndex", dict.getName().toLowerCase());
+						put("key", dict.getName().toLowerCase());
+						put("title", dict.getDescription());
+					}
+				});
 			}
 		}
-		
+
 		resultMap.put("response", new BaseResponse());
 		resultMap.put("statistics", statistics);
 		resultMap.put("statisticDetails", statisticDetails);
@@ -185,16 +190,33 @@ public class StatisticsController {
 
 	@ApiOperation(value = "获取统计项详细数据")
 	@RequestMapping(value = "/api/Statistics", method = { RequestMethod.POST })
-	public String getProjectDetail(StatisticModel statisticModel, HttpServletRequest request,
+	public String getProjectDetail(@RequestBody String statisticModelStr, HttpServletRequest request,
 			HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 
+		StatisticModel statisticModel = null;
+		try {
+			statisticModel = JSONObject.toJavaObject(JSONObject.parseObject(statisticModelStr), StatisticModel.class);
+		} catch (Exception e) {
+			log.error(e);
+		}
+		if (statisticModel == null) {
+			BaseResponse baseResponse = new BaseResponse();
+			response.setStatus(400);
+			baseResponse.setCode("400");
+			baseResponse.setText("传入参数为空");
+			resultMap.put("response", baseResponse);
+			String json = JSONObject.toJSONString(resultMap);
+			log.error(json);
+			return json;
+		}
 		JStatisconf statistics = statisconfService.getOne(statisticModel.getId());
+		System.out.println();
 		if (statistics == null) {
 			BaseResponse baseResponse = new BaseResponse();
-			response.setStatus(404);
-			baseResponse.setCode("404");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("统计ID错误");
 			resultMap.put("response", baseResponse);
 			String json = JSONObject.toJSONString(resultMap);
@@ -205,8 +227,8 @@ public class StatisticsController {
 
 		if (statisticDetails.size() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
-			response.setStatus(404);
-			baseResponse.setCode("404");
+			response.setStatus(400);
+			baseResponse.setCode("400");
 			baseResponse.setText("统计ID错误");
 			resultMap.put("response", baseResponse);
 			String json = JSONObject.toJSONString(resultMap);
@@ -216,8 +238,10 @@ public class StatisticsController {
 		List<Long> fieldIds = new ArrayList<Long>();
 		List<JTableFieldDict> tableFieldInfos = new ArrayList<JTableFieldDict>();
 		for (JStatisconfdetail detail : statisticDetails) {
-			fieldIds.add(detail.getFieldid());
-			tableFieldInfos.add(tableFieldDictService.getOne(detail.getFieldid()));
+			if ("1".equals(detail.getDefaulvalue())) {
+				fieldIds.add(detail.getFieldid());
+				tableFieldInfos.add(tableFieldDictService.getOne(detail.getFieldid()));
+			}
 		}
 
 //        var tableFieldInfos = (from table in orclJlpContext.JTabledicts
@@ -241,70 +265,71 @@ public class StatisticsController {
 //                             	equals tablefield.field.Id into tablefields
 //                             from tablefield in tablefields
 //                             select new { statisticDetail, tablefield.field, tablefield.table }).ToList();
-		Set<String> keys = new HashSet<>();
+//		Set<String> keys = new HashSet<>();
 		SortedSet<String> tableNames = new TreeSet<>();
 
-		for (JTableFieldDict tableFieldDict : tableFieldInfos) {
-			keys.add(tableFieldDict.getName().toLowerCase());
+//		for (JTableFieldDict tableFieldDict : tableFieldInfos) {
+//			keys.add(tableFieldDict.getName().toLowerCase());
+//
+//		}
 
-		}
-
-		if (statisticModel.getKeys() != null && statisticModel.getKeys().size() > 0) {
-			keys.addAll(statisticModel.getKeys());
-		}
+//		if (statisticModel.getKeys() != null && statisticModel.getKeys().size() > 0) {
+//			keys.addAll(statisticModel.getKeys());
+//		}
 		boolean IsCount = false;
 		List<StatisticFieldModel> selectFields = new ArrayList<StatisticFieldModel>();
 		List<StatisticFieldModel> groupFields = new ArrayList<StatisticFieldModel>();
 		List<StatisticFieldModel> countFields = new ArrayList<StatisticFieldModel>();
 
 		for (JStatisconfdetail detail : statisticDetails) {
-			for (JTableFieldDict tableFieldDict : tableFieldInfos) {
-				if (detail.getFieldid().longValue() == tableFieldDict.getId().longValue()) {
-					JTableDict tableDict = tableDictService.getByCode(tableFieldDict.getTablecode());
-					tableNames.add(tableDict.getName());
+			if ("1".equals(detail.getDefaulvalue())) {
+				for (JTableFieldDict tableFieldDict : tableFieldInfos) {
+					if (detail.getFieldid().longValue() == tableFieldDict.getId().longValue()) {
+						JTableDict tableDict = tableDictService.getByCode(tableFieldDict.getTablecode());
+						tableNames.add(tableDict.getName());
+					}
 				}
-			}
 
-			if ("1".equals(detail.getDetailtype())) {
-				for (JTableFieldDict tableFieldDict : tableFieldInfos) {
-					if (detail.getFieldid().longValue() == tableFieldDict.getId().longValue()) {
-						JTableDict tableDict = tableDictService.getByCode(tableFieldDict.getTablecode());
-						StatisticFieldModel model = new StatisticFieldModel();
-						model.setFieldTrans(detail.getFieldtypetrans());
-						model.setFieldName(tableFieldDict.getName());
-						model.setFieldTitle(tableFieldDict.getDescription());
-						model.setTableName(tableDict.getName());
-						selectFields.add(model);
+				if ("1".equals(detail.getDetailtype())) {
+					for (JTableFieldDict tableFieldDict : tableFieldInfos) {
+						if (detail.getFieldid().longValue() == tableFieldDict.getId().longValue()) {
+							JTableDict tableDict = tableDictService.getByCode(tableFieldDict.getTablecode());
+							StatisticFieldModel model = new StatisticFieldModel();
+							model.setFieldTrans(detail.getFieldtypetrans());
+							model.setFieldName(tableFieldDict.getName());
+							model.setFieldTitle(tableFieldDict.getDescription());
+							model.setTableName(tableDict.getName());
+							selectFields.add(model);
+						}
+					}
+				}
+				if ("2".equals(detail.getDetailtype())) {
+					for (JTableFieldDict tableFieldDict : tableFieldInfos) {
+						if (detail.getFieldid().longValue() == tableFieldDict.getId().longValue()) {
+							StatisticFieldModel model = new StatisticFieldModel();
+							model.setFieldTrans(detail.getFieldtypetrans());
+							model.setFieldName(tableFieldDict.getName());
+							model.setFieldTitle(tableFieldDict.getDescription());
+							JTableDict tableDict = tableDictService.getByCode(tableFieldDict.getTablecode());
+							model.setTableName(tableDict.getName());
+							groupFields.add(model);
+						}
+					}
+				}
+				if ("3".equals(detail.getDetailtype())) {
+					for (JTableFieldDict tableFieldDict : tableFieldInfos) {
+						if (detail.getFieldid().longValue() == tableFieldDict.getId().longValue()) {
+							StatisticFieldModel model = new StatisticFieldModel();
+							model.setFieldTrans(detail.getFieldtypetrans());
+							model.setFieldName(tableFieldDict.getName());
+							model.setFieldTitle(tableFieldDict.getDescription());
+							JTableDict tableDict = tableDictService.getByCode(tableFieldDict.getTablecode());
+							model.setTableName(tableDict.getName());
+							countFields.add(model);
+						}
 					}
 				}
 			}
-			if ("2".equals(detail.getDetailtype())) {
-				for (JTableFieldDict tableFieldDict : tableFieldInfos) {
-					if (detail.getFieldid().longValue() == tableFieldDict.getId().longValue()) {
-						StatisticFieldModel model = new StatisticFieldModel();
-						model.setFieldTrans(detail.getFieldtypetrans());
-						model.setFieldName(tableFieldDict.getName());
-						model.setFieldTitle(tableFieldDict.getDescription());
-						JTableDict tableDict = tableDictService.getByCode(tableFieldDict.getTablecode());
-						model.setTableName(tableDict.getName());
-						selectFields.add(model);
-					}
-				}
-			}
-			if ("3".equals(detail.getDetailtype())) {
-				for (JTableFieldDict tableFieldDict : tableFieldInfos) {
-					if (detail.getFieldid().longValue() == tableFieldDict.getId().longValue()) {
-						StatisticFieldModel model = new StatisticFieldModel();
-						model.setFieldTrans(detail.getFieldtypetrans());
-						model.setFieldName(tableFieldDict.getName());
-						model.setFieldTitle(tableFieldDict.getDescription());
-						JTableDict tableDict = tableDictService.getByCode(tableFieldDict.getTablecode());
-						model.setTableName(tableDict.getName());
-						selectFields.add(model);
-					}
-				}
-			}
-
 		}
 
 		if (selectFields.size() == 0 && groupFields.size() == 0 && countFields.size() == 0) {
@@ -321,36 +346,36 @@ public class StatisticsController {
 
 		List<Map<String, Object>> columns = new ArrayList<Map<String, Object>>();
 		for (StatisticFieldModel model : selectFields) {
-			columns.add(new HashMap<String, Object>() {
-				{
-					put("dataIndex", model.getFieldName().toLowerCase());
-					put("key", model.getFieldName().toLowerCase());
-					put("title", model.getFieldTitle());
-				}
-			});
-
-		}
-		columns.add(new HashMap<String, Object>() {
-			{
-				put("dataIndex", "num");
-				put("key", "num");
-				put("title", "数量");
+			Map<String, Object> map = new HashMap<>();
+			map.put("dataIndex", model.getFieldName().toLowerCase());
+			map.put("key", model.getFieldName().toLowerCase());
+			map.put("title", model.getFieldTitle());
+			if(!columns.contains(map)) {
+				columns.add(map);
 			}
-		});
+		}
 
+		Map<String, Object> map = new HashMap<>();
+		map.put("dataIndex", "num");
+		map.put("key", "num");
+		map.put("title", "数量");
+		columns.add(map);
+		
+		Set<String> selctFieldSet = new HashSet<String>();
+		Set<String> groupFieldSet = new HashSet<String>();
 		String selctFieldstr = "";// selectFields.Select(x => x.ToString(false)).ToArray().ToStringEx();
 		String groupFieldStr = "";// groupFields.Select(x => x.ToString(true)).ToArray().ToStringEx();
 		for (StatisticFieldModel model : selectFields) {
-			selctFieldstr += model.toString(false) + ",";
+			selctFieldSet.add(model.toString(false));
 		}
 		for (StatisticFieldModel model : groupFields) {
-			groupFieldStr += model.toString(true) + ",";
+			groupFieldSet.add(model.toString(true));
 		}
-		if (selctFieldstr.length() > 0) {
-			selctFieldstr = selctFieldstr.substring(0, selctFieldstr.length() - 1);
+		if (selctFieldSet.size() > 0) {
+			selctFieldstr = selctFieldSet.toString().substring(1, selctFieldSet.toString().length() - 1);
 		}
-		if (groupFieldStr.length() > 0) {
-			groupFieldStr = groupFieldStr.substring(0, groupFieldStr.length() - 1);
+		if (groupFieldSet.size() > 0) {
+			groupFieldStr = groupFieldSet.toString().substring(1, groupFieldSet.toString().length() - 1);
 		}
 
 		String tempSqlWhere = " where D_PATIENTGLOBAL.jlactiveflag='1' ";
@@ -359,7 +384,10 @@ public class StatisticsController {
 			Sql = "select count(*) AS NUM from " + JLPServiceImpl.toTableString(tableNames, "") + " " + tempSqlWhere;
 		} else {
 			Sql = "select " + selctFieldstr + ",count(*) AS NUM from " + JLPServiceImpl.toTableString(tableNames, "")
-					+ " " + tempSqlWhere + " group by " + groupFieldStr + " order by" + groupFieldStr;
+					+ " " + tempSqlWhere;
+			if (groupFieldStr.length() > 0) {
+				Sql += " group by " + groupFieldStr + " order by " + groupFieldStr;
+			}
 		}
 		List<Map<String, Object>> contents = jlpService.queryForSQL(Sql, new Object[] {});
 		resultMap.put("response", response);
@@ -378,20 +406,21 @@ public class StatisticsController {
 //                    keyDicts.Add(x.Name, new List<string>());
 //                }
 //            });
-			
+
 			for (Map<String, Object> item : contents) {
-				
+
 				for (String mapKey : item.keySet()) {
-					if(!"num".equals(mapKey) && !keyDicts.containsKey(mapKey)) {
+					if (!"num".equals(mapKey) && !keyDicts.containsKey(mapKey)) {
 						keyDicts.put(mapKey, new ArrayList<String>());
 					}
-						
+
 					if (keyDicts.containsKey(mapKey)) {
 						if (item.get(mapKey) == null || item.get(mapKey).toString().length() == 0) {
 //                            pro.SetValue(item, "other");
+							item.put(mapKey, "other");
 						}
 						if (!keyDicts.get(mapKey).contains(item.get(mapKey))) {
-							keyDicts.get(mapKey).add(item.get(mapKey).toString());
+							keyDicts.get(mapKey).add(item.get(mapKey).toString() + "");
 						}
 					}
 				}

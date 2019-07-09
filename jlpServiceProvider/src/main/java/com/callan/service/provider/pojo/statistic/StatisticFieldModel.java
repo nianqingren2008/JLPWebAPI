@@ -54,7 +54,7 @@ public class StatisticFieldModel {
 
 	public String toString(boolean IsGroup) {
 		String ret = "";
-		if (StringUtils.isNotBlank(fieldTrans)) {
+		if (StringUtils.isBlank(fieldTrans)) {
 			ret = tableName + "." + fieldName;
 		} else {
 			ret = String.format(fieldTrans, tableName + "." + fieldName);

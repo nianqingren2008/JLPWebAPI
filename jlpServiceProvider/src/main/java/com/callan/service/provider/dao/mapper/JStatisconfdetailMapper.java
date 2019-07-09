@@ -98,7 +98,7 @@ public interface JStatisconfdetailMapper {
         "ID, STATISCONFID, DETAILTYPE, FIELDID, FIELDTYPETRANS, SORTNO, CREATEDATE, ACTIVEFLAG, ",
         "DEFAULVALUE",
         "from J_STATISCONFDETAIL",
-        "where STATISCONFID = #{statisconfId,jdbcType=DECIMAL} and ACTIVEFLAG='"+JLPConts.ActiveFlag+"'"
+        "where statisconfid = #{statisconfid,jdbcType=DECIMAL} and ACTIVEFLAG='"+JLPConts.ActiveFlag+"'"
     })
     @Results({
         @Result(column="ID", property="id", jdbcType=JdbcType.DECIMAL, id=true),
@@ -111,5 +111,5 @@ public interface JStatisconfdetailMapper {
         @Result(column="ACTIVEFLAG", property="activeflag", jdbcType=JdbcType.CHAR),
         @Result(column="DEFAULVALUE", property="defaulvalue", jdbcType=JdbcType.CHAR)
     })
-	List<JStatisconfdetail> getByStatisconfid(Long statisconfId);
+	List<JStatisconfdetail> getByStatisconfid(Long statisconfid);
 }
