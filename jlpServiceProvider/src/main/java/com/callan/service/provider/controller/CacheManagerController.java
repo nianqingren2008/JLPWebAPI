@@ -90,7 +90,7 @@ public class CacheManagerController {
 	public String clearLocalCache() {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		int count = LocalData.dataMap.size();
-		LocalData.dataMap.clear();;
+		LocalData.dataMap.clear();
 		Map<String,Object> resultMap = new HashMap<String, Object>();
 		BaseResponse baseResponse = new BaseResponse();
 		baseResponse.setText("成功清理"+count+"条本地缓存");

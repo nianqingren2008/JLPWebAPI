@@ -5,14 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.callan.service.provider.dao.mapper.JRoleRightMapper;
 import com.callan.service.provider.pojo.base.CacheResponse;
-import com.callan.service.provider.pojo.cache.LocalCacheable;
-import com.callan.service.provider.pojo.cache.LocalData;
 import com.callan.service.provider.pojo.db.JRoleRight;
 import com.callan.service.provider.service.IJRoleRightService;
 
@@ -23,13 +20,13 @@ public class JRoleRightServiceImpl implements IJRoleRightService {
 	
 	@Override
 	public List<JRoleRight> getByRoleId(Long roleId) {
-		IJRoleRightService base = (IJRoleRightService) AopContext.currentProxy();
-		Map<Long, List<JRoleRight>> data = (Map<Long, List<JRoleRight>>) base.getAll4RoleId().getData();
-		List<JRoleRight> roleRight = data.get(roleId);
-		return roleRight;
+//		IJRoleRightService base = (IJRoleRightService) AopContext.currentProxy();
+//		Map<Long, List<JRoleRight>> data = (Map<Long, List<JRoleRight>>) base.getAll4RoleId().getData();
+//		List<JRoleRight> roleRight = data.get(roleId);
+		return roleRightMapper.getByRoleId(roleId);
 	}
 
-	@LocalCacheable
+//	@LocalCacheable
 	@Override
 	public CacheResponse getAll4RoleId() {
 		List<JRoleRight> all = roleRightMapper.getAll();

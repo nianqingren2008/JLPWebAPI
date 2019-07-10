@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -74,7 +75,7 @@ public class TaskController {
 				: request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 //		JUser user = (JUser) request.getSession().getAttribute("user");
-		
+
 		if (userId == null || userId.longValue() == 0) {
 			BaseResponse baseResponse = new BaseResponse();
 			response.setStatus(400);
@@ -191,18 +192,19 @@ public class TaskController {
 
 	}
 
+	@Transactional
 	@ApiOperation(value = "删除任务")
-	@RequestMapping(value = "/api/Task/", method = { RequestMethod.DELETE })
-	public String deleteTask(Long id) {
+	@RequestMapping(value = "/api/Task/{Id}", method = { RequestMethod.DELETE })
+	public String deleteTask(@PathVariable Long Id,HttpServletResponse resp) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		ControllerBaseResponse response = new ControllerBaseResponse();
-		Map<Long, JTask> taskMap = (Map<Long, JTask>) jTaskService.getAll4Id().getData();
-		JTask jtask = taskMap.get(id);
+		JTask jtask = jTaskService.getOne(Id);;
 		if (jtask != null) {
 			try {
-				jTaskService.delete(id);
+				jTaskService.delete(Id);
 			} catch (Exception e) {
 //				log.error("添加下载任务失败",e);
+				resp.setStatus(400);
 				response.getResponse().setCode("400");
 				response.getResponse().setText(e.getMessage());
 				String json = response.toJsonString();
@@ -210,8 +212,9 @@ public class TaskController {
 				return json;
 			}
 		} else {
+			resp.setStatus(400);
 			response.getResponse().setCode("400");
-			response.getResponse().setText("未找到id=" + id + "的任务!");
+			response.getResponse().setText("未找到id=" + Id + "的任务!");
 			String json = response.toJsonString();
 			log.error("response --> " + json);
 			return json;
@@ -221,13 +224,12 @@ public class TaskController {
 
 	@ApiOperation(value = "获取后台任务列表")
 	@RequestMapping(value = "/api/Task", method = { RequestMethod.GET })
-	public String getTaskList(String pageNum, String pageSize, HttpServletRequest request) {
+	public String getTaskList(Integer pageNum, Integer pageSize, HttpServletRequest request) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
 		BaseResponse baseResponse = new BaseResponse();
 		// 从前台header中获取token参数
-		String authorization = request.getHeader("Authorization") == null ? "6c52445e47389d707807022cbba731cd"
-				: request.getHeader("Authorization");
+		String authorization = request.getHeader("Authorization") == null ? "" : request.getHeader("Authorization");
 		Long userId = userService.getIdByToken(authorization);
 //		JUser user = (JUser) request.getSession().getAttribute("user");
 		if (userId == null || userId.longValue() == 0) {
@@ -240,44 +242,61 @@ public class TaskController {
 		}
 		log.info("userId : " + userId);
 		List<JTask> list = jTaskService.getByUserId(userId);
-		String urlHost = request.getRequestURL().toString();
-		urlHost = urlHost.substring(0, urlHost.indexOf("/api/")) + "/api/DownLoad/";
-		List<JTask> jtaskList = new ArrayList<JTask>();
-		if (list != null && list.size() > 0) {
-			for (JTask jtask : list) {
-				if ("3".equals(jtask.getStatus())) {
-					List<JTaskdownload> downLoadList = jTaskService.getAllDowndLoad();
-					if (downLoadList != null && downLoadList.size() > 0) {
-						for (JTaskdownload jTaskdownload : downLoadList) {
-							if (jtask.getId() == jTaskdownload.getTaskid()) {
-								JDownloadfile downloadfile = jTaskService
-										.getDownloadfileById(jTaskdownload.getFileid());
-								jTaskdownload.setUrl(
-										urlHost + downloadfile.getId() + "?fileCode=" + downloadfile.getFilemd5());
-//		    					useDownLoadList.add(jTaskdownload);
-								jtask.setFileurl(jTaskdownload.getUrl());
-							}
-						}
-					}
+		List<JTask> pageList = new ArrayList<JTask>();
+		if (pageNum == null || pageNum < 1) {
+			pageNum = 1;
+		}
+		if (pageSize == null || pageSize < 1) {
+			pageSize = 20;
+		}
+		if (list == null) {
+			pageList = new ArrayList<JTask>();
+		} else {
+			for (int i = 0; i < list.size(); i++) {
+				if (pageSize * (pageNum - 1) <= i && i < pageSize * pageNum) {
+					pageList.add(list.get(i));
 				}
 			}
 		}
 
-		List<Map<String, Object>> resultList = new ArrayList<Map<String, Object>>();
-		for (JTask task : jtaskList) {
+		String urlHost = request.getRequestURL().toString();
+		urlHost = urlHost.substring(0, urlHost.indexOf("/api/")) + "/api/DownLoad/";
+
+		List<Long> taskIds = new ArrayList<Long>();
+		for (JTask jtask : pageList) {
+			if ("3".equals(jtask.getStatus())) {
+				taskIds.add(jtask.getId());
+			}
+		}
+		List<Map<String, Object>> taskRet = new ArrayList<>();
+
+		for (JTask jtask : pageList) {
 			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("id", task.getId());
-			map.put("name", task.getName());
-			map.put("progress", Double.valueOf(task.getProgress()));
-			map.put("taskType", task.getTasktype());
-			map.put("endDate", task.getEnddate());
-			map.put("startDate", task.getStartdate());
-			map.put("fileUrl", task.getFileurl());
-			resultList.add(map);
+			map.put("id", jtask.getId());
+			map.put("name", jtask.getName());
+			map.put("progress", jtask.getProgress());
+			map.put("status", jtask.getStatus());
+			map.put("taskType", jtask.getTasktype());
+			map.put("endDate", jtask.getEnddate());
+			map.put("startDate", jtask.getStartdate());
+
+			List<JTaskdownload> downLoadList = jTaskService.getTaskDownloadByTaskId(jtask.getId());
+			if (downLoadList != null && downLoadList.size() > 0) {
+				for (JTaskdownload jTaskdownload : downLoadList) {
+					if(jTaskdownload.getFileid() != null) {
+						JDownloadfile downloadfile = jTaskService.getDownloadfileById(jTaskdownload.getFileid());
+						if (downloadfile != null) {
+							jtask.setFileurl(urlHost + downloadfile.getId() + "?fileCode=" + downloadfile.getFilemd5());
+						}
+					}
+				}
+			}
+			map.put("fileUrl", jtask.getFileurl());
+			taskRet.add(map);
 		}
 
 		resultMap.put("response", baseResponse);
-		resultMap.put("tasks", resultList);
+		resultMap.put("tasks", taskRet);
 		String json = JSONObject.toJSONString(resultMap);
 		log.info("response : " + json);
 		return json;

@@ -63,7 +63,6 @@ public class JTaskServiceImpl implements IJTaskService {
 		return jTaskMapper.getByIdAndUserId(id,userId);
 	}
 
-	@LocalCacheable
 	@Override
 	public CacheResponse getAll() {
 		CacheResponse response = new CacheResponse();
@@ -72,7 +71,6 @@ public class JTaskServiceImpl implements IJTaskService {
 		return response;
 	}
 
-	@LocalCacheable
 	@Override
 	public CacheResponse getAll4Id() {
 		List<JTask> list = jTaskMapper.getAll();
@@ -84,6 +82,16 @@ public class JTaskServiceImpl implements IJTaskService {
 		response.setCode(0);
 		response.setData(map);
 		return response;
+	}
+
+	@Override
+	public List<JTaskdownload> getTaskDownloadByTaskId(long tadkId) {
+		return jTaskMapper.getTaskDownloadByTaskId(tadkId);
+	}
+
+	@Override
+	public JTask getOne(Long id) {
+		return jTaskMapper.getOne(id);
 	}
 
 }

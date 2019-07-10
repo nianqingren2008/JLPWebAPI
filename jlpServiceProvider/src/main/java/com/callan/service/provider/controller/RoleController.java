@@ -171,7 +171,7 @@ public class RoleController {
 	public String Post(@RequestBody RoleModel roleModel, HttpServletResponse response) {
 		JLPLog log = ThreadPoolConfig.getBaseContext();
 		Map<String, Object> resultMap = new HashMap<String, Object>();
-
+		log.info("request --> " + JSONObject.toJSONString(roleModel));
 		JRole role = null;
 		if (roleModel.getId() != null && roleModel.getId().longValue() > 0) {
 			role = roleService.getOne(roleModel.getId());
@@ -226,10 +226,9 @@ public class RoleController {
 					rolerightsIdList.add(roleRight.getRightid());
 				}
 			}
-			List<Long> rolerightsNew = new ArrayList<Long>();
 			for (JRight right : rights) {
 				if (!rolerightsIdList.contains(right.getId())) {
-					rolerightsNew.add(right.getId());
+//					rolerightsNew.add(right.getId());
 					JRoleRight roleright = new JRoleRight();
 					roleright.setActiveflag(JLPConts.ActiveFlag);
 					roleright.setCreatedate(new Date());

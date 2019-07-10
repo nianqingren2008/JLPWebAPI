@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -72,6 +73,7 @@ public class UserController {
 	@Autowired
 	private IJUsertokensService usertokensService;
 
+	@Transactional
 	@ApiOperation(value = "用户登录")
 	@RequestMapping(value = "/api/User", method = { RequestMethod.POST })
 	public String login(@RequestBody UserModel user, HttpServletResponse resq, HttpServletRequest request) {
@@ -116,7 +118,7 @@ public class UserController {
 		long userRole = users.getUserrole();
 
 		JRole role = roleService.getOne(userRole);
-		List<JRoleRight> roleRightList = roleRightService.getByRoleId(userRole);
+		List<JRoleRight> roleRightList = roleRightService.getByRoleId(role.getId());
 		role.setList(roleRightList);
 		Map<String, Object> roleRet = new HashMap<String, Object>();
 		roleRet.put("roleId", role.getId());
@@ -143,6 +145,9 @@ public class UserController {
 		resultMap.put("response", response);
 		String json = JSONObject.toJSONString(resultMap);
 		log.info("response--> " + json);
+		//清理缓存
+		LocalData.dataMap.clear();
+		
 		return json;
 	}
 
@@ -180,6 +185,8 @@ public class UserController {
 			response.getResponse().setText(e.getMessage());
 			return response.toJsonString();
 		}
+		//清理缓存
+		LocalData.dataMap.clear();
 		return response.toJsonString();
 	}
 
@@ -303,8 +310,8 @@ public class UserController {
 		String json = JSONObject.toJSONString(resultMap);
 		log.info("response--> " + json);
 		
-		//清理本地内存
-		
+		//清理缓存
+		LocalData.dataMap.clear();
 		
 		return json;
 	}
@@ -344,6 +351,8 @@ public class UserController {
 			users.setUserrole(jRole.getId());
 			jUserService.update(users);
 		}
+		//清理缓存
+		LocalData.dataMap.clear();
 		BaseResponse baseResponse = new BaseResponse();
 		resultMap.put("response", baseResponse);
 		String json = JSONObject.toJSONString(resultMap);
@@ -373,6 +382,8 @@ public class UserController {
 		resultMap.put("response", baseResponse);
 		String json = JSONObject.toJSONString(resultMap);
 		log.info("response--> " + json);
+		//清理缓存
+		LocalData.dataMap.clear();
 		return json;
 	}
 

@@ -79,7 +79,7 @@ public class LocalCacheLoader implements InitializingBean{
 					
 //					userService.getAll4Id();
 					
-					roleRightService.getAll4RoleId();
+//					roleRightService.getAll4RoleId();
 					
 					systemConfigService.getAll();
 					

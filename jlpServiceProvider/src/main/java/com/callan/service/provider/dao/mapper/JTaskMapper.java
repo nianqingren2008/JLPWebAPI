@@ -97,6 +97,12 @@ public interface JTaskMapper {
 		@Select("SELECT * FROM J_TASK WHERE   ACTIVEFLAG='"+JLPConts.ActiveFlag+"'")
 		public List<JTask>  getAll();
 
+		@Select("SELECT * FROM J_TASKDOWNLOAD WHERE taskid=#{taskid} and activeflag='"+JLPConts.ActiveFlag+"'")
+		List<JTaskdownload> getTaskDownloadByTaskId(long taskid);
+
+		@Select("SELECT * FROM J_TASK WHERE  ID = #{id}   AND ACTIVEFLAG='"+JLPConts.ActiveFlag+"'")
+		JTask getOne(Long id);
+
  
 
 	

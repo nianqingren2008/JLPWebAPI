@@ -30,13 +30,9 @@ public class JTagdictServiceImpl implements IJTagdictService {
 
 	@Override
 	public JTagdicts getOne(Long id) {
-		IJTagdictService base = (IJTagdictService) AopContext.currentProxy();
-		Map<Long, JTagdicts> data = (Map<Long, JTagdicts>) base.getAll4Id().getData();
-		JTagdicts entity = data.get(id);
-		return entity;
+		return tagdictsMapper.selectByPrimaryKey(id);
 	}
 
-	@LocalCacheable
 	@Override
 	public CacheResponse getAll4Id() {
 		Map<Long, JTagdicts> map = new HashMap<>();

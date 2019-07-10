@@ -68,4 +68,8 @@ public interface IJTaskService {
 	CacheResponse getAll();
 
 	CacheResponse getAll4Id();
+
+	List<JTaskdownload> getTaskDownloadByTaskId(long id);
+
+	JTask getOne(Long id);
 }

@@ -44,7 +44,7 @@ public class JLPFilter implements Filter{
 		}else {
 		if(url.contains("/api/")) {
 			if(!"/api/User".equals(url) 
-				/* && !url.startsWith("/api/ShowField") */) {
+				 && !url.startsWith("/api/DownLoad/image")) {
 				String authorization = req.getHeader("Authorization") == null ? ""
 						: req.getHeader("Authorization");
 				if(StringUtils.isBlank(authorization)) {

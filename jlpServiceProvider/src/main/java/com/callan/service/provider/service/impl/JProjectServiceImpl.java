@@ -343,9 +343,12 @@ public class JProjectServiceImpl implements IJProjectService {
 		Set<String> fieldNames = new HashSet<String>();
 		Set<String> fieldShowNames = new HashSet<String>();
 		for (JShowDetailView dict : jShowDetailViewList) {
-			tableNames.add(dict.getjTableDict().getName());
-			fieldNames.add((dict.getjTableDict().getName() + "." + dict.getFieldname()).toLowerCase());
-			fieldShowNames.add(dict.getFieldname().toLowerCase());
+			if(dict.getjTableDict()!= null) {
+				tableNames.add(dict.getjTableDict().getName());
+				
+				fieldNames.add((dict.getjTableDict().getName() + "." + dict.getjTableFieldDict().getName()).toLowerCase());
+			}
+			fieldShowNames.add(dict.getjTableFieldDict().getName().toLowerCase());
 		}
 		tableNames.remove(JLPConts.PatientGlobalTable);
 
@@ -444,9 +447,9 @@ public class JProjectServiceImpl implements IJProjectService {
 
 				String SqlWhere = " ";
 				for (QueryDetailModel queryDetailModel : queryDetails) {
-					tableNameWheres.add(queryDetailModel.getCondition().split(".")[0]);
+					tableNameWheres.add(queryDetailModel.getCondition().split("\\.")[0]);
 					if (queryDetailModel.getFieldType() == 1) {
-						tableNameWhereValues.add(queryDetailModel.getCondValue().split(".")[0]);
+						tableNameWhereValues.add(queryDetailModel.getCondValue().split("\\.")[0]);
 					}
 					whereFields.add(queryDetailModel.getCondition().toUpperCase());
 

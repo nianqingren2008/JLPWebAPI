@@ -175,9 +175,13 @@ public class ProjectTagController {
 		if (projectstatistics != null && projectstatistics.size() > 0) {
 			for (ProjectTagCompleteModel model : projectTags) {
 				List<JProjecttags> tagsList = projecttagsService.getByTagId(model.get_id());
-				double complete = tagsList.size() * 100.00 / projectstatistics.get(0).getCount();
-				double comp = new BigDecimal(complete).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-				model.setTagComplete(comp + "%");
+				if(projectstatistics.get(0).getCount() == 0) {
+					model.setTagComplete("0%");
+				}else {
+					double complete = tagsList.size() * 100.00 / projectstatistics.get(0).getCount();
+					double comp = new BigDecimal(complete).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+					model.setTagComplete(comp + "%");
+				}
 			}
 		}
 		BaseResponse baseResponse = new BaseResponse();
@@ -204,15 +208,20 @@ public class ProjectTagController {
 		if (projectstatistics != null && projectstatistics.size() > 0) {
 			List<JProjecttags> tagsList = projecttagsService.getByProjectId(Id);
 			if (tagsList.size() > 0) {
-				double complete = tagsList.size() * 100.00 / projectstatistics.get(0).getCount();
-				double comp = new BigDecimal(complete).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-				resultMap.put("totalComplete", comp + "%");
+				if(projectstatistics.get(0).getCount() == 0) {
+					resultMap.put("totalComplete", "0%");
+				}else {
+					double complete = tagsList.size() * 100.00 / projectstatistics.get(0).getCount();
+					double comp = new BigDecimal(complete).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+					resultMap.put("totalComplete", comp + "%");
+				}
+				
 			} else {
-				resultMap.put("totalComplete", "0.00%");
+				resultMap.put("totalComplete", "v%");
 			}
 
 		} else {
-			resultMap.put("totalComplete", "0.00%");
+			resultMap.put("totalComplete", "0%");
 		}
 		BaseResponse baseResponse = new BaseResponse();
 		resultMap.put("response", baseResponse);

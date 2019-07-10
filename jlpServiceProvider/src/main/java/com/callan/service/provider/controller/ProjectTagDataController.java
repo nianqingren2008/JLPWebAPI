@@ -51,7 +51,7 @@ public class ProjectTagDataController {
 	private IJLpService jlpService;
 
 	@ApiOperation(value = "新建或更新课题标签值")
-	@RequestMapping(value = "/api/ProjectTagData", method = { RequestMethod.GET })
+	@RequestMapping(value = "/api/ProjectTagData", method = { RequestMethod.POST })
 	public String Post(@RequestBody ProjectTagDataModel projectTagData, HttpServletRequest request,
 			HttpServletResponse response) {
 		if (projectTagData.getTagValue() == null) {
